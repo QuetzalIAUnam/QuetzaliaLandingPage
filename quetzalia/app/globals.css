@@ -1138,69 +1138,93 @@ a {
 .person-content {
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.75rem;
 }
 
-.speaker-role {
-  font-size: 0.78rem;
-  font-weight: 600;
+/* Badge de procedencia / Organización destacada */
+.speaker-header-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.speaker-org-badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--body);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
   color: var(--accent);
-  margin-bottom: -0.2rem;
+  background: rgba(164, 53, 124, 0.14);
+  border: 1px solid rgba(164, 53, 124, 0.38);
+  padding: 0.2rem 0.65rem;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(164, 53, 124, 0.08);
 }
 
+.speaker-role-text {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--fg);
+  opacity: 0.85;
+}
+
+/* Nombre de la ponente con destello IA más pausado y visible */
 .speaker-name {
   font-size: 1.35rem;
-  line-height: 1.2;
+  line-height: 1.25;
   display: inline-block;
   cursor: pointer;
   position: relative;
   background: linear-gradient(
-    115deg,
+    110deg,
     var(--head) 0%,
-    var(--head) 36%,
-    var(--accent) 46%,
-    #ffffff 50%,
-    var(--accent) 54%,
-    var(--head) 64%,
+    var(--head) 28%,
+    var(--accent) 38%,
+    #ffffff 48%,
+    #ffffff 52%,
+    var(--accent) 62%,
+    var(--head) 72%,
     var(--head) 100%
   );
-  background-size: 280% 100%;
+  background-size: 320% 100%;
   background-position: 100% 0;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  transition: filter 0.4s ease;
+  transition: filter 0.5s ease;
 }
 
-/* Destello cuando el ponente aparece */
+/* Destello cuando la ponente aparece (más pausado: 2.8s) */
 .people.in-view .person .speaker-name {
-  animation: speakerGlint 1.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  animation-delay: calc(var(--speaker-delay, 0ms) + 380ms);
+  animation: speakerGlint 2.8s cubic-bezier(0.35, 0, 0.25, 1) forwards;
+  animation-delay: calc(var(--speaker-delay, 0ms) + 600ms);
 }
 
-/* Destello interactivo al pasar el mouse */
+/* Destello interactivo al pasar el mouse (2.0s) */
 .person:hover .speaker-name,
 .speaker-name:hover {
-  animation: speakerGlintHover 1.1s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+  animation: speakerGlintHover 2.0s cubic-bezier(0.35, 0, 0.25, 1) forwards !important;
 }
 
 @keyframes speakerGlint {
-  0% {
+  0%, 12% {
     background-position: 100% 0;
     filter: drop-shadow(0 0 0 transparent);
   }
-  35% {
-    filter: drop-shadow(0 0 1px rgba(244, 179, 217, 0.6))
-            drop-shadow(0 0 6px rgba(164, 53, 124, 0.35));
+  45% {
+    filter: drop-shadow(0 0 2px rgba(244, 179, 217, 0.8))
+            drop-shadow(0 0 9px rgba(164, 53, 124, 0.45));
   }
-  65% {
+  75% {
     background-position: 0% 0;
-    filter: drop-shadow(0 0 1.5px rgba(244, 179, 217, 0.75))
-            drop-shadow(0 0 8px rgba(164, 53, 124, 0.4));
+    filter: drop-shadow(0 0 2.5px rgba(244, 179, 217, 0.9))
+            drop-shadow(0 0 11px rgba(164, 53, 124, 0.5));
   }
-  90%, 100% {
+  95%, 100% {
     background-position: 0% 0;
     filter: drop-shadow(0 0 0 transparent);
   }
@@ -1211,14 +1235,14 @@ a {
     background-position: 100% 0;
     filter: drop-shadow(0 0 0 transparent);
   }
-  35% {
-    filter: drop-shadow(0 0 1.5px rgba(244, 179, 217, 0.8))
-            drop-shadow(0 0 8px rgba(164, 53, 124, 0.45));
-  }
-  70% {
-    background-position: 0% 0;
+  45% {
     filter: drop-shadow(0 0 2px rgba(244, 179, 217, 0.85))
             drop-shadow(0 0 9px rgba(164, 53, 124, 0.5));
+  }
+  80% {
+    background-position: 0% 0;
+    filter: drop-shadow(0 0 2.5px rgba(244, 179, 217, 0.95))
+            drop-shadow(0 0 12px rgba(164, 53, 124, 0.55));
   }
   100% {
     background-position: 0% 0;
@@ -1226,142 +1250,255 @@ a {
   }
 }
 
-.speaker-talk {
-  font-size: 0.95rem;
-  line-height: 1.45;
-  color: var(--head);
+/* Sección de Charla / Taller */
+.speaker-talk-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.45rem;
 }
 
-.speaker-talk .talk-badge {
-  display: inline-block;
-  align-self: flex-start;
+.speaker-talk-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.talk-chip {
+  display: inline-flex;
+  align-items: center;
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 0.15rem 0.55rem;
+  letter-spacing: 0.06em;
+  padding: 0.2rem 0.65rem;
   border-radius: 999px;
   background: rgba(164, 53, 124, 0.12);
   color: var(--accent);
+  border: 1px solid rgba(164, 53, 124, 0.3);
 }
 
-.speaker-talk .talk-title {
-  font-weight: 500;
+.talk-chip.chip-taller {
+  background: rgba(97, 57, 84, 0.13);
+  color: var(--head);
+  border: 1px solid rgba(97, 57, 84, 0.28);
+}
+
+.mobile-talk-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-family: var(--body);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.mobile-talk-toggle:hover {
+  background: rgba(164, 53, 124, 0.08);
+}
+
+.mobile-talk-toggle .toggle-chevron {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mobile-talk-toggle .toggle-chevron.rotated {
+  transform: rotate(180deg);
+}
+
+.speaker-talk-title {
+  font-size: 0.96rem;
+  line-height: 1.4;
+  font-weight: 600;
   font-style: italic;
+  color: var(--head);
 }
 
 .speaker-desc {
-  font-size: 0.92rem;
+  font-size: 0.91rem;
   line-height: 1.55;
   color: var(--fg);
   opacity: 0.92;
 }
 
-/* Botón LinkedIn - Sin bordes ni tarjetas */
-.speaker-linkedin {
+/* En desktop (min-width: 768px): La charla siempre está visible directamente */
+@media (min-width: 768px) {
+  .mobile-talk-toggle {
+    display: none !important;
+  }
+  .speaker-talk-body {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.35rem !important;
+    max-height: none !important;
+    opacity: 1 !important;
+    overflow: visible !important;
+  }
+}
+
+/* En mobile (max-width: 767px): Solo se ve el chip y el botón 'Ver charla' despliega el contenido */
+@media (max-width: 767px) {
+  .speaker-talk-body {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.3s ease,
+                margin-top 0.3s ease;
+  }
+  .speaker-talk-body.is-expanded {
+    max-height: 320px;
+    opacity: 1;
+    margin-top: 0.3rem;
+  }
+}
+
+/* Botón LinkedIn - Compacto y directo */
+.speaker-linkedin-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.45rem;
   align-self: flex-start;
-  margin-top: 0.35rem;
-  padding: 0.45rem 0.9rem;
+  margin-top: 0.3rem;
+  padding: 0.38rem 0.82rem;
   border-radius: 999px;
-  background: rgba(97, 57, 84, 0.07);
-  color: var(--head);
-  font-size: 0.85rem;
-  font-weight: 500;
+  background: rgba(10, 102, 194, 0.08);
+  color: #0A66C2;
+  font-size: 0.84rem;
+  font-weight: 600;
   text-decoration: none;
   border: none;
-  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.speaker-linkedin:hover {
-  background: rgba(164, 53, 124, 0.16);
-  color: var(--accent);
-  transform: translateX(4px);
+.speaker-linkedin-btn:hover {
+  background: rgba(10, 102, 194, 0.16);
+  color: #004182;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(10, 102, 194, 0.15);
 }
 
-.speaker-linkedin .linkedin-icon {
+.speaker-linkedin-btn .linkedin-icon {
   color: #0A66C2;
   transition: transform 0.25s ease;
 }
 
-.speaker-linkedin:hover .linkedin-icon {
-  transform: scale(1.15);
-}
-
-.speaker-linkedin .external-arrow {
-  opacity: 0.6;
-  transition: transform 0.25s ease, opacity 0.25s ease;
-}
-
-.speaker-linkedin:hover .external-arrow {
-  opacity: 1;
-  transform: translate(2px, -2px);
+.speaker-linkedin-btn:hover .linkedin-icon {
+  transform: scale(1.12);
 }
 
 /* Dark mode overrides para ponentes */
 @media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .speaker-org-badge {
+    background: rgba(238, 155, 203, 0.2);
+    border-color: rgba(238, 155, 203, 0.5);
+    color: #FFA5D8;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  }
   :root:not([data-theme="light"]) .speaker-name {
     background: linear-gradient(
-      115deg,
+      110deg,
       var(--head) 0%,
-      var(--head) 36%,
-      var(--accent-text) 46%,
-      #ffffff 50%,
-      var(--accent-text) 54%,
-      var(--head) 64%,
+      var(--head) 28%,
+      var(--accent-text) 38%,
+      #ffffff 48%,
+      #ffffff 52%,
+      var(--accent-text) 62%,
+      var(--head) 72%,
       var(--head) 100%
     );
-    background-size: 280% 100%;
+    background-size: 320% 100%;
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
   }
-  :root:not([data-theme="light"]) .speaker-linkedin {
-    background: rgba(245, 228, 233, 0.1);
+  :root:not([data-theme="light"]) .speaker-talk-title {
     color: var(--head);
   }
-  :root:not([data-theme="light"]) .speaker-linkedin:hover {
-    background: rgba(238, 155, 203, 0.2);
+  :root:not([data-theme="light"]) .talk-chip {
+    background: rgba(238, 155, 203, 0.18);
+    border-color: rgba(238, 155, 203, 0.4);
     color: var(--accent-text);
   }
-  :root:not([data-theme="light"]) .speaker-talk .talk-badge {
-    background: rgba(238, 155, 203, 0.18);
+  :root:not([data-theme="light"]) .talk-chip.chip-taller {
+    background: rgba(245, 228, 233, 0.16);
+    border-color: rgba(245, 228, 233, 0.35);
+    color: var(--head);
+  }
+  :root:not([data-theme="light"]) .mobile-talk-toggle {
     color: var(--accent-text);
+  }
+  :root:not([data-theme="light"]) .speaker-linkedin-btn {
+    background: rgba(10, 102, 194, 0.22);
+    color: #70B5F9;
+  }
+  :root:not([data-theme="light"]) .speaker-linkedin-btn .linkedin-icon {
+    color: #70B5F9;
+  }
+  :root:not([data-theme="light"]) .speaker-linkedin-btn:hover {
+    background: rgba(10, 102, 194, 0.35);
+    color: #FFFFFF;
   }
 }
 
+:root[data-theme="dark"] .speaker-org-badge {
+  background: rgba(238, 155, 203, 0.2);
+  border-color: rgba(238, 155, 203, 0.5);
+  color: #FFA5D8;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
 :root[data-theme="dark"] .speaker-name {
   background: linear-gradient(
-    115deg,
+    110deg,
     var(--head) 0%,
-    var(--head) 36%,
-    var(--accent-text) 46%,
-    #ffffff 50%,
-    var(--accent-text) 54%,
-    var(--head) 64%,
+    var(--head) 28%,
+    var(--accent-text) 38%,
+    #ffffff 48%,
+    #ffffff 52%,
+    var(--accent-text) 62%,
+    var(--head) 72%,
     var(--head) 100%
   );
-  background-size: 280% 100%;
+  background-size: 320% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-:root[data-theme="dark"] .speaker-linkedin {
-  background: rgba(245, 228, 233, 0.1);
+:root[data-theme="dark"] .speaker-talk-title {
   color: var(--head);
 }
-:root[data-theme="dark"] .speaker-linkedin:hover {
-  background: rgba(238, 155, 203, 0.2);
+:root[data-theme="dark"] .talk-chip {
+  background: rgba(238, 155, 203, 0.18);
+  border-color: rgba(238, 155, 203, 0.4);
   color: var(--accent-text);
 }
-:root[data-theme="dark"] .speaker-talk .talk-badge {
-  background: rgba(238, 155, 203, 0.18);
+:root[data-theme="dark"] .talk-chip.chip-taller {
+  background: rgba(245, 228, 233, 0.16);
+  border-color: rgba(245, 228, 233, 0.35);
+  color: var(--head);
+}
+:root[data-theme="dark"] .mobile-talk-toggle {
   color: var(--accent-text);
+}
+:root[data-theme="dark"] .speaker-linkedin-btn {
+  background: rgba(10, 102, 194, 0.22);
+  color: #70B5F9;
+}
+:root[data-theme="dark"] .speaker-linkedin-btn .linkedin-icon {
+  color: #70B5F9;
+}
+:root[data-theme="dark"] .speaker-linkedin-btn:hover {
+  background: rgba(10, 102, 194, 0.35);
+  color: #FFFFFF;
 }
 
 .allies-title {

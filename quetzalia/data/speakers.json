@@ -2,7 +2,9 @@
   {
     "id": "fer-osorio",
     "name": "Fer Osorio",
-    "role": "Ixalli",
+    "org": "Ixalli",
+    "role": "Red de Mujeres en Tech",
+    "type": "Charla",
     "desc": "Ponencia confirmada y enlace con la red de mujeres de la industria tecnológica.",
     "talk": "Rompiendo barreras en Tech y construyendo comunidad",
     "linkedin": "https://linkedin.com/in/fer-osorio",
@@ -11,8 +13,10 @@
   {
     "id": "brenda-olivas",
     "name": "Brenda Olivas",
-    "role": "NVIDIA",
-    "desc": "Arquitecta de Soluciones Senior en NVIDIA. Aliada clave de la industria de IA y supercómputo.",
+    "org": "NVIDIA",
+    "role": "Arquitecta de Soluciones Senior",
+    "type": "Charla",
+    "desc": "Aliada clave de la industria de IA y supercómputo, impulsando soluciones a escala.",
     "talk": "Arquitectura de Soluciones de IA a gran escala",
     "linkedin": "https://linkedin.com/in/brenda-olivas",
     "placeholderText": "Foto por definir"
@@ -20,8 +24,10 @@
   {
     "id": "sofia-mendoza",
     "name": "Dra. Sofía Mendoza",
+    "org": "UNAM - MAC",
     "role": "Investigadora en Matemáticas Aplicadas",
-    "desc": "Especialista en optimización matemática y algoritmos genéticos en la UNAM.",
+    "type": "Taller",
+    "desc": "Especialista en optimización matemática y algoritmos bioinspirados para resolución de problemas complejos.",
     "talk": "De las ecuaciones a los algoritmos que transforman el mundo",
     "linkedin": "https://linkedin.com/in/sofia-mendoza-unam",
     "placeholderText": "Foto por definir"
@@ -29,11 +35,12 @@
   {
     "id": "valeria-reyes",
     "name": "Valeria Reyes",
-    "role": "Oracle Cloud",
-    "desc": "Líder de Ingeniería en Infraestructura Cloud y mentora activa en iniciativas de mujeres en STEM.",
+    "org": "Oracle Cloud",
+    "role": "Líder de Infraestructura Cloud",
+    "type": "Taller",
+    "desc": "Mentora activa en iniciativas de mujeres en STEM e ingeniería de sistemas de nube resilientes.",
     "talk": "Construyendo nubes resilientes e impulsando nuevas voces",
     "linkedin": "https://linkedin.com/in/valeria-reyes-stem",
     "placeholderText": "Foto por definir"
   }
 ]
-
