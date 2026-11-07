@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description:
     "Donde la lógica echa raíces y la innovación emprende el vuelo: el encuentro de mujeres que construyen el futuro en la FES Acatlán.",
   icons: {
-    icon: "/QuetzaliaLogo.png",
+    icon: "/icon.png",
   },
 };
 
