@@ -589,8 +589,14 @@ a {
   }
 }
 
-/* Destello periódico que recorre "IA" */
-.shimmer-ia {
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* Efecto de destello "IA Glint" (Reutilizable)         */
+/* Uso: <span className="glint-ia">IA</span> o        */
+/* <span className="glint-ia on-band">IA</span>       */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.shimmer-ia,
+.glint-ia {
   display: inline-block;
   position: relative;
   background: linear-gradient(
@@ -612,19 +618,36 @@ a {
   transition: filter 0.6s ease;
 }
 
+/* Variante para fondos oscuros (Stats, Footer) */
+.glint-ia.on-band,
+.shimmer-ia.on-band {
+  background: linear-gradient(
+    115deg,
+    var(--band-fg) 0%,
+    var(--band-fg) 38%,
+    var(--band-accent) 46%,
+    #ffffff 50%,
+    var(--band-accent) 54%,
+    var(--band-fg) 62%,
+    var(--band-fg) 100%
+  );
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 @keyframes iaGlint {
   0%, 65% {
     background-position: 100% 0;
     filter: drop-shadow(0 0 0 transparent);
   }
   75% {
-    /* Iluminación tenue y suave del contorno durante el paso */
     filter: drop-shadow(0 0 1px rgba(244, 179, 217, 0.6))
             drop-shadow(0 0 5px rgba(164, 53, 124, 0.35));
   }
   85% {
     background-position: 0% 0;
-    /* Resplandor tenue alrededor de las letras */
     filter: drop-shadow(0 0 1.5px rgba(244, 179, 217, 0.7))
             drop-shadow(0 0 7px rgba(164, 53, 124, 0.4));
   }
@@ -982,16 +1005,51 @@ a {
   max-width: 54rem;
 }
 
-.agenda li {
+.agenda li.agenda-item {
+  position: relative;
   display: grid;
   grid-template-columns: 5.6rem 1fr;
   gap: .3rem 1.6rem;
   padding: 1.5rem 0;
   border-top: 1px solid var(--rule);
+  opacity: 0;
+  transform: translateX(-38px);
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Fila visible (entra de izquierda a derecha) */
+.agenda li.agenda-item.is-visible {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .agenda li:last-child {
   border-bottom: 1px solid var(--rule);
+}
+
+/* Línea rastreadora que se prende SOLO en el paso activo */
+.agenda-line-tracker {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent) 0%, #ffffff 70%, var(--accent) 100%);
+  opacity: 0;
+  box-shadow: 0 0 12px rgba(164, 53, 124, 0.7);
+  transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.agenda li.agenda-item.is-active-line .agenda-line-tracker {
+  width: 100%;
+  opacity: 1;
+}
+
+/* Efecto suave sobre la hora cuando la fila está activa */
+.agenda li.agenda-item.is-active-line time {
+  filter: drop-shadow(0 0 8px rgba(164, 53, 124, 0.45));
 }
 
 .agenda time {
