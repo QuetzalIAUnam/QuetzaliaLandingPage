@@ -7,6 +7,7 @@ import Allies from "@/components/Allies";
 import Signup from "@/components/Signup";
 import Faq from "@/components/Faq";
 import Footer from "@/components/Footer";
+import MobileFloatingDock from "@/components/MobileFloatingDock";
 
 export default function Home() {
   return (
@@ -22,6 +23,7 @@ export default function Home() {
         <Faq />
       </main>
       <Footer />
+      <MobileFloatingDock />
     </>
   );
 }
