@@ -1138,44 +1138,56 @@ a {
 .person-content {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.65rem;
 }
 
-/* Badge de procedencia / Organización destacada */
-.speaker-header-meta {
+/* Fila de chips: Rosa (tipo de charla) y Salmón (dónde vienen / organización) */
+.speaker-chips-row {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
+  justify-content: space-between;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
-.speaker-org-badge {
+.speaker-chips {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.speaker-chip {
   display: inline-flex;
   align-items: center;
   font-family: var(--body);
-  font-size: 0.76rem;
-  font-weight: 700;
-  letter-spacing: 0.07em;
+  font-size: 0.69rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--accent);
-  background: rgba(164, 53, 124, 0.14);
-  border: 1px solid rgba(164, 53, 124, 0.38);
-  padding: 0.2rem 0.65rem;
-  border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(164, 53, 124, 0.08);
+  padding: 0.16rem 0.52rem;
+  border-radius: 999px;
+  line-height: 1.25;
 }
 
-.speaker-role-text {
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: var(--fg);
-  opacity: 0.85;
+/* Chip Rosa: Tipo de ponencia / actividad */
+.speaker-chip.chip-pink {
+  background: rgba(164, 53, 124, 0.12);
+  color: var(--accent);
+  border: 1px solid rgba(164, 53, 124, 0.3);
+}
+
+/* Chip Salmón: Dónde vienen (Ixalli, NVIDIA, etc.) discreto para no competir con el nombre */
+.speaker-chip.chip-salmon {
+  background: rgba(224, 110, 85, 0.13);
+  color: #B94A2D;
+  border: 1px solid rgba(224, 110, 85, 0.35);
 }
 
 /* Nombre de la ponente con destello IA más pausado y visible */
 .speaker-name {
   font-size: 1.35rem;
-  line-height: 1.25;
+  line-height: 1.22;
   display: inline-block;
   cursor: pointer;
   position: relative;
@@ -1398,11 +1410,15 @@ a {
 
 /* Dark mode overrides para ponentes */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .speaker-org-badge {
-    background: rgba(238, 155, 203, 0.2);
-    border-color: rgba(238, 155, 203, 0.5);
+  :root:not([data-theme="light"]) .speaker-chip.chip-pink {
+    background: rgba(238, 155, 203, 0.18);
+    border-color: rgba(238, 155, 203, 0.45);
     color: #FFA5D8;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  }
+  :root:not([data-theme="light"]) .speaker-chip.chip-salmon {
+    background: rgba(235, 140, 118, 0.2);
+    border-color: rgba(235, 140, 118, 0.45);
+    color: #FF9B82;
   }
   :root:not([data-theme="light"]) .speaker-name {
     background: linear-gradient(
@@ -1424,16 +1440,6 @@ a {
   :root:not([data-theme="light"]) .speaker-talk-title {
     color: var(--head);
   }
-  :root:not([data-theme="light"]) .talk-chip {
-    background: rgba(238, 155, 203, 0.18);
-    border-color: rgba(238, 155, 203, 0.4);
-    color: var(--accent-text);
-  }
-  :root:not([data-theme="light"]) .talk-chip.chip-taller {
-    background: rgba(245, 228, 233, 0.16);
-    border-color: rgba(245, 228, 233, 0.35);
-    color: var(--head);
-  }
   :root:not([data-theme="light"]) .mobile-talk-toggle {
     color: var(--accent-text);
   }
@@ -1450,11 +1456,15 @@ a {
   }
 }
 
-:root[data-theme="dark"] .speaker-org-badge {
-  background: rgba(238, 155, 203, 0.2);
-  border-color: rgba(238, 155, 203, 0.5);
+:root[data-theme="dark"] .speaker-chip.chip-pink {
+  background: rgba(238, 155, 203, 0.18);
+  border-color: rgba(238, 155, 203, 0.45);
   color: #FFA5D8;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+:root[data-theme="dark"] .speaker-chip.chip-salmon {
+  background: rgba(235, 140, 118, 0.2);
+  border-color: rgba(235, 140, 118, 0.45);
+  color: #FF9B82;
 }
 :root[data-theme="dark"] .speaker-name {
   background: linear-gradient(
@@ -1474,16 +1484,6 @@ a {
   -webkit-text-fill-color: transparent;
 }
 :root[data-theme="dark"] .speaker-talk-title {
-  color: var(--head);
-}
-:root[data-theme="dark"] .talk-chip {
-  background: rgba(238, 155, 203, 0.18);
-  border-color: rgba(238, 155, 203, 0.4);
-  color: var(--accent-text);
-}
-:root[data-theme="dark"] .talk-chip.chip-taller {
-  background: rgba(245, 228, 233, 0.16);
-  border-color: rgba(245, 228, 233, 0.35);
   color: var(--head);
 }
 :root[data-theme="dark"] .mobile-talk-toggle {

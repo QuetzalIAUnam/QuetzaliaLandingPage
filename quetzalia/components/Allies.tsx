@@ -9,7 +9,6 @@ interface Speaker {
   id: string;
   name: string;
   org: string;
-  role: string;
   type: string;
   desc: string;
   talk: string;
@@ -38,7 +37,6 @@ export default function Allies() {
           if (entry.isIntersecting) {
             setInView(true);
           } else {
-            // Permite reiniciar la animación cuando el usuario vuelve a pasar por la sección
             setInView(false);
           }
         });
@@ -80,60 +78,54 @@ export default function Allies() {
               </PhotoArch>
 
               <div className="person-content">
-                {/* Dónde vienen / Organización resaltada para que no se pierda */}
-                <div className="speaker-header-meta">
-                  <span className="speaker-org-badge">{person.org}</span>
-                  <span className="speaker-role-text">{person.role}</span>
+                {/* Los dos chips juntos: Rosa (tipo de charla) y Salmón (dónde vienen / organización) */}
+                <div className="speaker-chips-row">
+                  <div className="speaker-chips">
+                    <span className="speaker-chip chip-pink">{person.type}</span>
+                    <span className="speaker-chip chip-salmon">{person.org}</span>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="mobile-talk-toggle"
+                    onClick={() => toggleTalk(person.id)}
+                    aria-expanded={!!expandedTalks[person.id]}
+                    aria-controls={`talk-body-${person.id}`}
+                  >
+                    <span>
+                      {expandedTalks[person.id] ? "Ocultar" : "Ver charla"}
+                    </span>
+                    <svg
+                      className={`toggle-chevron ${
+                        expandedTalks[person.id] ? "rotated" : ""
+                      }`}
+                      width="13"
+                      height="13"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </button>
                 </div>
 
-                {/* Nombre con efecto de destello suave y pausado */}
+                {/* Nombre de la ponente (protagonista, sin competir con cajas grandes) */}
                 <h3 className="speaker-name">{person.name}</h3>
 
-                {/* Charla: directa en desktop, plegable en mobile con chip siempre visible */}
-                <div className="speaker-talk-wrapper">
-                  <div className="speaker-talk-header">
-                    <span className={`talk-chip chip-${person.type.toLowerCase()}`}>
-                      {person.type}
-                    </span>
-
-                    <button
-                      type="button"
-                      className="mobile-talk-toggle"
-                      onClick={() => toggleTalk(person.id)}
-                      aria-expanded={!!expandedTalks[person.id]}
-                      aria-controls={`talk-body-${person.id}`}
-                    >
-                      <span>
-                        {expandedTalks[person.id] ? "Ocultar charla" : "Ver charla"}
-                      </span>
-                      <svg
-                        className={`toggle-chevron ${
-                          expandedTalks[person.id] ? "rotated" : ""
-                        }`}
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        aria-hidden="true"
-                      >
-                        <polyline points="6 9 12 15 18 9" />
-                      </svg>
-                    </button>
-                  </div>
-
-                  <div
-                    id={`talk-body-${person.id}`}
-                    className={`speaker-talk-body ${
-                      expandedTalks[person.id] ? "is-expanded" : ""
-                    }`}
-                  >
-                    <p className="speaker-talk-title">“{person.talk}”</p>
-                    <p className="speaker-desc">{person.desc}</p>
-                  </div>
+                {/* Charla y descripción: directa en desktop, colapsable en mobile */}
+                <div
+                  id={`talk-body-${person.id}`}
+                  className={`speaker-talk-body ${
+                    expandedTalks[person.id] ? "is-expanded" : ""
+                  }`}
+                >
+                  <p className="speaker-talk-title">“{person.talk}”</p>
+                  <p className="speaker-desc">{person.desc}</p>
                 </div>
 
                 {/* Solo botón de LinkedIn */}
@@ -147,8 +139,8 @@ export default function Allies() {
                 >
                   <svg
                     className="linkedin-icon"
-                    width="15"
-                    height="15"
+                    width="14"
+                    height="14"
                     viewBox="0 0 24 24"
                     fill="currentColor"
                     aria-hidden="true"
