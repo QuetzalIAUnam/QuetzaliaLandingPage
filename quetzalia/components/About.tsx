@@ -66,12 +66,18 @@ const pillarsData = [
 
 export default function About() {
   const sectionRef = useRef<HTMLElement>(null);
-
-  // Estados de la secuencia coreografiada
   const [inView, setInView] = useState(false);
-  const [showLabels, setShowLabels] = useState(false);
-  const [showImages, setShowImages] = useState(false);
-  const [startTypewriter, setStartTypewriter] = useState(false);
+
+  // Estados independientes para cada pilar (0: Inspírate, 1: Aprende, 2: Conecta)
+  const [activeStep, setActiveStep] = useState<{
+    showLabel: boolean[];
+    showImage: boolean[];
+    startType: boolean[];
+  }>({
+    showLabel: [false, false, false],
+    showImage: [false, false, false],
+    startType: [false, false, false],
+  });
 
   useEffect(() => {
     const el = sectionRef.current;
@@ -113,29 +119,56 @@ export default function About() {
     };
   }, []);
 
-  // Secuencia temporal coordinada
+  // Secuencia escalonada individual: Pilar 1 -> luego Pilar 2 -> luego Pilar 3
   useEffect(() => {
     if (!inView) return;
 
-    // 1. Títulos de los pilares aparecen (Inspírate, Aprende, Conecta)
-    const t1 = setTimeout(() => {
-      setShowLabels(true);
-    }, 450);
+    // Horarios escalonados para cada pilar (en ms):
+    // Pilar 0 (Inspírate): label en 500ms, icono en 900ms, texto en 1300ms
+    // Pilar 1 (Aprende):   label en 3100ms, icono en 3500ms, texto en 3900ms
+    // Pilar 2 (Conecta):   label en 5700ms, icono en 6100ms, texto en 6500ms
+    const schedule = [
+      { labelDelay: 500, imageDelay: 900, textDelay: 1300 },
+      { labelDelay: 3100, imageDelay: 3500, textDelay: 3900 },
+      { labelDelay: 5700, imageDelay: 6100, textDelay: 6500 },
+    ];
 
-    // 2. Luego aparecen las imágenes/iconos correspondientes
-    const t2 = setTimeout(() => {
-      setShowImages(true);
-    }, 1100);
+    const timers: NodeJS.Timeout[] = [];
 
-    // 3. Y poco a poco se empiezan a escribir los textos que los representan
-    const t3 = setTimeout(() => {
-      setStartTypewriter(true);
-    }, 1750);
+    schedule.forEach((s, idx) => {
+      timers.push(
+        setTimeout(() => {
+          setActiveStep((prev) => {
+            const next = [...prev.showLabel];
+            next[idx] = true;
+            return { ...prev, showLabel: next };
+          });
+        }, s.labelDelay)
+      );
+
+      timers.push(
+        setTimeout(() => {
+          setActiveStep((prev) => {
+            const next = [...prev.showImage];
+            next[idx] = true;
+            return { ...prev, showImage: next };
+          });
+        }, s.imageDelay)
+      );
+
+      timers.push(
+        setTimeout(() => {
+          setActiveStep((prev) => {
+            const next = [...prev.startType];
+            next[idx] = true;
+            return { ...prev, startType: next };
+          });
+        }, s.textDelay)
+      );
+    });
 
     return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
+      timers.forEach((t) => clearTimeout(t));
     };
   }, [inView]);
 
@@ -161,12 +194,11 @@ export default function About() {
             {pillarsData.map((p, idx) => (
               <div key={p.label}>
                 <dt className="pillar-dt-row">
-                  {/* PASO 2: La imagen aparece después del label */}
+                  {/* Icono del pilar (aparece después de su propio label) */}
                   <span
                     className={`pillar-icon-box ${
-                      showImages ? "is-shown" : "is-hidden"
+                      activeStep.showImage[idx] ? "is-shown" : "is-hidden"
                     }`}
-                    style={{ transitionDelay: `${idx * 160}ms` }}
                   >
                     <SkeletonImage
                       src={p.src}
@@ -178,22 +210,21 @@ export default function About() {
                     />
                   </span>
 
-                  {/* PASO 1: Primero aparece el nombre (Inspírate, Aprende, Conecta) */}
+                  {/* Nombre del pilar (Inspírate, Aprende, Conecta) */}
                   <span
                     className={`pillar-name-text ${
-                      showLabels ? "is-shown" : "is-hidden"
+                      activeStep.showLabel[idx] ? "is-shown" : "is-hidden"
                     }`}
-                    style={{ transitionDelay: `${idx * 140}ms` }}
                   >
                     {p.label}
                   </span>
                 </dt>
 
-                {/* PASO 3: Los mensajes se escriben poco a poco */}
+                {/* Mensaje descriptivo con máquina de escribir */}
                 <dd>
                   <TypewriterText
                     text={p.desc}
-                    start={startTypewriter}
+                    start={activeStep.startType[idx]}
                     speed={16}
                   />
                 </dd>
@@ -201,21 +232,23 @@ export default function About() {
             ))}
           </dl>
 
-          {/* Tarjeta inferior con fade in */}
+          {/* Tarjeta inferior con pluma flotante */}
           <div
             className={`name-note fade-in-el delay-3 ${
               inView ? "is-visible" : ""
             }`}
           >
             <div className="name-note-inner">
-              <SkeletonImage
-                src="/pluma.png"
-                alt="Pluma sagrada de Quetzal"
-                width={58}
-                height={58}
-                unoptimized
-                className="name-note-icon"
-              />
+              <div className="floating-feather-wrap">
+                <SkeletonImage
+                  src="/pluma.png"
+                  alt="Pluma sagrada de Quetzal"
+                  width={58}
+                  height={58}
+                  unoptimized
+                  className="name-note-icon floating-feather"
+                />
+              </div>
               <div>
                 <h3>¿Por qué Quetzal-IA?</h3>
                 <p>
