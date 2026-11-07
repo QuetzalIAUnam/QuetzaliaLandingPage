@@ -1105,26 +1105,263 @@ a {
 .people {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap: 2.2rem;
+  gap: 2.5rem;
 }
 
 .person {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.1rem;
   min-width: 0;
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.people.in-view .person {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: var(--speaker-delay, 0ms);
 }
 
 .person .ph {
   aspect-ratio: 1;
+  transition: transform 0.35s ease;
 }
 
-.person h3 {
-  font-size: 1.25rem;
+.person:hover .ph {
+  transform: translateY(-3px);
 }
 
-.person p {
-  font-size: .98rem;
+.person-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.speaker-role {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin-bottom: -0.2rem;
+}
+
+.speaker-name {
+  font-size: 1.35rem;
+  line-height: 1.2;
+  display: inline-block;
+  cursor: pointer;
+  position: relative;
+  background: linear-gradient(
+    115deg,
+    var(--head) 0%,
+    var(--head) 36%,
+    var(--accent) 46%,
+    #ffffff 50%,
+    var(--accent) 54%,
+    var(--head) 64%,
+    var(--head) 100%
+  );
+  background-size: 280% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  transition: filter 0.4s ease;
+}
+
+/* Destello cuando el ponente aparece */
+.people.in-view .person .speaker-name {
+  animation: speakerGlint 1.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation-delay: calc(var(--speaker-delay, 0ms) + 380ms);
+}
+
+/* Destello interactivo al pasar el mouse */
+.person:hover .speaker-name,
+.speaker-name:hover {
+  animation: speakerGlintHover 1.1s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+}
+
+@keyframes speakerGlint {
+  0% {
+    background-position: 100% 0;
+    filter: drop-shadow(0 0 0 transparent);
+  }
+  35% {
+    filter: drop-shadow(0 0 1px rgba(244, 179, 217, 0.6))
+            drop-shadow(0 0 6px rgba(164, 53, 124, 0.35));
+  }
+  65% {
+    background-position: 0% 0;
+    filter: drop-shadow(0 0 1.5px rgba(244, 179, 217, 0.75))
+            drop-shadow(0 0 8px rgba(164, 53, 124, 0.4));
+  }
+  90%, 100% {
+    background-position: 0% 0;
+    filter: drop-shadow(0 0 0 transparent);
+  }
+}
+
+@keyframes speakerGlintHover {
+  0% {
+    background-position: 100% 0;
+    filter: drop-shadow(0 0 0 transparent);
+  }
+  35% {
+    filter: drop-shadow(0 0 1.5px rgba(244, 179, 217, 0.8))
+            drop-shadow(0 0 8px rgba(164, 53, 124, 0.45));
+  }
+  70% {
+    background-position: 0% 0;
+    filter: drop-shadow(0 0 2px rgba(244, 179, 217, 0.85))
+            drop-shadow(0 0 9px rgba(164, 53, 124, 0.5));
+  }
+  100% {
+    background-position: 0% 0;
+    filter: drop-shadow(0 0 0 transparent);
+  }
+}
+
+.speaker-talk {
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: var(--head);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.speaker-talk .talk-badge {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(164, 53, 124, 0.12);
+  color: var(--accent);
+}
+
+.speaker-talk .talk-title {
+  font-weight: 500;
+  font-style: italic;
+}
+
+.speaker-desc {
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--fg);
+  opacity: 0.92;
+}
+
+/* Botón LinkedIn - Sin bordes ni tarjetas */
+.speaker-linkedin {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  align-self: flex-start;
+  margin-top: 0.35rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(97, 57, 84, 0.07);
+  color: var(--head);
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  border: none;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.speaker-linkedin:hover {
+  background: rgba(164, 53, 124, 0.16);
+  color: var(--accent);
+  transform: translateX(4px);
+}
+
+.speaker-linkedin .linkedin-icon {
+  color: #0A66C2;
+  transition: transform 0.25s ease;
+}
+
+.speaker-linkedin:hover .linkedin-icon {
+  transform: scale(1.15);
+}
+
+.speaker-linkedin .external-arrow {
+  opacity: 0.6;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.speaker-linkedin:hover .external-arrow {
+  opacity: 1;
+  transform: translate(2px, -2px);
+}
+
+/* Dark mode overrides para ponentes */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .speaker-name {
+    background: linear-gradient(
+      115deg,
+      var(--head) 0%,
+      var(--head) 36%,
+      var(--accent-text) 46%,
+      #ffffff 50%,
+      var(--accent-text) 54%,
+      var(--head) 64%,
+      var(--head) 100%
+    );
+    background-size: 280% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  :root:not([data-theme="light"]) .speaker-linkedin {
+    background: rgba(245, 228, 233, 0.1);
+    color: var(--head);
+  }
+  :root:not([data-theme="light"]) .speaker-linkedin:hover {
+    background: rgba(238, 155, 203, 0.2);
+    color: var(--accent-text);
+  }
+  :root:not([data-theme="light"]) .speaker-talk .talk-badge {
+    background: rgba(238, 155, 203, 0.18);
+    color: var(--accent-text);
+  }
+}
+
+:root[data-theme="dark"] .speaker-name {
+  background: linear-gradient(
+    115deg,
+    var(--head) 0%,
+    var(--head) 36%,
+    var(--accent-text) 46%,
+    #ffffff 50%,
+    var(--accent-text) 54%,
+    var(--head) 64%,
+    var(--head) 100%
+  );
+  background-size: 280% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+:root[data-theme="dark"] .speaker-linkedin {
+  background: rgba(245, 228, 233, 0.1);
+  color: var(--head);
+}
+:root[data-theme="dark"] .speaker-linkedin:hover {
+  background: rgba(238, 155, 203, 0.2);
+  color: var(--accent-text);
+}
+:root[data-theme="dark"] .speaker-talk .talk-badge {
+  background: rgba(238, 155, 203, 0.18);
+  color: var(--accent-text);
 }
 
 .allies-title {
