@@ -552,6 +552,80 @@ a {
   letter-spacing: .01em;
 }
 
+/* Fade in escalonado para el contenido del Hero */
+.hero-fade {
+  opacity: 0;
+  animation: heroFadeIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.hero-fade-1 {
+  animation-delay: 0.15s;
+}
+
+.hero-fade-2 {
+  animation-delay: 0.35s;
+}
+
+.hero-fade-3 {
+  animation-delay: 0.55s;
+}
+
+.hero-fade-4 {
+  animation-delay: 0.75s;
+}
+
+.hero-fade-5 {
+  animation-delay: 0.95s;
+}
+
+@keyframes heroFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Destello periódico que recorre "IA" */
+.shimmer-ia {
+  display: inline-block;
+  position: relative;
+  background: linear-gradient(
+    115deg,
+    var(--head) 0%,
+    var(--head) 35%,
+    var(--accent) 45%,
+    #ffffff 50%,
+    var(--accent) 55%,
+    var(--head) 65%,
+    var(--head) 100%
+  );
+  background-size: 260% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: iaGlint 5s ease-in-out infinite;
+  animation-delay: 1.5s;
+}
+
+@keyframes iaGlint {
+  0%, 70% {
+    background-position: 100% 0;
+    filter: drop-shadow(0 0 0 transparent);
+  }
+  80% {
+    background-position: 0% 0;
+    filter: drop-shadow(0 0 10px rgba(164, 53, 124, 0.65));
+  }
+  100% {
+    background-position: 0% 0;
+    filter: drop-shadow(0 0 0 transparent);
+  }
+}
+
 .hero .eyebrow {
   margin-top: 1.1rem;
 }

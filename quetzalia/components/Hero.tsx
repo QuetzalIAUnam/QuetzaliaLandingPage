@@ -28,14 +28,18 @@ export default function Hero() {
           <Spark variant="s4" />
         </div>
 
-        <h1>Quetzal-IA</h1>
-        <p className="eyebrow">Encuentro de mujeres en STEM · FES Acatlán</p>
-        <p className="lema">
+        <h1 className="hero-fade hero-fade-1">
+          Quetzal-<span className="shimmer-ia">IA</span>
+        </h1>
+        <p className="eyebrow hero-fade hero-fade-2">
+          Encuentro de mujeres en STEM · FES Acatlán
+        </p>
+        <p className="lema hero-fade hero-fade-3">
           Donde la lógica echa raíces y la innovación emprende el vuelo: el
           encuentro de mujeres que construyen el futuro.
         </p>
 
-        <div className="cta">
+        <div className="cta hero-fade hero-fade-4">
           <DecoButton variant="ghost" href="#agenda">
             Ver agenda
           </DecoButton>
@@ -44,7 +48,7 @@ export default function Hero() {
           </DecoButton>
         </div>
 
-        <p className="meta">
+        <p className="meta hero-fade hero-fade-5">
           <span>Abril de 2027</span>
           <span>FES Acatlán · CEMM</span>
           <span>Fecha y sede por confirmar</span>
