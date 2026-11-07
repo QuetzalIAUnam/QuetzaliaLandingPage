@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
+import SkeletonImage from "./ui/SkeletonImage";
 import { useCountUp } from "react-countup";
 
 const statsData = [
@@ -58,11 +58,12 @@ function StatCard({
   return (
     <li className="stat-card">
       <div className="stat-media">
-        <Image
+        <SkeletonImage
           src={image}
           alt={alt}
           width={500}
           height={500}
+          skeletonClassName="sk-dark"
           className="stat-card-img"
           unoptimized
         />
