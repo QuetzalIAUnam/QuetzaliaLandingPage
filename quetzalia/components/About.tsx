@@ -85,7 +85,9 @@ export default function About() {
 
     const checkAndTrigger = () => {
       const rect = el.getBoundingClientRect();
-      if (rect.top < window.innerHeight * 0.85 && rect.bottom > 0) {
+      const windowHeight =
+        window.innerHeight || document.documentElement.clientHeight;
+      if (rect.top < windowHeight * 0.85 && rect.bottom > 80) {
         setInView(true);
         return true;
       }
@@ -101,21 +103,27 @@ export default function About() {
           observer.disconnect();
         }
       },
-      { threshold: 0.15 }
+      {
+        threshold: [0, 0.05, 0.1],
+        rootMargin: "80px 0px -40px 0px",
+      }
     );
     observer.observe(el);
 
-    const onScroll = () => {
+    const onScrollOrResize = () => {
       if (checkAndTrigger()) {
-        window.removeEventListener("scroll", onScroll);
+        window.removeEventListener("scroll", onScrollOrResize);
+        window.removeEventListener("resize", onScrollOrResize);
         observer.disconnect();
       }
     };
-    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("scroll", onScrollOrResize, { passive: true });
+    window.addEventListener("resize", onScrollOrResize, { passive: true });
 
     return () => {
       observer.disconnect();
-      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("scroll", onScrollOrResize);
+      window.removeEventListener("resize", onScrollOrResize);
     };
   }, []);
 

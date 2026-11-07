@@ -21,17 +21,18 @@ export default function MobileFloatingDock() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("inicio");
 
-  // Detectar la sección visible actualmente al hacer scroll
+  // Detección precisa de la sección actual usando getBoundingClientRect
   useEffect(() => {
     const handleScroll = () => {
-      const scrollPosition = window.scrollY + 200;
+      const windowHeight =
+        window.innerHeight || document.documentElement.clientHeight;
+      const focusPoint = windowHeight * 0.4;
 
       for (const section of SECTIONS) {
         const el = document.getElementById(section.id);
         if (el) {
-          const top = el.offsetTop;
-          const height = el.offsetHeight;
-          if (scrollPosition >= top && scrollPosition < top + height) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= focusPoint && rect.bottom >= focusPoint) {
             setActiveSection(section.id);
             break;
           }
@@ -40,11 +41,15 @@ export default function MobileFloatingDock() {
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll, { passive: true });
     handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+    };
   }, []);
 
-  // Cerrar con la tecla Escape
+  // Cerrar con Escape
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -64,7 +69,17 @@ export default function MobileFloatingDock() {
     setIsOpen(false);
     const target = document.getElementById(id);
     if (target) {
-      target.scrollIntoView({ behavior: "smooth" });
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+
+      // En móviles, scrollIntoView programático a veces pausa los IntersectionObserver.
+      // Emitimos eventos periódicos durante y al finalizar el desplazamiento
+      // para despertar inmediatamente a todos los observadores y animaciones.
+      const syncDelays = [80, 180, 350, 550, 800, 1100];
+      syncDelays.forEach((delay) => {
+        setTimeout(() => {
+          window.dispatchEvent(new Event("scroll"));
+        }, delay);
+      });
     }
   };
 
@@ -140,7 +155,11 @@ export default function MobileFloatingDock() {
           className={`mobile-dock-trigger ${isOpen ? "is-open" : ""}`}
           aria-expanded={isOpen}
           aria-haspopup="dialog"
-          aria-label={isOpen ? "Cerrar menú de navegación" : `Menú de navegación. Sección actual: ${activeLabel}`}
+          aria-label={
+            isOpen
+              ? "Cerrar menú de navegación"
+              : `Menú de navegación. Sección actual: ${activeLabel}`
+          }
         >
           {/* Icono Brújula Neo-Déco */}
           <span className="dock-trigger-icon" aria-hidden="true">
@@ -183,4 +202,3 @@ export default function MobileFloatingDock() {
     </div>
   );
 }
-

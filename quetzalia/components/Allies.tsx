@@ -27,9 +27,27 @@ export default function Allies() {
     setExpandedTalks((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  // Observador con respaldo activo de scroll y getBoundingClientRect
+  // para garantizar detección en móviles y saltos directos desde el menú flotante
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
+
+    const checkVisibility = () => {
+      const rect = el.getBoundingClientRect();
+      const windowHeight =
+        window.innerHeight || document.documentElement.clientHeight;
+      const isVisible = rect.top < windowHeight * 0.85 && rect.bottom > 80;
+
+      if (isVisible) {
+        setInView(true);
+      } else {
+        // Solo resetear si la sección salió COMPLETAMENTE de la pantalla
+        if (rect.bottom < 0 || rect.top > windowHeight) {
+          setInView(false);
+        }
+      }
+    };
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -37,15 +55,31 @@ export default function Allies() {
           if (entry.isIntersecting) {
             setInView(true);
           } else {
-            setInView(false);
+            const rect = el.getBoundingClientRect();
+            const windowHeight =
+              window.innerHeight || document.documentElement.clientHeight;
+            if (rect.bottom < 0 || rect.top > windowHeight) {
+              setInView(false);
+            }
           }
         });
       },
-      { threshold: 0.15 }
+      {
+        threshold: [0, 0.05, 0.1],
+        rootMargin: "80px 0px -40px 0px",
+      }
     );
 
     observer.observe(el);
-    return () => observer.disconnect();
+    window.addEventListener("scroll", checkVisibility, { passive: true });
+    window.addEventListener("resize", checkVisibility, { passive: true });
+    checkVisibility();
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", checkVisibility);
+      window.removeEventListener("resize", checkVisibility);
+    };
   }, []);
 
   const alliesList = ["Ixalli", "NVIDIA", "Oracle", "UNAM - MAC"];
