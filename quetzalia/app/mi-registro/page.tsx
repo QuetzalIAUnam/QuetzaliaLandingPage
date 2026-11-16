@@ -123,57 +123,166 @@ export default function MiRegistroPage() {
           </div>
         ) : (
           <div className="space-y-8">
-            {/* Ficha de identidad del usuario */}
-            <div className="p-6 border border-[var(--rule)] bg-[var(--card)] flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                {user.photoURL ? (
-                  <Image
-                    src={user.photoURL}
-                    alt={user.displayName || "Avatar"}
-                    width={56}
-                    height={56}
-                    className="rounded-full border-2 border-[var(--accent)]"
-                    unoptimized
-                  />
-                ) : (
-                  <div className="w-14 h-14 rounded-full bg-[var(--head)] text-white flex items-center justify-center font-display text-2xl">
-                    {(user.displayName || user.email || "U")[0].toUpperCase()}
+            {/* Ficha de Identidad del Usuario */}
+            <div className="border border-[var(--accent)] bg-[var(--card)] p-6 sm:p-8 relative overflow-hidden shadow-sm">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                <div className="flex items-center gap-5">
+                  {user.photoURL ? (
+                    <Image
+                      src={user.photoURL}
+                      alt={user.displayName || "Avatar"}
+                      width={64}
+                      height={64}
+                      className="rounded-full border-2 border-[var(--accent)] shadow-sm shrink-0"
+                      unoptimized
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-[var(--head)] text-white flex items-center justify-center font-display text-2xl border-2 border-[var(--accent)] shrink-0">
+                      {(user.displayName || user.email || "U")[0].toUpperCase()}
+                    </div>
+                  )}
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] uppercase font-bold tracking-widest px-2.5 py-0.5 bg-emerald-100 text-emerald-900 border border-emerald-300">
+                        ✓ Sesión vinculada con Google
+                      </span>
+                    </div>
+                    <h2 className="text-2xl sm:text-3xl font-display text-[var(--head)] mt-1.5">
+                      {user.displayName || "Participante"}
+                    </h2>
+                    <p className="text-sm text-[var(--fg)] opacity-85 font-medium mt-0.5">
+                      {user.email}
+                    </p>
                   </div>
-                )}
-                <div>
-                  <h2 className="text-xl font-display text-[var(--head)]">
-                    {user.displayName || "Participante"}
-                  </h2>
-                  <p className="text-sm text-[var(--fg)] opacity-80">{user.email}</p>
-                  <p className="text-xs text-[var(--accent)] font-mono mt-1">
-                    UID: {user.uid}
-                  </p>
                 </div>
+
+                <button
+                  onClick={() => logout()}
+                  className="btn btn-ghost text-xs px-5 py-2.5 shrink-0 self-start sm:self-center"
+                >
+                  Cerrar sesión
+                </button>
               </div>
             </div>
 
-            {/* Detalle del Registro en Firestore */}
+            {/* Vista cuando NO hay registro activo */}
             {!registration ? (
-              <div className="border border-[var(--rule)] p-8 bg-[var(--bg-alt)] text-center">
-                <h3 className="text-xl font-display text-[var(--head)] mb-2">
-                  No hay registro activo asociado a esta cuenta
-                </h3>
-                <p className="mb-6 max-w-xl mx-auto text-[var(--fg)]">
-                  Aún no has enviado una solicitud de registro para Quetzalia 2027. Selecciona una de las modalidades a continuación:
-                </p>
-                <div className="flex flex-wrap justify-center gap-4">
-                  <Link href="/registro/asistentes" className="btn btn-primary text-sm">
-                    Registro Asistente
-                  </Link>
-                  <Link href="/registro/speakers" className="btn btn-ghost text-sm">
-                    Registro Ponente
-                  </Link>
-                  <Link href="/registro/patrocinadores" className="btn btn-ghost text-sm">
-                    Registro Patrocinador
-                  </Link>
-                  <Link href="/registro/comunidades" className="btn btn-ghost text-sm">
-                    Registro Comunidad
-                  </Link>
+              <div className="space-y-6">
+                <div className="border border-[var(--rule)] p-6 sm:p-8 bg-[var(--bg-alt)]/60 text-center">
+                  <p className="eyebrow text-xs">Pase no vinculado</p>
+                  <h3 className="text-2xl font-display text-[var(--head)] mt-1 mb-2">
+                    No hay un registro activo asociado a tu cuenta
+                  </h3>
+                  <p className="max-w-2xl mx-auto text-sm text-[var(--fg)] opacity-90 leading-relaxed">
+                    Aún no has completado tu solicitud de participación para <strong>Quetzalia 2027</strong> en la FES Acatlán de la UNAM. Elige tu modalidad de participación a continuación para vincular tus datos y generar tu confirmación oficial:
+                  </p>
+                </div>
+
+                {/* Cuadrícula de Modalidades de Participación */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* 1. Asistente General */}
+                  <div className="border border-[var(--rule)] bg-[var(--card)] p-6 sm:p-8 flex flex-col justify-between hover:border-[var(--accent)] transition-colors shadow-sm">
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="px-2.5 py-1 text-xs font-bold uppercase tracking-wider bg-blue-100 text-blue-900 border border-blue-300">
+                          👩‍💻 Asistencia General
+                        </span>
+                        <span className="text-xs font-semibold text-[var(--accent)] font-mono">
+                          Cupo: 400 lugares
+                        </span>
+                      </div>
+                      <h4 className="text-xl font-display text-[var(--head)] mb-2">
+                        Registro como Asistente
+                      </h4>
+                      <p className="text-xs text-[var(--fg)] opacity-85 leading-relaxed mb-6">
+                        Reserva tu lugar presencial en el auditorio de la FES Acatlán. Incluye acceso completo a ponencias magnas, dinámicas de vinculación y constancia digital oficial de participación con valor curricular.
+                      </p>
+                    </div>
+                    <Link
+                      href="/registro/asistentes"
+                      className="btn btn-primary text-xs w-full text-center"
+                    >
+                      Completar Registro de Asistente →
+                    </Link>
+                  </div>
+
+                  {/* 2. Ponente */}
+                  <div className="border border-[var(--rule)] bg-[var(--card)] p-6 sm:p-8 flex flex-col justify-between hover:border-[var(--accent)] transition-colors shadow-sm">
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="px-2.5 py-1 text-xs font-bold uppercase tracking-wider bg-purple-100 text-purple-900 border border-purple-300">
+                          🎙️ Convocatoria Académica
+                        </span>
+                        <span className="text-xs font-semibold text-purple-800 font-mono">
+                          Charlas y Talleres
+                        </span>
+                      </div>
+                      <h4 className="text-xl font-display text-[var(--head)] mb-2">
+                        Postulación de Ponentes
+                      </h4>
+                      <p className="text-xs text-[var(--fg)] opacity-85 leading-relaxed mb-6">
+                        Comparte tu trayectoria, investigaciones, talleres prácticos o proyectos de innovación en ciencia y tecnología ante la comunidad universitaria.
+                      </p>
+                    </div>
+                    <Link
+                      href="/registro/speakers"
+                      className="btn btn-ghost text-xs w-full text-center"
+                    >
+                      Postular mi Propuesta →
+                    </Link>
+                  </div>
+
+                  {/* 3. Patrocinadores */}
+                  <div className="border border-[var(--rule)] bg-[var(--card)] p-6 sm:p-8 flex flex-col justify-between hover:border-[var(--accent)] transition-colors shadow-sm">
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="px-2.5 py-1 text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-300">
+                          🏢 Marcas e Industria
+                        </span>
+                        <span className="text-xs font-semibold text-amber-800 font-mono">
+                          Alianzas Estratégicas
+                        </span>
+                      </div>
+                      <h4 className="text-xl font-display text-[var(--head)] mb-2">
+                        Patrocinadores e Instituciones
+                      </h4>
+                      <p className="text-xs text-[var(--fg)] opacity-85 leading-relaxed mb-6">
+                        Súmate como empresa o institución aliada. Impulsa becas, visibiliza oportunidades profesionales de talento femenino y potencia tu presencia de marca en la UNAM.
+                      </p>
+                    </div>
+                    <Link
+                      href="/registro/patrocinadores"
+                      className="btn btn-ghost text-xs w-full text-center"
+                    >
+                      Convenio de Patrocinio →
+                    </Link>
+                  </div>
+
+                  {/* 4. Comunidades STEM */}
+                  <div className="border border-[var(--rule)] bg-[var(--card)] p-6 sm:p-8 flex flex-col justify-between hover:border-[var(--accent)] transition-colors shadow-sm">
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="px-2.5 py-1 text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-900 border border-emerald-300">
+                          🌐 Redes Universitarias
+                        </span>
+                        <span className="text-xs font-semibold text-emerald-800 font-mono">
+                          Colectivos STEM
+                        </span>
+                      </div>
+                      <h4 className="text-xl font-display text-[var(--head)] mb-2">
+                        Comunidades y Colectivos
+                      </h4>
+                      <p className="text-xs text-[var(--fg)] opacity-85 leading-relaxed mb-6">
+                        Registra a tu club de robótica, capítulo IEEE, colectivo de mujeres tecnólogas o grupo estudiantil para tejer una alianza interinstitucional duradera.
+                      </p>
+                    </div>
+                    <Link
+                      href="/registro/comunidades"
+                      className="btn btn-ghost text-xs w-full text-center"
+                    >
+                      Registrar a mi Comunidad →
+                    </Link>
+                  </div>
                 </div>
               </div>
             ) : (
