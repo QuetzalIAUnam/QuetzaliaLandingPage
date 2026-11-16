@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { adminDb, adminAuth } from "@/lib/firebase-admin";
+import { adminDb, adminAuth, adminStorage } from "@/lib/firebase-admin";
 import { verifyAdminUser } from "@/lib/server-auth";
 import { Registration } from "@/lib/types";
 import { removeApprovedContact } from "@/lib/resend-broadcast";
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
 
     const regData = docSnap.data() as Registration;
 
-    // Remover de la audiencia de Resend si existía
+    // 1. Remover de la audiencia de Resend si existía
     if (regData.resendContactId || regData.email) {
       removeApprovedContact({
         email: regData.email,
@@ -41,10 +41,31 @@ export async function POST(req: Request) {
       }).catch((err) => console.warn("Error al remover contacto de Resend:", err));
     }
 
-    // Eliminar el documento de Firestore
+    // 2. Eliminar fotografías o logotipos en Firebase Storage
+    try {
+      const bucket = adminStorage.bucket();
+      const filesToDelete = [
+        regData.photoPath,
+        `speakers/private/${registrationId}/photo.jpg`,
+        `speakers/public/${registrationId}/photo.jpg`,
+        `sponsors/logos/${registrationId}/logo.jpg`,
+      ].filter(Boolean) as string[];
+
+      await Promise.all(
+        filesToDelete.map((filePath) =>
+          bucket.file(filePath).delete({ ignoreNotFound: true }).catch((err) => {
+            console.warn(`[Delete Storage] Archivo ${filePath} omitido o no encontrado:`, err?.message);
+          })
+        )
+      );
+    } catch (storageErr) {
+      console.warn("[Delete Storage] Advertencia al limpiar archivos de Storage:", storageErr);
+    }
+
+    // 3. Eliminar el documento de Firestore
     await docRef.delete();
 
-    // Si se solicitó eliminar también de Firebase Auth
+    // 4. Si se solicitó eliminar también de Firebase Auth
     if (deleteAuthUser) {
       await adminAuth.deleteUser(registrationId).catch((authErr) => {
         console.warn("No se pudo eliminar el usuario de Firebase Auth (posiblemente ya no existe):", authErr);
@@ -53,7 +74,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      message: `Postulación de ${regData.fullName} eliminada exitosamente${deleteAuthUser ? " (y cuenta de Google restablecida)" : ""}.`,
+      message: `Postulación de ${regData.fullName} eliminada exitosamente junto con sus archivos de imagen${deleteAuthUser ? " (y cuenta de Google restablecida)" : ""}.`,
     });
   } catch (error: unknown) {
     console.error("[POST /api/admin/delete] Error:", error);

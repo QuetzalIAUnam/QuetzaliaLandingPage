@@ -6,9 +6,9 @@ export interface CompressionResult {
   height: number;
 }
 
-const MAX_UNCOMPRESSED_SIZE = 5 * 1024 * 1024; // 5 MB
-const MAX_WIDTH = 1600; // 1600 px de ancho máximo
-const JPEG_QUALITY = 0.85; // Calidad para obtener un archivo de ~300-500 KB
+const MAX_UNCOMPRESSED_SIZE = 15 * 1024 * 1024; // 15 MB para soportar fotos tomadas con celulares modernos
+const MAX_DIMENSION = 1200; // 1200 px de dimensión máxima (ancho o alto)
+const JPEG_QUALITY = 0.80; // Calidad óptima para archivos ligeros (~150-250 KB) y subida instantánea
 
 export async function compressImage(file: File): Promise<CompressionResult> {
   // 1. Validar tipo de archivo
@@ -16,10 +16,10 @@ export async function compressImage(file: File): Promise<CompressionResult> {
     throw new Error("El archivo seleccionado no es una imagen válida.");
   }
 
-  // 2. Validar tamaño máximo antes de comprimir (5 MB)
+  // 2. Validar tamaño máximo antes de comprimir (15 MB)
   if (file.size > MAX_UNCOMPRESSED_SIZE) {
     throw new Error(
-      `El archivo pesa ${(file.size / (1024 * 1024)).toFixed(1)} MB y supera el límite de 5 MB sin comprimir.`
+      `El archivo pesa ${(file.size / (1024 * 1024)).toFixed(1)} MB y supera el límite de 15 MB sin comprimir.`
     );
   }
 
@@ -32,10 +32,15 @@ export async function compressImage(file: File): Promise<CompressionResult> {
 
       let { width, height } = img;
 
-      // Escalar si el ancho supera 1600 px manteniendo proporción
-      if (width > MAX_WIDTH) {
-        height = Math.round((height * MAX_WIDTH) / width);
-        width = MAX_WIDTH;
+      // Escalar si el ancho o alto supera 1200 px manteniendo proporción
+      if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+        if (width >= height) {
+          height = Math.round((height * MAX_DIMENSION) / width);
+          width = MAX_DIMENSION;
+        } else {
+          width = Math.round((width * MAX_DIMENSION) / height);
+          height = MAX_DIMENSION;
+        }
       }
 
       const canvas = document.createElement("canvas");

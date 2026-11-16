@@ -40,6 +40,7 @@ export default function RegistroSpeakersPage() {
 
   const [submittedReg, setSubmittedReg] = useState<Registration | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [photoCompressing, setPhotoCompressing] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [consentError, setConsentError] = useState(false);
 
@@ -53,14 +54,15 @@ export default function RegistroSpeakersPage() {
 
     setErrorMsg(null);
     setPhotoStats(null);
+    setPhotoCompressing(true);
 
     try {
-      // 1. Validar límite de 5 MB sin comprimir y comprimir a máx 1600 px
+      // 1. Validar límite de 15 MB sin comprimir y redimensionar a máx 1200 px en milisegundos
       const result = await compressImage(file);
       setPhotoFile(result.file);
       setPhotoPreview(URL.createObjectURL(result.file));
       setPhotoStats(
-        `Original: ${(result.originalSize / 1024).toFixed(0)} KB → Optimizada: ${(
+        `Original: ${(result.originalSize / (1024 * 1024) > 1 ? (result.originalSize / (1024 * 1024)).toFixed(1) + " MB" : (result.originalSize / 1024).toFixed(0) + " KB")} → Optimizada: ${(
           result.compressedSize / 1024
         ).toFixed(0)} KB (${result.width}x${result.height}px)`
       );
@@ -68,6 +70,8 @@ export default function RegistroSpeakersPage() {
       const error = err as Error;
       setErrorMsg(error.message || "Error al procesar la fotografía.");
       e.target.value = "";
+    } finally {
+      setPhotoCompressing(false);
     }
   };
 
@@ -362,17 +366,24 @@ export default function RegistroSpeakersPage() {
                   Fotografía de Semblanza (Opcional en postulación inicial)
                 </label>
                 <p className="text-xs text-[var(--fg)] opacity-80 mb-2">
-                  Formatos admitidos: JPG, PNG o WebP. Máximo 5 MB sin comprimir. La foto se optimiza automáticamente en tu navegador a 1600 px y se guarda en almacenamiento privado protegido.
+                  Formatos admitidos: JPG, PNG o WebP (hasta 15 MB). La imagen se optimiza al instante en tu navegador a máx 1200 px (~180 KB) para subirse rápidamente y protegerse de forma privada.
                 </p>
                 <input
                   id="photoUpload"
                   type="file"
                   accept="image/*"
                   onChange={handlePhotoSelect}
+                  disabled={photoCompressing || submitting}
                   className="form-input text-xs cursor-pointer"
                 />
 
-                {photoPreview && (
+                {photoCompressing && (
+                  <div className="mt-2 text-xs font-semibold text-amber-800 animate-pulse">
+                    ⚡ Optimizando fotografía en tu navegador...
+                  </div>
+                )}
+
+                {photoPreview && !photoCompressing && (
                   <div className="mt-3 flex items-center gap-4 p-3 bg-[var(--bg-alt)] border border-[var(--rule)]">
                     <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-[var(--accent)] shrink-0">
                       <Image
