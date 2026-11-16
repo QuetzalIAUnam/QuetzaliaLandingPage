@@ -1084,17 +1084,17 @@ export default function AdminDashboardPage() {
               <p className="text-sm text-[var(--fg)] opacity-90 max-w-3xl leading-relaxed">
                 Envía recordatorios y avisos generales a toda la comunidad de participantes <strong>APROBADOS</strong> (ej. <em>&ldquo;mañana es el evento&rdquo;</em>, <em>&ldquo;horarios y acceso a FES Acatlán&rdquo;</em>, <em>&ldquo;trae tu credencial&rdquo;</em>). Estos envíos se gestionan vía Resend Broadcasts y <strong>NO consumen el límite transaccional de 100 correos al día</strong>.
               </p>
-              <div className="flex flex-wrap gap-2 pt-1 text-xs font-medium text-[var(--head)]">
-                <span className="px-2.5 py-1 bg-white border border-[var(--rule)]">✓ Remitente: Quetzalia &lt;registro@quetzalia.dev&gt;</span>
-                <span className="px-2.5 py-1 bg-white border border-[var(--rule)]">✓ Respuestas: 923475@pcpuma.acatlan.unam.mx</span>
-                <span className="px-2.5 py-1 bg-white border border-[var(--rule)]">✓ Cupo de marketing: hasta 1,000 contactos</span>
-                <span className="px-2.5 py-1 bg-white border border-[var(--rule)]">✓ Enlace de cancelación incluido automáticamente</span>
+              <div className="flex flex-wrap gap-2 pt-1 text-xs">
+                <span className="px-2.5 py-1 bg-[var(--card)] text-[var(--head)] border border-[var(--rule)] font-semibold">✓ Remitente: Quetzalia &lt;registro@quetzalia.dev&gt;</span>
+                <span className="px-2.5 py-1 bg-[var(--card)] text-[var(--head)] border border-[var(--rule)] font-semibold">✓ Respuestas: 923475@pcpuma.acatlan.unam.mx</span>
+                <span className="px-2.5 py-1 bg-[var(--card)] text-[var(--head)] border border-[var(--rule)] font-semibold">✓ Cupo de marketing: hasta 1,000 contactos</span>
+                <span className="px-2.5 py-1 bg-[var(--card)] text-[var(--head)] border border-[var(--rule)] font-semibold">✓ Enlace de cancelación incluido automáticamente</span>
               </div>
               <p className="text-xs text-[var(--fg)] opacity-80 pt-1 italic">
                 ⚖️ <strong>Lineamiento de uso:</strong> Los avisos son exclusivos para logística del evento (recordatorios, horarios, sede, cambios). No mandes por Broadcast promociones de patrocinadores ni noticias no autorizadas.
               </p>
               {!audienceConfigured && (
-                <div className="p-3 bg-amber-50 border border-amber-300 text-amber-900 text-xs">
+                <div className="p-3 bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-200 text-xs">
                   ⚠️ <strong>Atención:</strong> <code>RESEND_AUDIENCE_ID</code> no está configurada en las variables de entorno. Crea la audiencia <strong>&ldquo;Quetzalia&rdquo;</strong> en tu panel de Resend e ingresa su ID en <code>.env.local</code> / Vercel para habilitar el envío masivo.
                 </div>
               )}
