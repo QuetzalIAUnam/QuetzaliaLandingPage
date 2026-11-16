@@ -178,6 +178,62 @@ export default function AdminDashboardPage() {
     }
   };
 
+  // Eliminar postulación / usuario (Herramienta para pruebas y administración)
+  const handleDeleteRegistration = async (regId: string, fullName: string) => {
+    const confirmDelete = window.confirm(
+      `¿Estás seguro de que deseas ELIMINAR permanentemente la postulación de "${fullName}"?\n\nEsta acción borrará el registro de Firestore y su contacto de audiencia para que pueda postularse de nuevo.`
+    );
+    if (!confirmDelete) return;
+
+    const alsoDeleteAuth = window.confirm(
+      `¿Deseas también ELIMINAR su cuenta de acceso de Firebase Auth?\n\n• ACEPTAR: Se borra la postulación Y la cuenta de Auth (reinicio total para pruebas de login).\n• CANCELAR: Se borra solo la postulación en Firestore (el usuario conserva su sesión activa pero sin registro).`
+    );
+
+    try {
+      setActionLoading(regId);
+      setFeedbackMsg(null);
+      const token = await getAuthToken();
+      if (!token) return;
+
+      const res = await fetch("/api/admin/delete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          registrationId: regId,
+          deleteAuthUser: alsoDeleteAuth,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setFeedbackMsg({
+          text: data.error || "No se pudo eliminar el registro.",
+          type: "error",
+        });
+        return;
+      }
+
+      setFeedbackMsg({
+        text: data.message || "Registro eliminado exitosamente.",
+        type: "success",
+      });
+
+      if (selectedReg && selectedReg.id === regId) {
+        setSelectedReg(null);
+      }
+      setRefreshKey((k) => k + 1);
+    } catch (err) {
+      console.error(err);
+      setFeedbackMsg({ text: "Error de red al eliminar el registro.", type: "error" });
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   // Promover a la primera persona en lista de espera
   const handlePromoteNext = async () => {
     if (!confirm("¿Deseas promover a la primera persona registrada en lista de espera al estatus Aprobado?")) {
@@ -966,6 +1022,16 @@ export default function AdminDashboardPage() {
                                 Rechazar
                               </button>
                             )}
+
+                            {/* Borrar registro (Pruebas) */}
+                            <button
+                              onClick={() => handleDeleteRegistration(reg.id, reg.fullName)}
+                              disabled={actionLoading === reg.id}
+                              className="px-2.5 py-1 text-xs font-semibold bg-red-950 text-red-200 border border-red-800 hover:bg-red-900 disabled:opacity-50"
+                              title="Eliminar postulación de la base de datos (para pruebas)"
+                            >
+                              Borrar
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -1581,6 +1647,14 @@ export default function AdminDashboardPage() {
                     className="btn btn-ghost text-xs"
                   >
                     Cerrar
+                  </button>
+                  <button
+                    onClick={() => handleDeleteRegistration(selectedReg.id, selectedReg.fullName)}
+                    disabled={actionLoading === selectedReg.id}
+                    className="px-3 py-1.5 text-xs font-semibold bg-red-950 text-red-200 border border-red-800 hover:bg-red-900"
+                    title="Eliminar postulación de la base de datos"
+                  >
+                    🗑️ Borrar Postulación
                   </button>
                   <button
                     onClick={() => handleUpdateStatus(selectedReg.id, "reject", adminNoteInput)}

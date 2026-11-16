@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
@@ -8,6 +8,44 @@ import Greca from "@/components/ui/Greca";
 
 export default function MiRegistroPage() {
   const { user, registration, loading, loginWithGoogle, logout } = useAuth();
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteMyRegistration = async () => {
+    if (
+      !window.confirm(
+        "¿Seguro que deseas eliminar tu postulación de la base de datos?\n\nEsto te permitirá volver a ingresar a las páginas de registro y probar el formulario desde cero con tu cuenta de Google."
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      const token = await user?.getIdToken();
+      if (!token) return;
+
+      const res = await fetch("/api/registrations/me", {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || "No se pudo eliminar el registro.");
+        return;
+      }
+
+      alert("Tu postulación ha sido eliminada. Ahora puedes volver a probar el registro.");
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+      alert("Error al intentar eliminar tu postulación.");
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)] flex flex-col">
@@ -139,8 +177,9 @@ export default function MiRegistroPage() {
                 </div>
               </div>
             ) : (
-              <div className="border-2 border-[var(--head)] p-6 sm:p-8 bg-[var(--card)] shadow-md">
-                <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--rule)] pb-4 mb-6">
+              <div className="space-y-6">
+                <div className="border-2 border-[var(--head)] p-6 sm:p-8 bg-[var(--card)] shadow-md">
+                  <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--rule)] pb-4 mb-6">
                   <div>
                     <span className="eyebrow">Tipo de registro</span>
                     <h3 className="text-2xl font-display text-[var(--head)] capitalize">
@@ -193,7 +232,28 @@ export default function MiRegistroPage() {
                   </div>
                 </div>
               </div>
-            )}
+
+              {/* Zona de Pruebas: Eliminar Registro */}
+              <div className="border border-red-300 dark:border-red-900/60 bg-red-50/50 dark:bg-red-950/20 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <h3 className="text-sm font-bold text-red-900 dark:text-red-300">
+                    Zona de Pruebas: Eliminar Postulación
+                  </h3>
+                  <p className="text-xs text-red-800 dark:text-red-400 mt-0.5">
+                    ¿Deseas probar el flujo de registro desde cero? Puedes borrar tu postulación actual de la base de datos para volver a registrarte.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleDeleteMyRegistration}
+                  disabled={deleting}
+                  className="px-3.5 py-2 text-xs font-bold uppercase tracking-wider bg-red-800 hover:bg-red-900 text-white transition-colors cursor-pointer disabled:opacity-50 whitespace-nowrap"
+                >
+                  {deleting ? "Eliminando..." : "🗑️ Eliminar mi registro"}
+                </button>
+              </div>
+            </div>
+          )}
           </div>
         )}
       </main>

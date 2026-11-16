@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase-admin";
 import { verifyAuthUser } from "@/lib/server-auth";
+import { Registration } from "@/lib/types";
+import { removeApprovedContact } from "@/lib/resend-broadcast";
 
 export async function GET(req: Request) {
   try {
@@ -26,6 +28,43 @@ export async function GET(req: Request) {
     console.error("[GET /api/registrations/me] Error:", error);
     return NextResponse.json(
       { error: "Error al consultar tu registro." },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const authUser = await verifyAuthUser(req);
+    if (!authUser) {
+      return NextResponse.json(
+        { error: "No autenticado. Inicia sesión con Google." },
+        { status: 401 }
+      );
+    }
+
+    const docRef = adminDb.collection("registrations").doc(authUser.uid);
+    const docSnap = await docRef.get();
+
+    if (docSnap.exists) {
+      const regData = docSnap.data() as Registration;
+      if (regData.resendContactId || regData.email) {
+        removeApprovedContact({
+          email: regData.email,
+          contactId: regData.resendContactId,
+        }).catch((err) => console.warn("Error al remover de Resend:", err));
+      }
+      await docRef.delete();
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "Tu postulación ha sido eliminada con éxito. Ya puedes postularte nuevamente para tus pruebas.",
+    });
+  } catch (error: unknown) {
+    console.error("[DELETE /api/registrations/me] Error:", error);
+    return NextResponse.json(
+      { error: "Error al eliminar tu registro." },
       { status: 500 }
     );
   }
