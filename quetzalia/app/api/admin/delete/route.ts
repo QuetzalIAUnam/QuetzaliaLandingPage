@@ -45,7 +45,7 @@ export async function POST(req: Request) {
     try {
       const bucket = adminStorage.bucket();
       const filesToDelete = [
-        regData.photoPath,
+        regData.photoPath && !regData.photoPath.startsWith("data:") ? regData.photoPath : undefined,
         `speakers/private/${registrationId}/photo.jpg`,
         `speakers/public/${registrationId}/photo.jpg`,
         `sponsors/logos/${registrationId}/logo.jpg`,

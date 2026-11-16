@@ -1,5 +1,6 @@
 export interface CompressionResult {
   file: File;
+  base64: string;
   originalSize: number;
   compressedSize: number;
   width: number;
@@ -7,8 +8,8 @@ export interface CompressionResult {
 }
 
 const MAX_UNCOMPRESSED_SIZE = 15 * 1024 * 1024; // 15 MB para soportar fotos tomadas con celulares modernos
-const MAX_DIMENSION = 1200; // 1200 px de dimensión máxima (ancho o alto)
-const JPEG_QUALITY = 0.80; // Calidad óptima para archivos ligeros (~150-250 KB) y subida instantánea
+const MAX_DIMENSION = 800; // 800 px para optimizar peso en Firestore (<60 KB) manteniendo nitidez HD
+const JPEG_QUALITY = 0.75; // Calidad óptima para almacenamiento directo en Firestore
 
 export async function compressImage(file: File): Promise<CompressionResult> {
   // 1. Validar tipo de archivo
@@ -32,7 +33,7 @@ export async function compressImage(file: File): Promise<CompressionResult> {
 
       let { width, height } = img;
 
-      // Escalar si el ancho o alto supera 1200 px manteniendo proporción
+      // Escalar si el ancho o alto supera MAX_DIMENSION px manteniendo proporción
       if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
         if (width >= height) {
           height = Math.round((height * MAX_DIMENSION) / width);
@@ -53,8 +54,15 @@ export async function compressImage(file: File): Promise<CompressionResult> {
         return;
       }
 
+      // Fondo blanco para imágenes transparentes (PNG) al convertir a JPEG
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, width, height);
+
       // Dibujar imagen redimensionada
       ctx.drawImage(img, 0, 0, width, height);
+
+      // Generar Data URL Base64 para guardado instantáneo en Firestore
+      const base64 = canvas.toDataURL("image/jpeg", JPEG_QUALITY);
 
       // Exportar en JPEG optimizado
       canvas.toBlob(
@@ -71,6 +79,7 @@ export async function compressImage(file: File): Promise<CompressionResult> {
 
           resolve({
             file: compressedFile,
+            base64,
             originalSize: file.size,
             compressedSize: compressedFile.size,
             width,

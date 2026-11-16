@@ -1784,7 +1784,7 @@ export default function AdminDashboardPage() {
               {/* Gestión de Fotografía o Logotipo y Garantía de Retiro en 72h */}
               {selectedReg.photoPath && (
                 <div className="border border-[var(--accent)] p-4 bg-[var(--bg-alt)]/30 space-y-3 text-xs">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div>
                       <p className="font-bold text-[var(--head)] uppercase tracking-wider">
                         {selectedReg.type === "sponsor"
@@ -1793,18 +1793,24 @@ export default function AdminDashboardPage() {
                           ? "Emblema / Logotipo del colectivo:"
                           : "Fotografía de semblanza:"}
                       </p>
-                      <p className="font-mono text-[11px] opacity-80 mt-0.5">
-                        Ruta: {selectedReg.photoPath}
-                      </p>
+                      {selectedReg.photoPath.startsWith("data:") ? (
+                        <span className="text-[11px] text-emerald-800 font-semibold">
+                          ✓ Almacenada en base de datos (Optimización HD)
+                        </span>
+                      ) : (
+                        <p className="font-mono text-[11px] opacity-80 mt-0.5">
+                          Ruta: {selectedReg.photoPath}
+                        </p>
+                      )}
                     </div>
                     <div>
-                      {selectedReg.photoPath.includes("public") ? (
+                      {selectedReg.photoPath.startsWith("data:") ? (
+                        <span className="px-2 py-0.5 font-bold uppercase text-[10px] bg-emerald-100 text-emerald-900 border border-emerald-400">
+                          Imagen Vinculada
+                        </span>
+                      ) : selectedReg.photoPath.includes("public") ? (
                         <span className="px-2 py-0.5 font-bold uppercase text-[10px] bg-emerald-100 text-emerald-900 border border-emerald-400">
                           Publicada en Agenda Oficial
-                        </span>
-                      ) : selectedReg.photoPath.includes("sponsors") || selectedReg.photoPath.includes("communities") ? (
-                        <span className="px-2 py-0.5 font-bold uppercase text-[10px] bg-emerald-100 text-emerald-900 border border-emerald-400">
-                          Archivo de Imagen en Storage
                         </span>
                       ) : (
                         <span className="px-2 py-0.5 font-bold uppercase text-[10px] bg-amber-100 text-amber-900 border border-amber-400">
@@ -1813,6 +1819,24 @@ export default function AdminDashboardPage() {
                       )}
                     </div>
                   </div>
+
+                  {/* Previsualización visual de la imagen */}
+                  {selectedReg.photoPath.startsWith("data:") && (
+                    <div className="p-2 bg-[var(--card)] border border-[var(--rule)] flex items-center gap-3">
+                      <Image
+                        src={selectedReg.photoPath}
+                        alt="Previsualización adjunta"
+                        width={144}
+                        height={96}
+                        className="max-h-24 max-w-36 object-contain rounded border border-[var(--accent)] bg-white p-1"
+                        unoptimized
+                      />
+                      <div className="text-[11px] opacity-85">
+                        <p className="font-semibold text-[var(--head)]">Archivo gráfico listo</p>
+                        <p>Visible para revisión del comité y despliegue oficial.</p>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="flex flex-wrap gap-2 pt-1">
                     {selectedReg.photoPath.includes("private") && (

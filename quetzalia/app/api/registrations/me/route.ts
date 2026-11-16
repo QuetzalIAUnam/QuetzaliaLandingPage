@@ -63,7 +63,7 @@ export async function DELETE(req: Request) {
       try {
         const bucket = adminStorage.bucket();
         const files = [
-          regData.photoPath,
+          regData.photoPath && !regData.photoPath.startsWith("data:") ? regData.photoPath : undefined,
           `speakers/private/${authUser.uid}/photo.jpg`,
           `speakers/public/${authUser.uid}/photo.jpg`,
           `sponsors/logos/${authUser.uid}/logo.jpg`,

@@ -450,6 +450,31 @@ export default function MiRegistroPage() {
                     <p className="font-semibold text-[var(--head)]">Versión de consentimiento:</p>
                     <p className="font-mono text-xs">{registration.consentVersion || "v1.0"}</p>
                   </div>
+
+                  {registration.photoPath && (
+                    <div className="sm:col-span-2 pt-2 border-t border-[var(--rule)] flex items-center gap-4">
+                      <Image
+                        src={registration.photoPath}
+                        alt="Imagen o logotipo registrado"
+                        width={64}
+                        height={64}
+                        className="w-16 h-16 object-contain rounded-md border border-[var(--accent)] bg-white p-1 shrink-0"
+                        unoptimized
+                      />
+                      <div className="text-xs">
+                        <p className="font-semibold text-[var(--head)]">
+                          {registration.type === "sponsor"
+                            ? "Logotipo corporativo registrado"
+                            : registration.type === "community"
+                            ? "Emblema de la comunidad registrado"
+                            : "Fotografía de semblanza registrada"}
+                        </p>
+                        <p className="opacity-80">
+                          Almacenado de forma segura y asociado a tu solicitud.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
