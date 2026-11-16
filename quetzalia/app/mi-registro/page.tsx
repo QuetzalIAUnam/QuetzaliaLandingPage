@@ -1,50 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import Greca from "@/components/ui/Greca";
 
 export default function MiRegistroPage() {
   const { user, registration, loading, loginWithGoogle, logout } = useAuth();
-  const [securityTestResult, setSecurityTestResult] = useState<string | null>(null);
-  const [testingSecurity, setTestingSecurity] = useState(false);
-
-  // Prueba interactiva del criterio de Fase 1: verificar que no se puede leer el registro de otro usuario
-  const testUnauthorizedRead = async () => {
-    setTestingSecurity(true);
-    setSecurityTestResult(null);
-    try {
-      // Intentamos leer un ID que no le pertenece al usuario
-      const otherDocRef = doc(db, "registrations", "usuario-ajeno-no-autorizado-999");
-      const snap = await getDoc(otherDocRef);
-      if (snap.exists()) {
-        setSecurityTestResult(
-          "ALERTA: Se pudo leer el documento ajeno. Revisa las reglas de seguridad."
-        );
-      } else {
-        setSecurityTestResult(
-          "Resultado: El documento ajeno no existe o fue bloqueado por Firestore."
-        );
-      }
-    } catch (err: unknown) {
-      const error = err as { code?: string; message?: string };
-      if (error?.code === "permission-denied" || error?.message?.includes("Missing or insufficient permissions")) {
-        setSecurityTestResult(
-          "Criterio superado con éxito: Firestore bloqueó la lectura con error 'permission-denied'. Un usuario no puede leer datos de otro."
-        );
-      } else {
-        setSecurityTestResult(
-          `Consulta denegada o bloqueada por Firestore: ${error?.message || "Error de permisos"}`
-        );
-      }
-    } finally {
-      setTestingSecurity(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)] flex flex-col">
@@ -231,30 +194,6 @@ export default function MiRegistroPage() {
                 </div>
               </div>
             )}
-
-            {/* Panel de Verificación de Reglas Firestore */}
-            <div className="border border-[var(--accent)] p-6 bg-[var(--bg-alt)]">
-              <h3 className="text-lg font-display text-[var(--head)] mb-2">
-                Verificación de Reglas de Seguridad (Fase 1)
-              </h3>
-              <p className="text-sm mb-4 text-[var(--fg)]">
-                Comprueba en tiempo real que tu cuenta de usuario tiene estrictamente prohibido leer o alterar registros que no te pertenecen en Firestore:
-              </p>
-              <button
-                type="button"
-                onClick={testUnauthorizedRead}
-                disabled={testingSecurity}
-                className="btn btn-ghost text-xs uppercase tracking-wider font-bold"
-              >
-                {testingSecurity ? "Ejecutando prueba..." : "Probar lectura no autorizada"}
-              </button>
-
-              {securityTestResult && (
-                <div className="mt-4 p-4 text-xs font-mono bg-white dark:bg-[#1f131c] border border-[var(--head)]">
-                  {securityTestResult}
-                </div>
-              )}
-            </div>
           </div>
         )}
       </main>
