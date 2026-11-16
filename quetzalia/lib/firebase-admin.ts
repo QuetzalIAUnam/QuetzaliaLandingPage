@@ -39,5 +39,10 @@ function initAdminApp(): App {
 
 export const adminApp: App = initAdminApp();
 export const adminDb: Firestore = getFirestore(adminApp);
+try {
+  adminDb.settings({ ignoreUndefinedProperties: true });
+} catch {
+  // Settings might already be set or immutable
+}
 export const adminAuth: Auth = getAuth(adminApp);
 export const adminStorage: Storage = getStorage(adminApp);

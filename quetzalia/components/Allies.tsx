@@ -6,6 +6,8 @@ import Link from "next/link";
 import PhotoArch from "./ui/PhotoArch";
 import SectionHead from "./ui/SectionHead";
 
+import { SocialLinks } from "@/lib/types";
+
 interface SpeakerItem {
   id: string;
   name: string;
@@ -15,6 +17,7 @@ interface SpeakerItem {
   talk: string;
   linkedin?: string;
   photoUrl?: string;
+  socials?: SocialLinks;
 }
 
 interface SponsorItem {
@@ -30,17 +33,80 @@ interface CommunityItem {
   representative?: string;
   desc?: string;
   logoUrl?: string;
+  socials?: SocialLinks;
+}
+
+function formatSocialUrl(
+  url: string,
+  platform: "linkedin" | "instagram" | "tiktok" | "twitter" | "website"
+): string {
+  const trimmed = url.trim();
+  const lower = trimmed.toLowerCase();
+
+  // Bloqueo preventivo de esquemas de scripting (XSS)
+  if (
+    lower.startsWith("javascript:") ||
+    lower.startsWith("data:") ||
+    lower.startsWith("vbscript:")
+  ) {
+    return "#";
+  }
+
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+    return trimmed;
+  }
+  const clean = trimmed.replace(/^@/, "").replace(/['"<>\s]/g, "");
+  switch (platform) {
+    case "instagram":
+      return `https://instagram.com/${clean}`;
+    case "tiktok":
+      return `https://tiktok.com/@${clean}`;
+    case "linkedin":
+      return clean.includes("company/") || clean.includes("in/")
+        ? `https://linkedin.com/${clean}`
+        : `https://linkedin.com/in/${clean}`;
+    case "twitter":
+      return `https://x.com/${clean}`;
+    case "website":
+    default:
+      return `https://${clean}`;
+  }
 }
 
 export default function Allies() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const [inView, setInView] = useState(false);
   const [expandedTalks, setExpandedTalks] = useState<Record<string, boolean>>({});
+  const [selectedCommunity, setSelectedCommunity] = useState<CommunityItem | null>(null);
+
+  // Cerrar modal con tecla Escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setSelectedCommunity(null);
+      }
+    };
+    if (selectedCommunity) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedCommunity]);
 
   // Los datos provienen estrictamente de la base de datos (Firestore)
   const [speakers, setSpeakers] = useState<SpeakerItem[]>([]);
   const [sponsors, setSponsors] = useState<SponsorItem[]>([]);
   const [communities, setCommunities] = useState<CommunityItem[]>([]);
+
+  // Límite inicial de elementos visibles antes de desplegar "Ver más"
+  const SHOWCASE_PAGE_SIZE = 6;
+  const [showAllSpeakers, setShowAllSpeakers] = useState(false);
+  const [showAllCommunities, setShowAllCommunities] = useState(false);
+  const [showAllSponsors, setShowAllSponsors] = useState(false);
+
+  // Listas calculadas con paginación progresiva
+  const visibleSpeakers = showAllSpeakers ? speakers : speakers.slice(0, SHOWCASE_PAGE_SIZE);
+  const visibleCommunities = showAllCommunities ? communities : communities.slice(0, SHOWCASE_PAGE_SIZE);
+  const visibleSponsors = showAllSponsors ? sponsors : sponsors.slice(0, SHOWCASE_PAGE_SIZE);
 
   // Estrellas fijas titilantes al 100% de ancho de la sección
   const stars = useMemo(
@@ -254,78 +320,213 @@ export default function Allies() {
             </div>
 
             {speakers.length === 0 ? (
-              <div className="p-8 sm:p-10 border border-[var(--rule)] bg-[var(--card)]/80 max-w-2xl mx-auto space-y-4 shadow-sm backdrop-blur-xs">
+              <div className="p-5 sm:p-8 md:p-10 border border-[var(--rule)] bg-[var(--card)]/80 max-w-2xl mx-auto space-y-4 shadow-sm backdrop-blur-xs">
                 <p className="text-sm sm:text-base text-[var(--fg)] opacity-90 leading-relaxed max-w-xl mx-auto">
                   El escenario de Quetzalia 2027 en la FES Acatlán de la UNAM está listo para amplificar tu trayectoria. Sé parte de las mujeres que lideran la vanguardia en ciencia y tecnología compartiendo tu ponencia o taller.
                 </p>
                 <div className="pt-2 flex justify-center">
                   <Link
                     href="/registro/speakers"
-                    className="auth-btn-ghost auth-btn-lg inline-flex items-center gap-2 cursor-pointer group"
+                    className="auth-btn-ghost auth-btn-lg inline-flex items-center justify-center text-center gap-2 cursor-pointer group max-w-full"
                   >
-                    <span className="auth-btn-text text-sm sm:text-base">
+                    <span className="auth-btn-text text-xs sm:text-base text-center leading-relaxed whitespace-normal">
                       Postula tu propuesta como Ponente →
                     </span>
                   </Link>
                 </div>
               </div>
             ) : (
-              <div className={`people ${inView ? "in-view" : ""} grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6`}>
-                {speakers.map((person, idx) => (
-                  <article
-                    className="person"
-                    key={person.id}
-                    style={{ "--speaker-delay": `${idx * 260}ms` } as React.CSSProperties}
-                  >
-                    <PhotoArch ariaLabel={`Fotografía de ${person.name}`} style={{ aspectRatio: "1" }}>
-                      {person.photoUrl ? (
-                        <img src={person.photoUrl} alt={person.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <span>{person.name.charAt(0)}</span>
-                      )}
-                    </PhotoArch>
+              <div className="space-y-6">
+                <div
+                  className={`people ${inView ? "in-view" : ""} ${
+                    speakers.length === 1
+                      ? "flex justify-center"
+                      : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 justify-items-center"
+                  }`}
+                >
+                  {visibleSpeakers.map((person, idx) => (
+                    <article
+                      className="person group w-full max-w-[360px] mx-auto bg-[var(--card)] border border-[var(--rule)] hover:border-[var(--accent)] rounded-2xl p-5 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
+                      key={person.id}
+                      style={{ "--speaker-delay": `${idx * 260}ms` } as React.CSSProperties}
+                    >
+                      {/* Marco acotado y centrado para la foto con proporciones estrictas */}
+                      <div className="w-full flex justify-center mb-3">
+                        <PhotoArch
+                          src={person.photoUrl}
+                          alt={`Fotografía oficial de ${person.name}`}
+                          ariaLabel={`Fotografía de ${person.name}`}
+                          className="w-full max-w-[260px] aspect-square rounded-t-full overflow-hidden shadow-inner border border-[var(--rule)] group-hover:border-[var(--accent)] transition-colors"
+                          style={{ aspectRatio: "1" }}
+                        >
+                          {!person.photoUrl && (
+                            <div className="w-full h-full flex flex-col items-center justify-center text-[var(--accent)] p-4">
+                              <span className="font-display text-4xl sm:text-5xl font-bold">
+                                {person.name.charAt(0).toUpperCase()}
+                              </span>
+                              <span className="text-[10px] uppercase font-mono tracking-widest mt-1 opacity-75 font-semibold">
+                                Ponente STEM
+                              </span>
+                            </div>
+                          )}
+                        </PhotoArch>
+                      </div>
 
-                    <div className="person-content">
-                      <div className="speaker-chips-row">
-                        <div className="speaker-chips">
-                          <span className="speaker-chip chip-pink">{person.type || "Ponencia"}</span>
-                          <span className="speaker-chip chip-salmon">{person.org}</span>
+                      <div className="person-content flex-1 flex flex-col justify-between">
+                        <div className="space-y-2.5">
+                          <div className="speaker-chips-row">
+                            <div className="speaker-chips">
+                              <span className="speaker-chip chip-pink">{person.type || "Ponencia"}</span>
+                              <span className="speaker-chip chip-salmon">{person.org}</span>
+                            </div>
+
+                            <button
+                              type="button"
+                              className="mobile-talk-toggle"
+                              onClick={() => toggleTalk(person.id)}
+                              aria-expanded={!!expandedTalks[person.id]}
+                              aria-controls={`talk-body-${person.id}`}
+                            >
+                              <span>{expandedTalks[person.id] ? "Ocultar" : "Ver charla"}</span>
+                            </button>
+                          </div>
+
+                          <h4 className="speaker-name text-lg font-bold text-[var(--head)] group-hover:text-[var(--accent-text)] transition-colors line-clamp-2">
+                            {person.name}
+                          </h4>
+
+                          <div
+                            id={`talk-body-${person.id}`}
+                            className={`speaker-talk-body ${expandedTalks[person.id] ? "is-expanded" : ""}`}
+                          >
+                            <p className="speaker-talk-title">“{person.talk}”</p>
+                            <p className="speaker-desc line-clamp-4">{person.desc}</p>
+                          </div>
                         </div>
 
-                        <button
-                          type="button"
-                          className="mobile-talk-toggle"
-                          onClick={() => toggleTalk(person.id)}
-                          aria-expanded={!!expandedTalks[person.id]}
-                          aria-controls={`talk-body-${person.id}`}
-                        >
-                          <span>{expandedTalks[person.id] ? "Ocultar" : "Ver charla"}</span>
-                        </button>
+                        {/* Redes sociales de la ponente */}
+                        {(() => {
+                          const s = person.socials || {};
+                          const li = s.linkedin || person.linkedin;
+                          const ig = s.instagram;
+                          const tt = s.tiktok;
+                          const tw = s.twitter;
+                          const web = s.website;
+
+                          if (!li && !ig && !tt && !tw && !web) return null;
+
+                          return (
+                            <div className="flex flex-wrap items-center gap-1.5 mt-3 pt-2 border-t border-[var(--rule)]/40">
+                              {li && (
+                                <a
+                                  href={formatSocialUrl(li, "linkedin")}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#0A66C2]/10 text-[#0A66C2] hover:bg-[#0A66C2] hover:text-white transition-colors"
+                                  title="LinkedIn"
+                                >
+                                  <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
+                                  </svg>
+                                  <span>LinkedIn</span>
+                                </a>
+                              )}
+                              {ig && (
+                                <a
+                                  href={formatSocialUrl(ig, "instagram")}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#E1306C]/10 text-[#E1306C] hover:bg-[#E1306C] hover:text-white transition-colors"
+                                  title="Instagram"
+                                >
+                                  <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                                  </svg>
+                                  <span>Instagram</span>
+                                </a>
+                              )}
+                              {tt && (
+                                <a
+                                  href={formatSocialUrl(tt, "tiktok")}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-black/10 dark:bg-white/10 text-[var(--head)] hover:bg-[var(--accent)] hover:text-white transition-colors"
+                                  title="TikTok"
+                                >
+                                  <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.24 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+                                  </svg>
+                                  <span>TikTok</span>
+                                </a>
+                              )}
+                              {tw && (
+                                <a
+                                  href={formatSocialUrl(tw, "twitter")}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-[var(--bg-alt)] text-[var(--head)] hover:bg-[var(--accent)] hover:text-white transition-colors"
+                                  title="X / Twitter"
+                                >
+                                  <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                                  </svg>
+                                  <span>X</span>
+                                </a>
+                              )}
+                              {web && (
+                                <a
+                                  href={formatSocialUrl(web, "website")}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-[var(--accent)]/10 text-[var(--accent-text)] hover:bg-[var(--accent)] hover:text-white transition-colors"
+                                  title="Sitio Web o Portafolio"
+                                >
+                                  <svg className="w-3.5 h-3.5 stroke-current fill-none" viewBox="0 0 24 24" strokeWidth="2" aria-hidden="true">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <line x1="2" y1="12" x2="22" y2="12" />
+                                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                                  </svg>
+                                  <span>Web</span>
+                                </a>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </div>
+                    </article>
+                  ))}
+                </div>
 
-                      <h4 className="speaker-name text-lg font-bold">{person.name}</h4>
+                {/* Botón Ver Más / Mostrar Menos Ponentes */}
+                {speakers.length > SHOWCASE_PAGE_SIZE && (
+                  <div className="pt-2 flex justify-center">
+                    <button
+                      type="button"
+                      onClick={() => setShowAllSpeakers(!showAllSpeakers)}
+                      className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full border-2 border-[var(--accent)] text-[var(--head)] bg-[var(--card)] hover:bg-[var(--accent)] hover:text-white transition-all duration-300 font-semibold text-xs sm:text-sm shadow-md hover:shadow-lg cursor-pointer group"
+                    >
+                      <span className="transition-transform duration-300 group-hover:scale-110">
+                        {showAllSpeakers ? "▲" : "▼"}
+                      </span>
+                      <span>
+                        {showAllSpeakers
+                          ? "Mostrar menos ponentes"
+                          : `Ver más ponentes (${speakers.length - SHOWCASE_PAGE_SIZE} restantes)`}
+                      </span>
+                    </button>
+                  </div>
+                )}
 
-                      <div
-                        id={`talk-body-${person.id}`}
-                        className={`speaker-talk-body ${expandedTalks[person.id] ? "is-expanded" : ""}`}
-                      >
-                        <p className="speaker-talk-title">“{person.talk}”</p>
-                        <p className="speaker-desc">{person.desc}</p>
-                      </div>
-
-                      {person.linkedin && (
-                        <a
-                          href={person.linkedin}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="speaker-linkedin-btn mt-2"
-                        >
-                          <span>LinkedIn</span>
-                        </a>
-                      )}
-                    </div>
-                  </article>
-                ))}
+                <div className="pt-2 flex justify-center">
+                  <Link
+                    href="/registro/speakers"
+                    className="auth-btn-ghost inline-flex items-center justify-center gap-2 cursor-pointer text-xs max-w-full text-center"
+                  >
+                    <span className="auth-btn-text text-center whitespace-normal leading-relaxed text-xs sm:text-sm">
+                      ¿Deseas compartir una charla o taller? Postula tu propuesta →
+                    </span>
+                  </Link>
+                </div>
               </div>
             )}
           </div>
@@ -344,16 +545,16 @@ export default function Allies() {
             </div>
 
             {communities.length === 0 ? (
-              <div className="p-8 sm:p-10 border border-[var(--rule)] bg-[var(--card)]/80 max-w-2xl mx-auto space-y-4 shadow-sm backdrop-blur-xs">
+              <div className="p-5 sm:p-8 md:p-10 border border-[var(--rule)] bg-[var(--card)]/80 max-w-2xl mx-auto space-y-4 shadow-sm backdrop-blur-xs">
                 <p className="text-sm sm:text-base text-[var(--fg)] opacity-90 leading-relaxed max-w-xl mx-auto">
                   Espacio reservado para clubes de robótica, capítulos IEEE, colectivos de mujeres tecnólogas y agrupaciones estudiantiles. Suma a tu colectivo para visibilizar sus causas y proyectos en el encuentro.
                 </p>
                 <div className="pt-2 flex justify-center">
                   <Link
                     href="/registro/comunidades"
-                    className="auth-btn-ghost auth-btn-lg inline-flex items-center gap-2 cursor-pointer group"
+                    className="auth-btn-ghost auth-btn-lg inline-flex items-center justify-center text-center gap-2 cursor-pointer group max-w-full"
                   >
-                    <span className="auth-btn-text text-sm sm:text-base">
+                    <span className="auth-btn-text text-xs sm:text-base text-center leading-relaxed whitespace-normal">
                       Registra a tu Comunidad →
                     </span>
                   </Link>
@@ -361,31 +562,87 @@ export default function Allies() {
               </div>
             ) : (
               <div className="space-y-6">
-                <ul className="allies">
-                  {communities.map((c) => (
-                    <li key={c.id} className="font-semibold text-sm flex flex-col items-center justify-center p-4">
-                      {c.logoUrl ? (
-                        <img
-                          src={c.logoUrl}
-                          alt={c.name}
-                          className="max-h-14 max-w-full object-contain mb-2"
-                        />
-                      ) : null}
-                      <span className="text-[var(--head)]">{c.name}</span>
-                      {c.representative && (
-                        <span className="text-xs text-[var(--fg)] opacity-75 mt-0.5">
-                          Coord: {c.representative}
-                        </span>
-                      )}
+                <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 list-none p-0">
+                  {visibleCommunities.map((c) => (
+                    <li key={c.id} className="h-full">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCommunity(c)}
+                        className="group w-full h-full text-center p-5 bg-[var(--card)] border border-[var(--rule)] hover:border-[var(--accent)] hover:shadow-lg transition-all duration-300 flex flex-col items-center justify-between cursor-pointer focus-visible:outline-2 focus-visible:outline-[var(--accent)]"
+                        aria-haspopup="dialog"
+                        aria-label={`Ver ficha de la comunidad ${c.name}`}
+                      >
+                        {/* Marco bonito para el emblema / imagen */}
+                        <div className="w-full flex justify-center mb-3">
+                          <div className="relative w-28 h-28 sm:w-32 sm:h-32 p-3 bg-gradient-to-b from-[var(--bg-alt)]/80 to-[var(--bg)] border-2 border-[var(--rule)] group-hover:border-[var(--accent)] rounded-2xl shadow-sm flex items-center justify-center transition-all duration-300 group-hover:scale-105 group-hover:shadow-[0_0_15px_rgba(164,53,124,0.2)]">
+                            {/* Esquinas Art Déco sutiles */}
+                            <span className="absolute -top-1 -left-1 w-2.5 h-2.5 border-t-2 border-l-2 border-[var(--accent)] rounded-tl-sm pointer-events-none opacity-80" />
+                            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 border-t-2 border-r-2 border-[var(--accent)] rounded-tr-sm pointer-events-none opacity-80" />
+                            <span className="absolute -bottom-1 -left-1 w-2.5 h-2.5 border-b-2 border-l-2 border-[var(--accent)] rounded-bl-sm pointer-events-none opacity-80" />
+                            <span className="absolute -bottom-1 -right-1 w-2.5 h-2.5 border-b-2 border-r-2 border-[var(--accent)] rounded-br-sm pointer-events-none opacity-80" />
+
+                            {c.logoUrl ? (
+                              <img
+                                src={c.logoUrl}
+                                alt={c.name}
+                                className="max-h-full max-w-full object-contain filter drop-shadow-xs"
+                              />
+                            ) : (
+                              <div className="flex flex-col items-center justify-center text-[var(--accent)]">
+                                <span className="font-display text-3xl font-bold">
+                                  {c.name.charAt(0).toUpperCase()}
+                                </span>
+                                <span className="text-[10px] tracking-widest uppercase opacity-75 font-semibold">
+                                  Aliada
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Nombre de la comunidad */}
+                        <div className="text-center w-full flex-1 flex flex-col justify-center">
+                          <h4 className="font-display text-base sm:text-lg font-bold text-[var(--head)] group-hover:text-[var(--accent-text)] transition-colors line-clamp-2">
+                            {c.name}
+                          </h4>
+                        </div>
+
+                        {/* Indicador de acción (reemplaza Coord) */}
+                        <div className="mt-3 pt-2 w-full border-t border-[var(--rule)]/50 flex items-center justify-center text-xs font-semibold text-[var(--accent-text)] group-hover:underline gap-1">
+                          <span>Conocer comunidad</span>
+                          <span aria-hidden="true">→</span>
+                        </div>
+                      </button>
                     </li>
                   ))}
                 </ul>
+
+                {/* Botón Ver Más / Mostrar Menos Comunidades */}
+                {communities.length > SHOWCASE_PAGE_SIZE && (
+                  <div className="pt-2 flex justify-center">
+                    <button
+                      type="button"
+                      onClick={() => setShowAllCommunities(!showAllCommunities)}
+                      className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full border-2 border-[var(--accent)] text-[var(--head)] bg-[var(--card)] hover:bg-[var(--accent)] hover:text-white transition-all duration-300 font-semibold text-xs sm:text-sm shadow-md hover:shadow-lg cursor-pointer group"
+                    >
+                      <span className="transition-transform duration-300 group-hover:scale-110">
+                        {showAllCommunities ? "▲" : "▼"}
+                      </span>
+                      <span>
+                        {showAllCommunities
+                          ? "Mostrar menos colectivos"
+                          : `Ver más colectivos aliados (${communities.length - SHOWCASE_PAGE_SIZE} restantes)`}
+                      </span>
+                    </button>
+                  </div>
+                )}
+
                 <div className="pt-2 flex justify-center">
                   <Link
                     href="/registro/comunidades"
-                    className="auth-btn-ghost inline-flex items-center gap-2 cursor-pointer text-xs"
+                    className="auth-btn-ghost inline-flex items-center justify-center gap-2 cursor-pointer text-xs max-w-full text-center"
                   >
-                    <span className="auth-btn-text">
+                    <span className="auth-btn-text text-center whitespace-normal leading-relaxed text-xs sm:text-sm">
                       ¿Representas un colectivo? Registra a tu Comunidad →
                     </span>
                   </Link>
@@ -408,16 +665,16 @@ export default function Allies() {
             </div>
 
             {sponsors.length === 0 ? (
-              <div className="p-8 sm:p-10 border border-[var(--rule)] bg-[var(--card)]/80 max-w-2xl mx-auto space-y-4 shadow-sm backdrop-blur-xs">
+              <div className="p-5 sm:p-8 md:p-10 border border-[var(--rule)] bg-[var(--card)]/80 max-w-2xl mx-auto space-y-4 shadow-sm backdrop-blur-xs">
                 <p className="text-sm sm:text-base text-[var(--fg)] opacity-90 leading-relaxed max-w-xl mx-auto">
                   Espacio reservado para empresas, fundaciones e instituciones comprometidas con impulsar becas, mentorías y oportunidades profesionales para mujeres en ciencia y tecnología.
                 </p>
                 <div className="pt-2 flex justify-center">
                   <Link
                     href="/registro/patrocinadores"
-                    className="auth-btn-ghost auth-btn-lg inline-flex items-center gap-2 cursor-pointer group"
+                    className="auth-btn-ghost auth-btn-lg inline-flex items-center justify-center text-center gap-2 cursor-pointer group max-w-full"
                   >
-                    <span className="auth-btn-text text-sm sm:text-base">
+                    <span className="auth-btn-text text-xs sm:text-base text-center leading-relaxed whitespace-normal">
                       Súmate como Patrocinador →
                     </span>
                   </Link>
@@ -426,7 +683,7 @@ export default function Allies() {
             ) : (
               <div className="space-y-6">
                 <ul className="allies">
-                  {sponsors.map((s) => (
+                  {visibleSponsors.map((s) => (
                     <li key={s.id} className="font-semibold text-sm flex flex-col items-center justify-center p-4">
                       {s.logoUrl ? (
                         <img
@@ -439,12 +696,33 @@ export default function Allies() {
                     </li>
                   ))}
                 </ul>
+
+                {/* Botón Ver Más / Mostrar Menos Patrocinadores */}
+                {sponsors.length > SHOWCASE_PAGE_SIZE && (
+                  <div className="pt-2 flex justify-center">
+                    <button
+                      type="button"
+                      onClick={() => setShowAllSponsors(!showAllSponsors)}
+                      className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full border-2 border-[var(--accent)] text-[var(--head)] bg-[var(--card)] hover:bg-[var(--accent)] hover:text-white transition-all duration-300 font-semibold text-xs sm:text-sm shadow-md hover:shadow-lg cursor-pointer group"
+                    >
+                      <span className="transition-transform duration-300 group-hover:scale-110">
+                        {showAllSponsors ? "▲" : "▼"}
+                      </span>
+                      <span>
+                        {showAllSponsors
+                          ? "Mostrar menos patrocinadores"
+                          : `Ver más marcas y alianzas (${sponsors.length - SHOWCASE_PAGE_SIZE} restantes)`}
+                      </span>
+                    </button>
+                  </div>
+                )}
+
                 <div className="pt-2 flex justify-center">
                   <Link
                     href="/registro/patrocinadores"
-                    className="auth-btn-ghost inline-flex items-center gap-2 cursor-pointer text-xs"
+                    className="auth-btn-ghost inline-flex items-center justify-center gap-2 cursor-pointer text-xs max-w-full text-center"
                   >
-                    <span className="auth-btn-text">
+                    <span className="auth-btn-text text-center whitespace-normal leading-relaxed text-xs sm:text-sm">
                       ¿Te interesa una alianza corporativa? Sumar a mi Empresa →
                     </span>
                   </Link>
@@ -454,6 +732,188 @@ export default function Allies() {
           </div>
         </div>
       </div>
+
+      {/* Modal / Ficha de la Comunidad */}
+      {selectedCommunity && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="community-modal-title"
+          onClick={() => setSelectedCommunity(null)}
+        >
+          <div
+            className="relative w-full max-w-lg bg-[var(--card)] border-2 border-[var(--accent)] p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Botón cerrar */}
+            <button
+              type="button"
+              onClick={() => setSelectedCommunity(null)}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full border border-[var(--rule)] bg-[var(--bg-alt)] hover:bg-[var(--accent)] hover:text-white text-[var(--head)] flex items-center justify-center transition-colors cursor-pointer text-sm font-bold"
+              aria-label="Cerrar ficha"
+            >
+              ✕
+            </button>
+
+            {/* Cabecera / Imagen con marco bonito */}
+            <div className="flex flex-col items-center text-center space-y-3">
+              <div className="relative w-28 h-28 sm:w-36 sm:h-36 p-3 bg-gradient-to-b from-[var(--bg-alt)] to-[var(--bg)] border-2 border-[var(--accent)] rounded-2xl shadow-md flex items-center justify-center">
+                <span className="absolute -top-1 -left-1 w-3 h-3 border-t-2 border-l-2 border-[var(--head)]" />
+                <span className="absolute -top-1 -right-1 w-3 h-3 border-t-2 border-r-2 border-[var(--head)]" />
+                <span className="absolute -bottom-1 -left-1 w-3 h-3 border-b-2 border-l-2 border-[var(--head)]" />
+                <span className="absolute -bottom-1 -right-1 w-3 h-3 border-b-2 border-r-2 border-[var(--head)]" />
+                {selectedCommunity.logoUrl ? (
+                  <img
+                    src={selectedCommunity.logoUrl}
+                    alt={selectedCommunity.name}
+                    className="max-h-full max-w-full object-contain filter drop-shadow-sm"
+                  />
+                ) : (
+                  <div className="text-center text-[var(--accent)]">
+                    <span className="font-display text-4xl font-bold">
+                      {selectedCommunity.name.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <p className="text-xs uppercase tracking-widest font-bold text-[var(--accent)]">
+                  Comunidad Aliada STEM
+                </p>
+                <h3
+                  id="community-modal-title"
+                  className="text-2xl sm:text-3xl font-display text-[var(--head)] font-bold mt-1"
+                >
+                  {selectedCommunity.name}
+                </h3>
+                {selectedCommunity.representative && (
+                  <p className="text-xs text-[var(--fg)] opacity-80 mt-1 font-medium">
+                    Coordinación / Representante: <strong className="text-[var(--head)]">{selectedCommunity.representative}</strong>
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Quiénes son y qué hacen */}
+            <div className="border-t border-[var(--rule)] pt-4 space-y-2 text-left">
+              <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--head)]">
+                Quiénes son y qué hacen:
+              </h4>
+              <div className="bg-[var(--bg-alt)]/40 p-4 border border-[var(--rule)] text-sm text-[var(--fg)] leading-relaxed whitespace-pre-wrap max-h-52 overflow-y-auto">
+                {selectedCommunity.desc || "Colectivo aliado comprometido con visibilizar y empoderar el liderazgo de las mujeres en ciencia y tecnología en Quetzalia 2027."}
+              </div>
+            </div>
+
+            {/* Redes y Canales Oficiales */}
+            <div className="border-t border-[var(--rule)] pt-4 space-y-3">
+              <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--head)] text-left">
+                Redes y Canales Oficiales:
+              </h4>
+              {(() => {
+                const s = selectedCommunity.socials || {};
+                const li = s.linkedin;
+                const ig = s.instagram;
+                const tt = s.tiktok;
+                const tw = s.twitter;
+                const web = s.website;
+
+                if (!li && !ig && !tt && !tw && !web) {
+                  return (
+                    <p className="text-xs text-[var(--fg)] opacity-70 italic text-left">
+                      Esta comunidad no ha registrado enlaces externos aún.
+                    </p>
+                  );
+                }
+
+                return (
+                  <div className="flex flex-wrap items-center gap-2">
+                    {ig && (
+                      <a
+                        href={formatSocialUrl(ig, "instagram")}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-[#E1306C]/10 text-[#E1306C] hover:bg-[#E1306C] hover:text-white transition-colors"
+                      >
+                        <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                        </svg>
+                        <span>Instagram</span>
+                      </a>
+                    )}
+                    {li && (
+                      <a
+                        href={formatSocialUrl(li, "linkedin")}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-[#0A66C2]/10 text-[#0A66C2] hover:bg-[#0A66C2] hover:text-white transition-colors"
+                      >
+                        <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
+                        </svg>
+                        <span>LinkedIn</span>
+                      </a>
+                    )}
+                    {tt && (
+                      <a
+                        href={formatSocialUrl(tt, "tiktok")}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-black/10 dark:bg-white/10 text-[var(--head)] hover:bg-[var(--accent)] hover:text-white transition-colors"
+                      >
+                        <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.24 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+                        </svg>
+                        <span>TikTok</span>
+                      </a>
+                    )}
+                    {tw && (
+                      <a
+                        href={formatSocialUrl(tw, "twitter")}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-[var(--bg-alt)] text-[var(--head)] hover:bg-[var(--accent)] hover:text-white transition-colors"
+                      >
+                        <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                        <span>X</span>
+                      </a>
+                    )}
+                    {web && (
+                      <a
+                        href={formatSocialUrl(web, "website")}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-[var(--accent)]/10 text-[var(--accent-text)] hover:bg-[var(--accent)] hover:text-white transition-colors"
+                      >
+                        <svg className="w-4 h-4 stroke-current fill-none" viewBox="0 0 24 24" strokeWidth="2" aria-hidden="true">
+                          <circle cx="12" cy="12" r="10" />
+                          <line x1="2" y1="12" x2="22" y2="12" />
+                          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                        </svg>
+                        <span>Sitio Web</span>
+                      </a>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Pie de modal */}
+            <div className="pt-2 flex justify-center">
+              <button
+                type="button"
+                onClick={() => setSelectedCommunity(null)}
+                className="btn btn-ghost text-xs px-6 py-2 cursor-pointer"
+              >
+                Cerrar Ficha
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

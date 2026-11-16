@@ -21,6 +21,12 @@ export default function RegistroComunidadesPage() {
   const [memberCount, setMemberCount] = useState(""); // Número aproximado de integrantes
   const [talkMaterials, setTalkMaterials] = useState(""); // Descripción / actividades
 
+  // Redes sociales y presencia digital (opcionales)
+  const [instagram, setInstagram] = useState("");
+  const [linkedin, setLinkedin] = useState("");
+  const [tiktok, setTiktok] = useState("");
+  const [website, setWebsite] = useState("");
+
   // Manejo de logotipo o emblema de la comunidad
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
@@ -108,6 +114,13 @@ export default function RegistroComunidadesPage() {
         uploadedLogoPath = uploadRes.path;
       }
 
+      // Filtrar redes sociales no vacías
+      const cleanSocials: Record<string, string> = {};
+      if (linkedin.trim()) cleanSocials.linkedin = linkedin.trim();
+      if (instagram.trim()) cleanSocials.instagram = instagram.trim();
+      if (tiktok.trim()) cleanSocials.tiktok = tiktok.trim();
+      if (website.trim()) cleanSocials.website = website.trim();
+
       const reg = await saveRegistration(
         {
           userId: user.uid,
@@ -119,6 +132,11 @@ export default function RegistroComunidadesPage() {
           talkTitle: memberCount ? `Comunidad (~${memberCount} integrantes)` : "Comunidad STEM",
           talkMaterials: `Número aproximado de integrantes: ${memberCount || "No especificado"}.\nDescripción y actividades: ${talkMaterials.trim()}`,
           photoPath: uploadedLogoPath,
+          ...(Object.keys(cleanSocials).length > 0 ? { socials: cleanSocials } : {}),
+          ...(cleanSocials.linkedin ? { linkedin: cleanSocials.linkedin } : {}),
+          ...(cleanSocials.instagram ? { instagram: cleanSocials.instagram } : {}),
+          ...(cleanSocials.tiktok ? { tiktok: cleanSocials.tiktok } : {}),
+          ...(cleanSocials.website ? { website: cleanSocials.website } : {}),
           consent,
           consentVersion: CURRENT_CONSENT_VERSION,
           consentTimestamp: new Date().toISOString(),
@@ -416,6 +434,76 @@ export default function RegistroComunidadesPage() {
                     </div>
                   </div>
                 )}
+              </div>
+
+              {/* Redes Sociales y Enlaces Oficiales (Opcionales) */}
+              <div className="border-t border-[var(--rule)] pt-4 mt-2 space-y-4">
+                <div>
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--head)]">
+                    Redes Sociales y Enlaces Oficiales (Opcionales)
+                  </h3>
+                  <p className="text-xs text-[var(--fg)] opacity-80 mt-1">
+                    Indica las redes de tu comunidad o colectivo. Se mostrarán en la ficha pública para que las asistentes puedan seguirlas y contactarlas.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="form-label" htmlFor="instagram">
+                      Instagram (Usuario o URL)
+                    </label>
+                    <input
+                      id="instagram"
+                      type="text"
+                      value={instagram}
+                      onChange={(e) => setInstagram(e.target.value)}
+                      placeholder="Ej. @comunidad_stem o https://instagram.com/..."
+                      className="form-input"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="form-label" htmlFor="linkedin">
+                      LinkedIn (Perfil o Página)
+                    </label>
+                    <input
+                      id="linkedin"
+                      type="text"
+                      value={linkedin}
+                      onChange={(e) => setLinkedin(e.target.value)}
+                      placeholder="https://linkedin.com/company/..."
+                      className="form-input"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="form-label" htmlFor="tiktok">
+                      TikTok
+                    </label>
+                    <input
+                      id="tiktok"
+                      type="text"
+                      value={tiktok}
+                      onChange={(e) => setTiktok(e.target.value)}
+                      placeholder="Ej. @comunidad_stem o https://tiktok.com/@..."
+                      className="form-input"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="form-label" htmlFor="website">
+                      Sitio Web / Linktree / Canal
+                    </label>
+                    <input
+                      id="website"
+                      type="url"
+                      value={website}
+                      onChange={(e) => setWebsite(e.target.value)}
+                      placeholder="https://micomunidad.org"
+                      className="form-input"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 

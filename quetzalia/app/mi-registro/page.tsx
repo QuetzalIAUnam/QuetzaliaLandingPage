@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import Greca from "@/components/ui/Greca";
+import BoardingPass from "@/components/BoardingPass";
 
 export default function MiRegistroPage() {
   const { user, registration, loading, isAdmin, loginWithGoogle, logout } = useAuth();
@@ -231,6 +232,17 @@ export default function MiRegistroPage() {
                   </div>
                 </div>
 
+                {/* Pase de Abordar Exclusivo del Comité Organizador */}
+                <div className="pt-4 border-t border-[var(--rule)]">
+                  <BoardingPass
+                    passengerName={user.displayName || "Integrante del Comité"}
+                    role="admin"
+                    registrationId="QTZ-COMITE-01"
+                    organization="UNAM FES Acatlán"
+                    status="aprobado"
+                  />
+                </div>
+
                 <div className="pt-2 flex flex-col sm:flex-row gap-4 justify-between items-center">
                   <Link
                     href="/admin"
@@ -398,6 +410,23 @@ export default function MiRegistroPage() {
               </div>
             ) : (
               <div className="space-y-6">
+                {/* Pase de Abordar Digital Oficial: SOLO VISIBLE SI ESTÁ ACEPTADO / APROBADO */}
+                {registration.status === "aprobado" && (
+                  <BoardingPass
+                    passengerName={
+                      registration.fullName ||
+                      registration.chosenName ||
+                      user.displayName ||
+                      "Participante Quetzalia"
+                    }
+                    role={registration.type}
+                    registrationId={registration.id || user.uid}
+                    organization={registration.organization}
+                    status={registration.status}
+                    photoPath={registration.photoPath}
+                  />
+                )}
+
                 <div className="border-2 border-[var(--head)] p-6 sm:p-8 bg-[var(--card)] shadow-md">
                   <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--rule)] pb-4 mb-6">
                     <div>
@@ -450,6 +479,19 @@ export default function MiRegistroPage() {
                       <p className="font-semibold text-[var(--head)]">Versión de consentimiento:</p>
                       <p className="font-mono text-xs">{registration.consentVersion || "v1.0"}</p>
                     </div>
+                    {registration.type === "speaker" && registration.talkTitle && (
+                      <div className="sm:col-span-2 pt-2 border-t border-[var(--rule)]/60">
+                        <p className="font-semibold text-[var(--head)]">
+                          {registration.talkType === "Taller" ? "🛠️ Taller Práctico Propuesto:" : "🎙️ Ponencia Propuesta:"}
+                        </p>
+                        <p className="text-sm font-medium mt-0.5">{registration.talkTitle}</p>
+                        {registration.talkType && (
+                          <span className="inline-block mt-1 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-[var(--accent)]/15 text-[var(--accent-text)] rounded border border-[var(--accent)]/30">
+                            {registration.talkType}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 

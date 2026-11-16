@@ -87,44 +87,46 @@ export default function AuthStatus() {
 
   return (
     <div className="auth-status-logged">
-      <Link href="/mi-registro" className="auth-user-link" title="Ver mi registro">
+      <Link href="/mi-registro" className="auth-user-link shrink min-w-0" title="Ver mi registro">
         {user.photoURL ? (
           <Image
             src={user.photoURL}
             alt={user.displayName || "Usuario"}
-            width={28}
-            height={28}
-            className="auth-avatar"
+            width={26}
+            height={26}
+            className="auth-avatar shrink-0 w-6 h-6 sm:w-7 sm:h-7"
             unoptimized
           />
         ) : (
-          <div className="auth-avatar-fallback">
+          <div className="auth-avatar-fallback shrink-0 w-6 h-6 sm:w-7 sm:h-7 text-xs">
             {(user.displayName || user.email || "U")[0].toUpperCase()}
           </div>
         )}
-        <span className="auth-user-name">
+        <span className="auth-user-name truncate">
           {user.displayName?.split(" ")[0] || "Mi cuenta"}
         </span>
         {statusBadge()}
       </Link>
-      {user.email?.toLowerCase() === "dr87152@gmail.com" && (
-        <Link
-          href="/admin"
-          className="text-xs font-bold uppercase tracking-wider text-[var(--head)] bg-[var(--bg-alt)] px-2 py-1 border border-[var(--accent)] hover:bg-[var(--accent)] hover:text-white transition-colors"
-          title="Panel de Administración"
+      <div className="auth-logged-actions flex items-center gap-1.5 shrink-0">
+        {user.email?.toLowerCase() === "dr87152@gmail.com" && (
+          <Link
+            href="/admin"
+            className="text-xs font-bold uppercase tracking-wider text-[var(--head)] bg-[var(--bg-alt)] px-2 py-1 border border-[var(--accent)] hover:bg-[var(--accent)] hover:text-white transition-colors"
+            title="Panel de Administración"
+          >
+            Admin
+          </Link>
+        )}
+        <button
+          type="button"
+          onClick={() => logout()}
+          className="auth-btn-logout"
+          title="Cerrar sesión"
+          aria-label="Cerrar sesión"
         >
-          Admin
-        </Link>
-      )}
-      <button
-        type="button"
-        onClick={() => logout()}
-        className="auth-btn-logout"
-        title="Cerrar sesión"
-        aria-label="Cerrar sesión"
-      >
-        Salir
-      </button>
+          Salir
+        </button>
+      </div>
     </div>
   );
 }

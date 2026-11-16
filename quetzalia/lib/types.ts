@@ -12,6 +12,17 @@ export interface ConsentRecord {
   futureEditions: boolean;        // Notificaciones para futuras ediciones
 }
 
+export interface SocialLinks {
+  linkedin?: string;
+  instagram?: string;
+  tiktok?: string;
+  twitter?: string;
+  website?: string;
+  facebook?: string;
+  github?: string;
+  youtube?: string;
+}
+
 export interface Registration {
   id: string;
   userId: string;
@@ -25,10 +36,17 @@ export interface Registration {
   legalName?: string;
   phone?: string;
   organization?: string;
+  talkType?: 'Ponencia' | 'Taller' | string;
   talkTitle?: string;
   talkMaterials?: string;
   photoPath?: string;
   logoPath?: string;
+  socials?: SocialLinks;
+  linkedin?: string;
+  instagram?: string;
+  tiktok?: string;
+  twitter?: string;
+  website?: string;
   consent: ConsentRecord;
   consentVersion: string;
   consentTimestamp: string;

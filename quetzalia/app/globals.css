@@ -908,6 +908,7 @@ a {
   opacity: .5;
   pointer-events: none;
   border-radius: inherit;
+  z-index: 2;
 }
 
 .arch {
@@ -1159,11 +1160,12 @@ a {
   max-width: 54rem;
 }
 
-/* Aliadas */
+/* Aliadas / Ponentes */
 .people {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap: 2.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 360px));
+  justify-content: center;
+  gap: 2rem;
 }
 
 .person {
@@ -1171,6 +1173,9 @@ a {
   flex-direction: column;
   gap: 1.1rem;
   min-width: 0;
+  max-width: 360px;
+  width: 100%;
+  margin: 0 auto;
   opacity: 0;
   transform: translateY(32px);
   transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
@@ -1186,7 +1191,26 @@ a {
 
 .person .ph {
   aspect-ratio: 1;
+  width: 100%;
+  max-width: 260px;
+  max-height: 260px;
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 999px 999px 0 0;
   transition: transform 0.35s ease;
+  position: relative;
+  background: var(--bg-alt);
+}
+
+.person .ph img,
+.person .ph > div > img {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
 }
 
 .person:hover .ph {
@@ -1753,6 +1777,20 @@ footer li {
     align-items: center;
   }
 
+  .top.has-session {
+    width: 100%;
+  }
+
+  .top.has-session .top-nav-auth {
+    width: 100%;
+  }
+
+  .top.has-session .auth-status-logged {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
   .top ul,
   .top ul.top-nav-list {
     display: none;
@@ -2138,6 +2176,7 @@ footer li {
 .auth-btn-ghost {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.55rem;
   padding: 0.35rem 0.5rem;
   background: transparent;
@@ -2146,7 +2185,7 @@ footer li {
   cursor: pointer;
   text-decoration: none;
   transition: opacity 0.2s ease;
-  white-space: nowrap;
+  max-width: 100%;
 }
 
 .auth-btn-ghost:disabled {
@@ -2176,6 +2215,14 @@ footer li {
 .auth-btn-ghost.auth-btn-lg {
   padding: 0.6rem 1.2rem;
   gap: 0.75rem;
+  max-width: 100%;
+}
+
+@media (max-width: 640px) {
+  .auth-btn-ghost.auth-btn-lg {
+    padding: 0.45rem 0.65rem;
+    gap: 0.5rem;
+  }
 }
 
 .auth-btn-ghost.auth-btn-lg .google-icon {
@@ -2185,18 +2232,33 @@ footer li {
 
 .auth-btn-ghost.auth-btn-lg .auth-btn-text {
   font-size: 0.95rem;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
+}
+
+@media (max-width: 640px) {
+  .auth-btn-ghost.auth-btn-lg .auth-btn-text {
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+  }
 }
 
 .auth-btn-text {
   font-family: var(--body);
   font-size: 0.8rem;
   font-weight: 600;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--head);
   display: inline-block;
   position: relative;
+  max-width: 100%;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: break-word;
+  line-height: 1.35;
+  text-align: center;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
   background: linear-gradient(
     110deg,
     var(--head) 0%,
@@ -2214,6 +2276,13 @@ footer li {
   background-clip: text;
   -webkit-text-fill-color: transparent;
   transition: filter 0.5s ease;
+}
+
+@media (max-width: 640px) {
+  .auth-btn-text {
+    letter-spacing: 0.06em;
+    font-size: 0.76rem;
+  }
 }
 
 .auth-btn-ghost:hover .auth-btn-text,
@@ -2378,19 +2447,28 @@ footer li {
 
 .auth-btn-logout {
   font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--accent-text);
-  background: transparent;
-  border: none;
+  color: #ffffff !important;
+  background: #613954;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 3px;
   cursor: pointer;
-  padding: 0.3rem 0.5rem;
-  transition: opacity 0.2s;
+  padding: 0.28rem 0.65rem;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2;
 }
 
 .auth-btn-logout:hover {
-  text-decoration: underline;
+  background: #A4357C;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
 }
 
 .auth-err-tooltip {

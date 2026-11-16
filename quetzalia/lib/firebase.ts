@@ -111,6 +111,23 @@ export function subscribeToUserRegistration(
   );
 }
 
+// Helper recursivo para eliminar propiedades con valor undefined (incompatibles con Firestore setDoc)
+function removeUndefinedFields<T>(obj: T): T {
+  if (obj === null || obj === undefined || typeof obj !== "object") {
+    return obj;
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(removeUndefinedFields) as unknown as T;
+  }
+  const clean: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== undefined) {
+      clean[key] = removeUndefinedFields(value);
+    }
+  }
+  return clean as T;
+}
+
 // Guardar o enviar registro inicial desde el navegador
 export async function saveRegistration(
   data: Omit<Registration, "id" | "status" | "createdAt" | "updatedAt">,
@@ -126,8 +143,11 @@ export async function saveRegistration(
     updatedAt: now,
   };
 
+  // Sanitizar documento para garantizar que no existan campos undefined
+  const sanitizedRecord = removeUndefinedFields(registrationRecord);
+
   const docRef = doc(db, "registrations", userId);
-  await setDoc(docRef, registrationRecord);
+  await setDoc(docRef, sanitizedRecord);
 
   // Notificar al endpoint de backend para envío de correo de confirmación
   try {

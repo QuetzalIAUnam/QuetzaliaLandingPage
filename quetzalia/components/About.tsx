@@ -204,9 +204,8 @@ export default function About() {
                 <dt className="pillar-dt-row">
                   {/* Icono del pilar (aparece después de su propio label) */}
                   <span
-                    className={`pillar-icon-box ${
-                      activeStep.showImage[idx] ? "is-shown" : "is-hidden"
-                    }`}
+                    className={`pillar-icon-box ${activeStep.showImage[idx] ? "is-shown" : "is-hidden"
+                      }`}
                   >
                     <SkeletonImage
                       src={p.src}
@@ -220,9 +219,8 @@ export default function About() {
 
                   {/* Nombre del pilar (Inspírate, Aprende, Conecta) */}
                   <span
-                    className={`pillar-name-text ${
-                      activeStep.showLabel[idx] ? "is-shown" : "is-hidden"
-                    }`}
+                    className={`pillar-name-text ${activeStep.showLabel[idx] ? "is-shown" : "is-hidden"
+                      }`}
                   >
                     {p.label}
                   </span>
@@ -242,9 +240,8 @@ export default function About() {
 
           {/* Tarjeta inferior con pluma flotante */}
           <div
-            className={`name-note fade-in-el delay-3 ${
-              inView ? "is-visible" : ""
-            }`}
+            className={`name-note fade-in-el delay-3 ${inView ? "is-visible" : ""
+              }`}
           >
             <div className="name-note-inner">
               <div className="floating-feather-wrap">
@@ -270,17 +267,74 @@ export default function About() {
           </div>
         </div>
 
-        {/* Foto de la columna derecha con fade in */}
+        {/* Columna derecha: Foto oficial + Mapita con pin en el CEMM */}
         <div
-          className={`about-photo-wrap fade-in-el delay-2 ${
+          className={`about-photo-wrap flex flex-col gap-6 fade-in-el delay-2 ${
             inView ? "is-visible" : ""
           }`}
         >
-          <PhotoArch ariaLabel="Espacio reservado para una fotografía del evento">
-            Foto del evento
-            <br />
-            por definir
-          </PhotoArch>
+          <PhotoArch
+            src="/about.png"
+            alt="Comunidad universitaria y ponentes en el encuentro Quetzal-IA en la FES Acatlán"
+            ariaLabel="Fotografía oficial del encuentro Quetzal-IA"
+          />
+
+          {/* Tarjeta de Ubicación con Mapita y Pin en el CEMM FES Acatlán */}
+          <div className="location-card border border-[var(--rule)] bg-[var(--card)] p-4 sm:p-5 shadow-sm space-y-3 relative overflow-hidden transition-all duration-300 hover:border-[var(--accent)]">
+            {/* Cabecera de ubicación */}
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-2.5">
+                <span className="text-xl sm:text-2xl mt-0.5 animate-bounce" aria-hidden="true">
+                  📍
+                </span>
+                <div>
+                  <span className="text-[10px] uppercase font-bold tracking-widest text-[var(--accent-text)] block font-mono">
+                    Sede Presencial del Encuentro
+                  </span>
+                  <h4 className="text-base sm:text-lg font-display font-bold text-[var(--head)] leading-snug">
+                    FES Acatlán · CEMM
+                  </h4>
+                  <p className="text-xs text-[var(--fg)] opacity-85 mt-0.5">
+                    Centro de Estudios Municipales y Metropolitanos, UNAM
+                  </p>
+                </div>
+              </div>
+              <span className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-[var(--bg-alt)] border border-[var(--rule)] text-[var(--head)]">
+                Naucalpan, Méx.
+              </span>
+            </div>
+
+            {/* Mapa interactivo con pin */}
+            <div className="w-full h-48 sm:h-52 rounded overflow-hidden border border-[var(--rule)] relative bg-[var(--bg-alt)]">
+              <iframe
+                title="Ubicación CEMM FES Acatlán UNAM"
+                src="https://maps.google.com/maps?q=Centro+de+Estudios+Municipales+y+Metropolitanos+CEMM+FES+Acatlan+UNAM&t=&z=16&ie=UTF8&iwloc=&output=embed"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen={false}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="w-full h-full grayscale-[25%] contrast-[1.05] hover:grayscale-0 transition-all duration-500"
+              />
+            </div>
+
+            {/* Pie con dirección y botón a Google Maps */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-1 text-xs">
+              <p className="text-[11px] text-[var(--fg)] opacity-80 leading-tight">
+                Av. San Juan Totoltepec s/n, Sta Cruz Acatlan, 53150 Naucalpan de Juárez.
+              </p>
+              <a
+                href="https://share.google/3XX21kLJ4Tt5xBUDn"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-ghost text-[11px] px-3 py-1.5 font-bold whitespace-nowrap shrink-0 inline-flex items-center gap-1.5"
+              >
+                <span>Abrir en Maps</span>
+                <span className="text-sm">↗</span>
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </section>

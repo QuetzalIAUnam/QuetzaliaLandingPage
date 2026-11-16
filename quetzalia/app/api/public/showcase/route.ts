@@ -18,6 +18,13 @@ export async function GET() {
       talk: string;
       linkedin?: string;
       photoUrl?: string;
+      socials?: {
+        linkedin?: string;
+        instagram?: string;
+        tiktok?: string;
+        twitter?: string;
+        website?: string;
+      };
     }> = [];
 
     const sponsors: Array<{
@@ -33,6 +40,13 @@ export async function GET() {
       representative?: string;
       desc?: string;
       logoUrl?: string;
+      socials?: {
+        linkedin?: string;
+        instagram?: string;
+        tiktok?: string;
+        twitter?: string;
+        website?: string;
+      };
     }> = [];
 
     snapshot.docs.forEach((doc) => {
@@ -40,15 +54,32 @@ export async function GET() {
       const type = data.type;
 
       if (type === "speaker") {
+        const rawSocials = data.socials || {};
+        const linkedin =
+          (typeof rawSocials.linkedin === "string" && rawSocials.linkedin.trim()) ||
+          (typeof data.linkedin === "string" && data.linkedin.trim()) ||
+          undefined;
+        const instagram = rawSocials.instagram || data.instagram;
+        const tiktok = rawSocials.tiktok || data.tiktok;
+        const twitter = rawSocials.twitter || data.twitter;
+        const website = rawSocials.website || data.website;
+
         speakers.push({
           id: doc.id,
           name: data.chosenName || data.fullName || "Ponente Quetzalia",
           org: data.organization || "Comunidad STEM",
-          type: "Ponencia",
+          type: data.talkType || "Ponencia",
           desc: data.talkMaterials || "",
           talk: data.talkTitle || "Charla en Quetzalia 2027",
-          linkedin: typeof data.phone === "string" && data.phone.startsWith("http") ? data.phone : undefined,
+          linkedin,
           photoUrl: data.photoPath || undefined,
+          socials: {
+            linkedin,
+            instagram,
+            tiktok,
+            twitter,
+            website,
+          },
         });
       } else if (type === "sponsor") {
         sponsors.push({
@@ -58,12 +89,26 @@ export async function GET() {
           logoUrl: data.photoPath || data.logoPath || undefined,
         });
       } else if (type === "community") {
+        const rawSocials = data.socials || {};
+        const linkedin = rawSocials.linkedin || data.linkedin;
+        const instagram = rawSocials.instagram || data.instagram;
+        const tiktok = rawSocials.tiktok || data.tiktok;
+        const twitter = rawSocials.twitter || data.twitter;
+        const website = rawSocials.website || data.website;
+
         communities.push({
           id: doc.id,
           name: data.organization || "Colectivo STEM",
           representative: data.fullName,
           desc: data.talkMaterials || "",
           logoUrl: data.photoPath || data.logoPath || undefined,
+          socials: {
+            linkedin,
+            instagram,
+            tiktok,
+            twitter,
+            website,
+          },
         });
       }
     });

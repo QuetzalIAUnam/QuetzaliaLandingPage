@@ -19,8 +19,15 @@ export default function RegistroSpeakersPage() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [organization, setOrganization] = useState("");
+  const [talkType, setTalkType] = useState<"Ponencia" | "Taller">("Ponencia");
   const [talkTitle, setTalkTitle] = useState("");
   const [talkMaterials, setTalkMaterials] = useState("");
+
+  // Redes sociales y perfiles profesionales (opcionales)
+  const [linkedin, setLinkedin] = useState("");
+  const [instagram, setInstagram] = useState("");
+  const [tiktok, setTiktok] = useState("");
+  const [website, setWebsite] = useState("");
 
   // Foto de semblanza
   const [photoFile, setPhotoFile] = useState<File | null>(null);
@@ -110,6 +117,13 @@ export default function RegistroSpeakersPage() {
         uploadedPhotoPath = uploadRes.path;
       }
 
+      // Filtrar redes sociales no vacías
+      const cleanSocials: Record<string, string> = {};
+      if (linkedin.trim()) cleanSocials.linkedin = linkedin.trim();
+      if (instagram.trim()) cleanSocials.instagram = instagram.trim();
+      if (tiktok.trim()) cleanSocials.tiktok = tiktok.trim();
+      if (website.trim()) cleanSocials.website = website.trim();
+
       const reg = await saveRegistration(
         {
           userId: user.uid,
@@ -120,9 +134,15 @@ export default function RegistroSpeakersPage() {
           email: finalEmail,
           phone: phone.trim(),
           organization: organization.trim(),
+          talkType,
           talkTitle: talkTitle.trim(),
           talkMaterials: talkMaterials.trim(),
           photoPath: uploadedPhotoPath,
+          ...(Object.keys(cleanSocials).length > 0 ? { socials: cleanSocials } : {}),
+          ...(cleanSocials.linkedin ? { linkedin: cleanSocials.linkedin } : {}),
+          ...(cleanSocials.instagram ? { instagram: cleanSocials.instagram } : {}),
+          ...(cleanSocials.tiktok ? { tiktok: cleanSocials.tiktok } : {}),
+          ...(cleanSocials.website ? { website: cleanSocials.website } : {}),
           consent,
           consentVersion: CURRENT_CONSENT_VERSION,
           consentTimestamp: new Date().toISOString(),
@@ -167,7 +187,8 @@ export default function RegistroSpeakersPage() {
               <p><strong>Folio / ID:</strong> <span className="font-mono text-xs">{submittedReg.id}</span></p>
               <p><strong>Estatus:</strong> <span className="px-2 py-0.5 font-bold uppercase text-xs bg-amber-100 text-amber-900 border border-amber-300">Pendiente de revisión</span></p>
               <p><strong>Nombre registrado:</strong> {submittedReg.chosenName || submittedReg.legalName}</p>
-              <p><strong>Ponencia propuesta:</strong> {submittedReg.talkTitle}</p>
+              <p><strong>Formato propuesto:</strong> <span className="font-semibold text-emerald-800">{submittedReg.talkType || "Ponencia"}</span></p>
+              <p><strong>{submittedReg.talkType === "Taller" ? "Taller propuesto:" : "Ponencia propuesta:"}</strong> {submittedReg.talkTitle}</p>
               <p>
                 <strong>Fotografía de semblanza:</strong>{" "}
                 {submittedReg.photoPath ? (
@@ -429,9 +450,69 @@ export default function RegistroSpeakersPage() {
                 Propuesta de Ponencia o Taller
               </h2>
 
+              {/* Selector de Modalidad: Ponencia o Taller */}
+              <div>
+                <label className="form-label mb-2 block">
+                  Formato de la Actividad *
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <label
+                    className={`flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
+                      talkType === "Ponencia"
+                        ? "border-[var(--accent)] bg-[var(--accent)]/10 shadow-sm"
+                        : "border-[var(--rule)] bg-[var(--bg-alt)]/40 hover:border-[var(--accent)]/60"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="talkType"
+                      value="Ponencia"
+                      checked={talkType === "Ponencia"}
+                      onChange={() => setTalkType("Ponencia")}
+                      className="mt-1 text-[var(--accent)] focus:ring-[var(--accent)]"
+                    />
+                    <div>
+                      <p className="font-bold text-sm text-[var(--head)] flex items-center gap-1.5">
+                        <span className="text-base">🎙️</span>
+                        <span>Ponencia / Conferencia</span>
+                      </p>
+                      <p className="text-xs text-[var(--fg)] opacity-80 mt-1 leading-relaxed">
+                        Charla expositiva o magistral sobre tu investigación, desarrollo o experiencia en STEM (30 a 45 min).
+                      </p>
+                    </div>
+                  </label>
+
+                  <label
+                    className={`flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
+                      talkType === "Taller"
+                        ? "border-[var(--accent)] bg-[var(--accent)]/10 shadow-sm"
+                        : "border-[var(--rule)] bg-[var(--bg-alt)]/40 hover:border-[var(--accent)]/60"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="talkType"
+                      value="Taller"
+                      checked={talkType === "Taller"}
+                      onChange={() => setTalkType("Taller")}
+                      className="mt-1 text-[var(--accent)] focus:ring-[var(--accent)]"
+                    />
+                    <div>
+                      <p className="font-bold text-sm text-[var(--head)] flex items-center gap-1.5">
+                        <span className="text-base">🛠️</span>
+                        <span>Taller Práctico / Workshop</span>
+                      </p>
+                      <p className="text-xs text-[var(--fg)] opacity-80 mt-1 leading-relaxed">
+                        Sesión interactiva o de programación práctica donde las asistentes desarrollan un ejercicio guiado (60 a 90 min).
+                      </p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
               <div>
                 <label className="form-label" htmlFor="talkTitle">
-                  Título de la Ponencia o Taller *
+                  {talkType === "Taller" ? "Título del Taller *" : "Título de la Ponencia *"}
                 </label>
                 <input
                   id="talkTitle"
@@ -439,14 +520,20 @@ export default function RegistroSpeakersPage() {
                   required
                   value={talkTitle}
                   onChange={(e) => setTalkTitle(e.target.value)}
-                  placeholder="Ej. Inteligencia Artificial aplicada a la Genómica"
+                  placeholder={
+                    talkType === "Taller"
+                      ? "Ej. Taller Práctico: Construcción de Agentes de IA con Python"
+                      : "Ej. Inteligencia Artificial aplicada a la Genómica y Biomedicina"
+                  }
                   className="form-input"
                 />
               </div>
 
               <div>
                 <label className="form-label" htmlFor="talkMaterials">
-                  Resumen de la Ponencia y Necesidades de Materiales *
+                  {talkType === "Taller"
+                    ? "Resumen del Taller, Temario y Requerimientos de Software *"
+                    : "Resumen de la Ponencia y Necesidades Técnicas *"}
                 </label>
                 <textarea
                   id="talkMaterials"
@@ -454,9 +541,83 @@ export default function RegistroSpeakersPage() {
                   required
                   value={talkMaterials}
                   onChange={(e) => setTalkMaterials(e.target.value)}
-                  placeholder="Breve semblanza, objetivos de la charla, y requerimientos técnicos (proyector, audio, internet, diapositivas)."
+                  placeholder={
+                    talkType === "Taller"
+                      ? "Describe los objetivos del taller, prerrequisitos para las asistentes (laptop, software preinstalado) y dinámicas a realizar."
+                      : "Breve semblanza, objetivos de la charla, y requerimientos técnicos (proyector, audio, internet, diapositivas)."
+                  }
                   className="form-textarea"
                 />
+              </div>
+            </div>
+
+            {/* Redes Sociales y Perfiles Profesionales (Opcionales) */}
+            <div className="border border-[var(--rule)] bg-[var(--card)] p-6 space-y-4">
+              <div>
+                <h3 className="text-lg font-display text-[var(--head)] border-b border-[var(--rule)] pb-2">
+                  Presencia Digital y Redes Profesionales (Opcionales)
+                </h3>
+                <p className="text-xs text-[var(--fg)] opacity-80 mt-1">
+                  Comparte tus enlaces para que la comunidad y las asistentes puedan conocer tu trayectoria e interactuar con tu trabajo.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="form-label" htmlFor="linkedin">
+                    LinkedIn (Perfil o Página)
+                  </label>
+                  <input
+                    id="linkedin"
+                    type="text"
+                    value={linkedin}
+                    onChange={(e) => setLinkedin(e.target.value)}
+                    placeholder="https://linkedin.com/in/tu-perfil"
+                    className="form-input"
+                  />
+                </div>
+
+                <div>
+                  <label className="form-label" htmlFor="instagram">
+                    Instagram (Usuario o URL)
+                  </label>
+                  <input
+                    id="instagram"
+                    type="text"
+                    value={instagram}
+                    onChange={(e) => setInstagram(e.target.value)}
+                    placeholder="Ej. @tu_usuario o https://instagram.com/..."
+                    className="form-input"
+                  />
+                </div>
+
+                <div>
+                  <label className="form-label" htmlFor="tiktok">
+                    TikTok
+                  </label>
+                  <input
+                    id="tiktok"
+                    type="text"
+                    value={tiktok}
+                    onChange={(e) => setTiktok(e.target.value)}
+                    placeholder="Ej. @tu_usuario o https://tiktok.com/@..."
+                    className="form-input"
+                  />
+                </div>
+
+                <div>
+                  <label className="form-label" htmlFor="website">
+                    Sitio Web / Portafolio / GitHub
+                  </label>
+                  <input
+                    id="website"
+                    type="url"
+                    value={website}
+                    onChange={(e) => setWebsite(e.target.value)}
+                    placeholder="https://tudominio.com"
+                    className="form-input"
+                  />
+                </div>
               </div>
             </div>
 

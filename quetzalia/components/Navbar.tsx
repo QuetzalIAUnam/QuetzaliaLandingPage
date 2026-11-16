@@ -1,10 +1,15 @@
+"use client";
+
 import React from "react";
 import AuthStatus from "./AuthStatus";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Navbar() {
+  const { user } = useAuth();
+
   return (
-    <nav className="top top-nav" aria-label="Principal">
-      <a className="brand" href="#inicio">
+    <nav className={`top top-nav ${user ? "has-session" : ""}`} aria-label="Principal">
+      <a className={`brand ${user ? "hidden sm:inline-block" : ""}`} href="#inicio">
         Quetzal-IA
       </a>
       <ul className="top-nav-list">
@@ -21,7 +26,7 @@ export default function Navbar() {
           <a href="#inscripcion">Inscripción</a>
         </li>
       </ul>
-      <div className="top-nav-auth">
+      <div className={`top-nav-auth ${user ? "is-logged" : ""}`}>
         <AuthStatus />
       </div>
     </nav>

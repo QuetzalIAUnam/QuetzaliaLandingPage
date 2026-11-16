@@ -43,6 +43,19 @@ export function formatRegistrationType(type?: string): string {
 }
 
 /**
+ * Función de sanitización contra inyección HTML y XSS en clientes de correo
+ */
+export function escapeHtml(str?: string): string {
+  if (!str || typeof str !== "string") return "";
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+/**
  * Plantilla Maestra / Contenedor Art Déco para todos los correos de Quetzalia
  */
 export function getBaseEmailLayout(
@@ -190,13 +203,16 @@ export function renderRegistrationReceivedEmail({
   regId?: string;
   type?: string;
 }): EmailRenderResult {
+  const safeName = escapeHtml(toName);
   const typeLabel = formatRegistrationType(type);
+  const safeType = escapeHtml(typeLabel);
+  const safeRegId = escapeHtml(regId);
   const subject = `Quetzalia: Hemos recibido tu registro (${typeLabel})`;
   const previewText = `Tu solicitud de registro para Quetzalia como ${typeLabel} ha sido recibida y se encuentra pendiente de revisión.`;
 
   const content = `
     <h2 style="color:#5A354C; font-size:22px; font-weight:700; margin-top:0; margin-bottom:16px; font-family:'Playfair Display',Georgia,serif;">
-      ¡Hola, ${toName}!
+      ¡Hola, ${safeName}!
     </h2>
     <p style="margin-top:0;">
       Confirmamos que hemos recibido satisfactoriamente tu solicitud de registro para participar en <strong>Quetzalia</strong>.
@@ -210,15 +226,15 @@ export function renderRegistrationReceivedEmail({
             Tipo de postulación:
           </p>
           <p style="margin:0 0 12px 0; font-size:15px; color:#942969; font-weight:700;">
-            ${typeLabel}
+            ${safeType}
           </p>
           ${
-            regId
+            safeRegId
               ? `<p style="margin:0 0 4px 0; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:#5A354C; font-weight:bold;">
                   Folio de registro:
                  </p>
                  <p style="margin:0 0 12px 0; font-family:Consolas,monaco,monospace; font-size:14px; color:#362B32; font-weight:bold;">
-                  ${regId}
+                  ${safeRegId}
                  </p>`
               : ""
           }
@@ -275,8 +291,12 @@ export function renderRegistrationApprovedEmail({
   talkTitle?: string;
   organization?: string;
 }): EmailRenderResult {
+  const safeName = escapeHtml(toName);
+  const safeOrg = escapeHtml(organization);
+  const safeTalk = escapeHtml(talkTitle);
   const normType = (type || "").toLowerCase().trim();
   const typeLabel = formatRegistrationType(type);
+  const safeType = escapeHtml(typeLabel);
   const isSpeaker = normType === "speaker" || normType === "ponente" || normType === "tallerista";
   const isSponsor = normType === "sponsor" || normType === "patrocinador";
   const isCommunity = normType === "community" || normType === "comunidad";
@@ -342,10 +362,10 @@ export function renderRegistrationApprovedEmail({
 
   const content = `
     <h2 style="color:#065F46; font-size:22px; font-weight:700; margin-top:0; margin-bottom:16px; font-family:'Playfair Display',Georgia,serif;">
-      ¡Felicidades, ${toName}!
+      ¡Felicidades, ${safeName}!
     </h2>
     <p style="margin-top:0;">
-      Nos complace informarte que tu registro en <strong>Quetzalia</strong> como <strong>${typeLabel}</strong> ha sido <strong>APROBADO</strong> por el comité organizador.
+      Nos complace informarte que tu registro en <strong>Quetzalia</strong> como <strong>${safeType}</strong> ha sido <strong>APROBADO</strong> por el comité organizador.
     </p>
 
     <!-- Ficha de confirmación -->
@@ -359,15 +379,15 @@ export function renderRegistrationApprovedEmail({
             ✓ REGISTRO APROBADO
           </p>
           ${
-            organization
+            safeOrg
               ? `<p style="margin:0 0 2px 0; font-size:12px; color:#065F46; font-weight:bold;">Organización / Afiliación:</p>
-                 <p style="margin:0 0 8px 0; font-size:14px; color:#1F2937;">${organization}</p>`
+                 <p style="margin:0 0 8px 0; font-size:14px; color:#1F2937;">${safeOrg}</p>`
               : ""
           }
           ${
-            talkTitle
+            safeTalk
               ? `<p style="margin:0 0 2px 0; font-size:12px; color:#065F46; font-weight:bold;">Ponencia / Sesión:</p>
-                 <p style="margin:0; font-size:14px; color:#1F2937; font-style:italic;">"${talkTitle}"</p>`
+                 <p style="margin:0; font-size:14px; color:#1F2937; font-style:italic;">"${safeTalk}"</p>`
               : ""
           }
         </td>
@@ -376,13 +396,87 @@ export function renderRegistrationApprovedEmail({
 
     ${roleNoticeHtml}
 
-    <p>
-      Puedes consultar el detalle completo de tu registro, constancias y acreditaciones en tu panel oficial de Quetzalia:
-    </p>
+    <!-- SECCIÓN CONMEMORATIVA: PASE DE ABORDAR OFICIAL ESTILO ARTEMIS -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:26px 0; background-color:#FAF2F5; border:2px solid #5A354C; box-shadow:0 8px 24px rgba(90,53,76,0.12);">
+      <tr>
+        <td style="background-color:#5A354C; padding:16px 20px; border-bottom:3px solid #DFB15B;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td>
+                <p style="margin:0; font-family:'Playfair Display',Georgia,serif; font-size:16px; font-weight:bold; color:#DFB15B; letter-spacing:1px; text-transform:uppercase;">
+                  QUETZAL-IA 2027 · PASE DE ABORDAR
+                </p>
+                <p style="margin:2px 0 0 0; font-size:10px; color:#F5E4E9; font-weight:600; letter-spacing:0.5px;">
+                  CUMBRE DE MUJERES EN STEM · UNAM FES ACATLÁN
+                </p>
+              </td>
+              <td align="right">
+                <span style="display:inline-block; background-color:#48283C; border:1px solid #DFB15B; color:#FFFFFF; font-size:10px; font-weight:bold; padding:4px 10px; text-transform:uppercase; letter-spacing:1px;">
+                  ${safeType}
+                </span>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <tr>
+        <td style="padding:20px 22px;">
+          <!-- Trayectoria CÓDICE -> FUTURO IA -->
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:16px; border-bottom:1px dashed #D4B5C3; padding-bottom:14px;">
+            <tr>
+              <td width="35%">
+                <p style="margin:0; font-size:9px; font-family:monospace; color:#8D627B; font-weight:bold;">ORIGEN (FROM)</p>
+                <p style="margin:2px 0 0 0; font-size:22px; font-weight:bold; color:#5A354C; font-family:'Playfair Display',Georgia,serif;">CDX</p>
+                <p style="margin:0; font-size:10px; color:#774665; font-weight:600;">CÓDICE / CURIOSIDAD</p>
+              </td>
+              <td width="30%" align="center">
+                <p style="margin:0; font-size:9px; font-family:monospace; color:#DFB15B; font-weight:bold;">✈ VIAJE STEM</p>
+                <p style="margin:4px 0 0 0; font-size:14px; color:#DFB15B; letter-spacing:3px;">- - ✦ - -</p>
+              </td>
+              <td width="35%" align="right">
+                <p style="margin:0; font-size:9px; font-family:monospace; color:#8D627B; font-weight:bold;">DESTINO (TO)</p>
+                <p style="margin:2px 0 0 0; font-size:22px; font-weight:bold; color:#5A354C; font-family:'Playfair Display',Georgia,serif;">QIA</p>
+                <p style="margin:0; font-size:10px; color:#774665; font-weight:600;">FUTURO IA 2027</p>
+              </td>
+            </tr>
+          </table>
+
+          <!-- Datos del Pasajero -->
+          <p style="margin:0 0 2px 0; font-size:10px; font-family:monospace; color:#8D627B; font-weight:bold;">PASAJERA / PASSENGER:</p>
+          <p style="margin:0 0 14px 0; font-size:18px; font-weight:bold; color:#5A354C; text-transform:uppercase;">${safeName}</p>
+
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F5E8EE; padding:10px; border:1px solid #E5CBD6;">
+            <tr>
+              <td width="33%">
+                <p style="margin:0; font-size:9px; font-family:monospace; color:#8D627B;">FECHA</p>
+                <p style="margin:2px 0 0 0; font-size:11px; font-weight:bold; color:#5A354C;">27 ABR 2027</p>
+              </td>
+              <td width="33%">
+                <p style="margin:0; font-size:9px; font-family:monospace; color:#8D627B;">MODALIDAD</p>
+                <p style="margin:2px 0 0 0; font-size:11px; font-weight:bold; color:#5A354C;">PRESENCIAL // CEMM</p>
+              </td>
+              <td width="34%">
+                <p style="margin:0; font-size:9px; font-family:monospace; color:#8D627B;">CLASE</p>
+                <p style="margin:2px 0 0 0; font-size:11px; font-weight:bold; color:#059669;">✓ ACREDITADA</p>
+              </td>
+            </tr>
+          </table>
+
+          <!-- Lema y Llamado a Redes Sociales -->
+          <div style="margin-top:16px; padding:12px; background-color:#FFFFFF; border-left:3px solid #DFB15B; font-size:12px; color:#5A354C; line-height:1.5;">
+            <p style="margin:0 0 6px 0; font-style:italic; font-weight:bold; font-size:13px; color:#613954;">
+              “Tejiendo el futuro desde nuestras raíces”
+            </p>
+            Tu Pase de Abordar conmemorativo ya está listo y validado en tu perfil. Puedes descargarlo en alta resolución para publicarlo en LinkedIn, Instagram o TikTok con la etiqueta <em>@quetzalia</em>.
+          </div>
+        </td>
+      </tr>
+    </table>
 
     <div style="text-align:center; margin:28px 0 10px 0;">
-      <a href="https://quetzalia.dev/mi-registro" style="display:inline-block; background-color:#059669; color:#FFFFFF; text-decoration:none; padding:13px 30px; font-weight:700; letter-spacing:1.5px; font-size:13px; text-transform:uppercase; border:1px solid #047857;" target="_blank" rel="noopener noreferrer">
-        Ver Mi Pase Aprobado
+      <a href="https://quetzalia.dev/mi-registro" style="display:inline-block; background-color:#5A354C; color:#FFFFFF; text-decoration:none; padding:14px 32px; font-weight:700; letter-spacing:1.5px; font-size:13px; text-transform:uppercase; border:2px solid #DFB15B; box-shadow:0 4px 14px rgba(90,53,76,0.2);" target="_blank" rel="noopener noreferrer">
+        🎫 Descargar Mi Pase de Abordar
       </a>
     </div>
   `;
@@ -408,16 +502,18 @@ export function renderWaitlistEmail({
   toName: string;
   type?: string;
 }): EmailRenderResult {
+  const safeName = escapeHtml(toName);
   const typeLabel = formatRegistrationType(type);
+  const safeType = escapeHtml(typeLabel);
   const subject = `Quetzalia: Estado de tu registro (Lista de espera)`;
   const previewText = `El cupo de Quetzalia ha alcanzado su capacidad máxima. Tu registro ha quedado en lista de espera en estricto orden cronológico.`;
 
   const content = `
     <h2 style="color:#5A354C; font-size:22px; font-weight:700; margin-top:0; margin-bottom:16px; font-family:'Playfair Display',Georgia,serif;">
-      Hola, ${toName}
+      Hola, ${safeName}
     </h2>
     <p style="margin-top:0;">
-      Te escribimos del comité organizador de <strong>Quetzalia</strong> para informarte sobre el estado de tu postulación como <strong>${typeLabel}</strong>.
+      Te escribimos del comité organizador de <strong>Quetzalia</strong> para informarte sobre el estado de tu postulación como <strong>${safeType}</strong>.
     </p>
 
     <!-- Ficha de Lista de Espera -->
@@ -473,20 +569,18 @@ export function renderRejectedEmail({
   toName: string;
   type?: string;
 }): EmailRenderResult {
+  const safeName = escapeHtml(toName);
   const typeLabel = formatRegistrationType(type);
+  const safeType = escapeHtml(typeLabel);
   const subject = `Actualización sobre tu postulación a Quetzalia`;
   const previewText = `Agradecemos tu interés en Quetzalia. Te compartimos una actualización sobre tu solicitud.`;
 
   const content = `
     <h2 style="color:#5A354C; font-size:22px; font-weight:700; margin-top:0; margin-bottom:16px; font-family:'Playfair Display',Georgia,serif;">
-      Estimada/o ${toName},
+      Estimada/o ${safeName},
     </h2>
     <p style="margin-top:0;">
-      Agradecemos sinceramente tu interés y el tiempo dedicado a registrar tu postulación como <strong>${typeLabel}</strong> para <strong>Quetzalia</strong>.
-    </p>
-
-    <p>
-      Debido a las limitaciones de espacio, tiempo y aforo del programa para esta edición, lamentamos informarte que en esta ocasión no fue posible integrar tu solicitud en la agenda final del evento.
+      Agradecemos sinceramente tu interés y el tiempo dedicado a registrar tu postulación como <strong>${safeType}</strong> para <strong>Quetzalia</strong>.
     </p>
 
     <!-- Recuadro Respetuoso -->
@@ -528,8 +622,12 @@ export function renderWaitlistPromotedEmail({
   talkTitle?: string;
   organization?: string;
 }): EmailRenderResult {
+  const safeName = escapeHtml(toName);
+  const safeOrg = escapeHtml(organization);
+  const safeTalk = escapeHtml(talkTitle);
   const normType = (type || "").toLowerCase().trim();
   const typeLabel = formatRegistrationType(type);
+  const safeType = escapeHtml(typeLabel);
   const isSpeaker = normType === "speaker" || normType === "ponente" || normType === "tallerista";
   const isSponsor = normType === "sponsor" || normType === "patrocinador";
   const isCommunity = normType === "community" || normType === "comunidad";
@@ -595,10 +693,10 @@ export function renderWaitlistPromotedEmail({
 
   const content = `
     <h2 style="color:#065F46; font-size:22px; font-weight:700; margin-top:0; margin-bottom:16px; font-family:'Playfair Display',Georgia,serif;">
-      ¡Excelentes noticias, ${toName}!
+      ¡Excelentes noticias, ${safeName}!
     </h2>
     <p style="margin-top:0;">
-      Te confirmamos que <strong>se ha liberado un lugar en Quetzalia</strong> y tu postulación como <strong>${typeLabel}</strong> ha sido promovida de la lista de espera: <strong>¡ahora tu registro está APROBADO!</strong>
+      Te confirmamos que <strong>se ha liberado un lugar en Quetzalia</strong> y tu postulación como <strong>${safeType}</strong> ha sido promovida de la lista de espera: <strong>¡ahora tu registro está APROBADO!</strong>
     </p>
 
     <!-- Ficha de Promoción a Aprobado -->
@@ -612,15 +710,15 @@ export function renderWaitlistPromotedEmail({
             ✓ PROMOVIDO A REGISTRO APROBADO
           </p>
           ${
-            organization
+            safeOrg
               ? `<p style="margin:0 0 2px 0; font-size:12px; color:#065F46; font-weight:bold;">Organización / Afiliación:</p>
-                 <p style="margin:0 0 8px 0; font-size:14px; color:#1F2937;">${organization}</p>`
+                 <p style="margin:0 0 8px 0; font-size:14px; color:#1F2937;">${safeOrg}</p>`
               : ""
           }
           ${
-            talkTitle
+            safeTalk
               ? `<p style="margin:0 0 2px 0; font-size:12px; color:#065F46; font-weight:bold;">Ponencia / Sesión:</p>
-                 <p style="margin:0; font-size:14px; color:#1F2937; font-style:italic;">"${talkTitle}"</p>`
+                 <p style="margin:0; font-size:14px; color:#1F2937; font-style:italic;">"${safeTalk}"</p>`
               : ""
           }
         </td>
@@ -663,29 +761,35 @@ export function renderCustomNoticeEmail({
   actionUrl?: string;
   actionText?: string;
 }): EmailRenderResult {
+  const safeName = escapeHtml(toName);
   const previewText = `Comunicado oficial del comité organizador de Quetzalia: ${subject}`;
 
-  // Formatear saltos de línea a párrafos HTML si viene en texto plano
+  // Formatear saltos de línea a párrafos HTML sanitizados si viene en texto plano
   const formattedBody = messageContent.includes("<p>")
     ? messageContent
     : messageContent
         .split("\n\n")
-        .map((p) => `<p style="margin:0 0 14px 0;">${p.replace(/\n/g, "<br>")}</p>`)
+        .map((p) => `<p style="margin:0 0 14px 0;">${escapeHtml(p).replace(/\n/g, "<br>")}</p>`)
         .join("");
+
+  const validActionUrl =
+    actionUrl && (actionUrl.startsWith("http://") || actionUrl.startsWith("https://"))
+      ? actionUrl
+      : undefined;
 
   const content = `
     <h2 style="color:#5A354C; font-size:22px; font-weight:700; margin-top:0; margin-bottom:16px; font-family:'Playfair Display',Georgia,serif;">
-      Hola, ${toName}
+      Hola, ${safeName}
     </h2>
     <div style="font-size:15px; line-height:1.68; color:#362B32;">
       ${formattedBody}
     </div>
 
     ${
-      actionUrl && actionText
+      validActionUrl && actionText
         ? `<div style="text-align:center; margin:30px 0 12px 0;">
-             <a href="${actionUrl}" style="display:inline-block; background-color:#5A354C; color:#FFFFFF; text-decoration:none; padding:13px 30px; font-weight:700; letter-spacing:1.5px; font-size:13px; text-transform:uppercase; border:1px solid #DFB15B;" target="_blank" rel="noopener noreferrer">
-               ${actionText}
+             <a href="${escapeHtml(validActionUrl)}" style="display:inline-block; background-color:#5A354C; color:#FFFFFF; text-decoration:none; padding:13px 30px; font-weight:700; letter-spacing:1.5px; font-size:13px; text-transform:uppercase; border:1px solid #DFB15B;" target="_blank" rel="noopener noreferrer">
+               ${escapeHtml(actionText)}
              </a>
            </div>`
         : ""
@@ -719,8 +823,13 @@ export function renderBroadcastEmail({
     ? messageContent
     : messageContent
         .split("\n\n")
-        .map((p) => `<p style="margin:0 0 14px 0;">${p.replace(/\n/g, "<br>")}</p>`)
+        .map((p) => `<p style="margin:0 0 14px 0;">${escapeHtml(p).replace(/\n/g, "<br>")}</p>`)
         .join("");
+
+  const validActionUrl =
+    actionUrl && (actionUrl.startsWith("http://") || actionUrl.startsWith("https://"))
+      ? actionUrl
+      : undefined;
 
   const content = `
     <h2 style="color:#5A354C; font-size:22px; font-weight:700; margin-top:0; margin-bottom:16px; font-family:'Playfair Display',Georgia,serif;">
@@ -731,10 +840,10 @@ export function renderBroadcastEmail({
     </div>
 
     ${
-      actionUrl && actionText
+      validActionUrl && actionText
         ? `<div style="text-align:center; margin:30px 0 12px 0;">
-             <a href="${actionUrl}" style="display:inline-block; background-color:#5A354C; color:#FFFFFF; text-decoration:none; padding:13px 30px; font-weight:700; letter-spacing:1.5px; font-size:13px; text-transform:uppercase; border:1px solid #DFB15B;" target="_blank" rel="noopener noreferrer">
-               ${actionText}
+             <a href="${escapeHtml(validActionUrl)}" style="display:inline-block; background-color:#5A354C; color:#FFFFFF; text-decoration:none; padding:13px 30px; font-weight:700; letter-spacing:1.5px; font-size:13px; text-transform:uppercase; border:1px solid #DFB15B;" target="_blank" rel="noopener noreferrer">
+               ${escapeHtml(actionText)}
              </a>
            </div>`
         : ""

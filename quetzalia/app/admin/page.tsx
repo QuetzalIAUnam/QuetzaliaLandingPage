@@ -1162,7 +1162,7 @@ export default function AdminDashboardPage() {
                           {reg.talkTitle && (
                             <p className="text-xs italic text-[var(--accent-text)] truncate max-w-sm mt-0.5 font-medium">
                               {reg.type === "speaker"
-                                ? `🎙️ Ponencia: "${reg.talkTitle}"`
+                                ? `${reg.talkType === "Taller" ? "🛠️ Taller" : "🎙️ Ponencia"}: "${reg.talkTitle}"`
                                 : reg.type === "sponsor"
                                 ? `💼 Propuesta: ${reg.talkTitle}`
                                 : reg.type === "community"
@@ -1766,9 +1766,20 @@ export default function AdminDashboardPage() {
               </div>
 
               {selectedReg.talkTitle && (
-                <div className="text-sm">
-                  <p className="font-semibold text-[var(--head)]">Título de Ponencia:</p>
-                  <p>{selectedReg.talkTitle}</p>
+                <div className="text-sm space-y-1">
+                  <p className="font-semibold text-[var(--head)]">
+                    {selectedReg.type === "speaker"
+                      ? selectedReg.talkType === "Taller"
+                        ? "🛠️ Taller Práctico Propuesto:"
+                        : "🎙️ Ponencia Propuesta:"
+                      : "Título / Propuesta:"}
+                  </p>
+                  <p className="font-medium text-base text-[var(--head)]">{selectedReg.talkTitle}</p>
+                  {selectedReg.talkType && (
+                    <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-[var(--accent)]/15 text-[var(--accent-text)] border border-[var(--accent)]/30">
+                      Formato: {selectedReg.talkType}
+                    </span>
+                  )}
                 </div>
               )}
 
@@ -1780,6 +1791,78 @@ export default function AdminDashboardPage() {
                   </p>
                 </div>
               )}
+
+              {/* Redes Sociales Registradas */}
+              {(() => {
+                const s = selectedReg.socials || {};
+                const li = s.linkedin || selectedReg.linkedin;
+                const ig = s.instagram || selectedReg.instagram;
+                const tt = s.tiktok || selectedReg.tiktok;
+                const tw = s.twitter || selectedReg.twitter;
+                const web = s.website || selectedReg.website;
+
+                if (!li && !ig && !tt && !tw && !web) return null;
+
+                return (
+                  <div className="text-sm border border-[var(--rule)] p-3 bg-[var(--bg-alt)]/20">
+                    <p className="font-semibold text-[var(--head)] text-xs uppercase tracking-wider mb-2">
+                      Redes Sociales / Enlaces Registrados:
+                    </p>
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      {li && (
+                        <a
+                          href={li.startsWith("http") ? li : `https://${li}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-2 py-1 bg-[#0A66C2]/15 text-[#0A66C2] rounded font-semibold underline"
+                        >
+                          LinkedIn ↗
+                        </a>
+                      )}
+                      {ig && (
+                        <a
+                          href={ig.startsWith("http") ? ig : `https://instagram.com/${ig.replace(/^@/, "")}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-2 py-1 bg-[#E1306C]/15 text-[#E1306C] rounded font-semibold underline"
+                        >
+                          Instagram ↗
+                        </a>
+                      )}
+                      {tt && (
+                        <a
+                          href={tt.startsWith("http") ? tt : `https://tiktok.com/@${tt.replace(/^@/, "")}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-2 py-1 bg-black/10 dark:bg-white/10 text-[var(--head)] rounded font-semibold underline"
+                        >
+                          TikTok ↗
+                        </a>
+                      )}
+                      {tw && (
+                        <a
+                          href={tw.startsWith("http") ? tw : `https://x.com/${tw.replace(/^@/, "")}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-2 py-1 bg-[var(--bg-alt)] text-[var(--head)] rounded font-semibold underline"
+                        >
+                          X / Twitter ↗
+                        </a>
+                      )}
+                      {web && (
+                        <a
+                          href={web.startsWith("http") ? web : `https://${web}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-2 py-1 bg-[var(--accent)]/15 text-[var(--accent-text)] rounded font-semibold underline"
+                        >
+                          Web ↗
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Gestión de Fotografía o Logotipo y Garantía de Retiro en 72h */}
               {selectedReg.photoPath && (

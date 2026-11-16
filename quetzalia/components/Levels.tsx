@@ -8,16 +8,22 @@ export default function Levels() {
       tag: "Secundaria",
       title: "Descubre de qué se trata",
       desc: "Conoce qué hacen las mujeres que trabajan en ciencia y tecnología y prueba actividades para imaginar tu futuro.",
+      src: "/secundaria.jpg",
+      alt: "Estudiantes de nivel secundaria en Quetzal-IA explorando actividades interactivas en STEM",
     },
     {
       tag: "Bachillerato",
       title: "Piensa qué quieres estudiar",
       desc: "Descubre qué carreras existen, cómo es la vida en la universidad y qué puedes hacer con la tecnología.",
+      src: "/preparatoria.jpg",
+      alt: "Estudiantes de preparatoria y bachillerato en talleres prácticos de Quetzal-IA",
     },
     {
       tag: "Licenciatura",
       title: "Da el siguiente paso",
       desc: "Escucha charlas técnicas de la industria y haz contactos que te ayuden a prepararte para trabajar.",
+      src: "/universidad.jpg",
+      alt: "Estudiantes universitarias de licenciatura en ponencias magistrales y vinculación profesional",
     },
   ];
 
@@ -33,11 +39,11 @@ export default function Levels() {
           {levelsData.map((level, idx) => (
             <article className="level" key={idx}>
               <PhotoArch
-                ariaLabel="Espacio reservado para una fotografía"
+                src={level.src}
+                alt={level.alt}
+                ariaLabel={`Fotografía de la etapa de ${level.tag}`}
                 style={{ aspectRatio: "4 / 3" }}
-              >
-                Foto por definir
-              </PhotoArch>
+              />
               <span className="chip tag">{level.tag}</span>
               <h3>{level.title}</h3>
               <p>{level.desc}</p>
@@ -48,4 +54,3 @@ export default function Levels() {
     </section>
   );
 }
-
