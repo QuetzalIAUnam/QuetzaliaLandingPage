@@ -1,0 +1,40 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // 1. Fotografías privadas de Speakers:
+    // Solo la dueña autenticada puede leer y subir su foto (máximo 5 MB e imagen)
+    // El comité organizador tiene acceso completo a través del Admin SDK en el servidor.
+    match /speakers/private/{userId}/{fileName} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null
+                   && request.auth.uid == userId
+                   && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    // 2. Fotografías públicas de Speakers:
+    // Solo fotografías aprobadas con Formato 01 (Autorización de imagen) firmado.
+    // Lectura: pública para mostrar en el programa y landing page.
+    // Escritura: estrictamente prohibida desde el navegador del cliente.
+    // Únicamente el comité organizador puede publicar aquí a través de la API Route del servidor con Admin SDK.
+    match /speakers/public/{userId}/{fileName} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // 3. Logotipos de Patrocinadores:
+    // Solo logotipos con Convenio de patrocinio y licencia 06 firmado.
+    // Lectura: pública para desplegar en la sección de Aliadas / Patrocinadores.
+    // Escritura: estrictamente a través del servidor o dueño autenticado.
+    match /sponsors/logos/{sponsorId}/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == sponsorId;
+    }
+
+    // Por defecto, cualquier otra ruta queda bloqueada
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

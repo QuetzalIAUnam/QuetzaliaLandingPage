@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Reglas para la colección 'registrations' de Quetzalia
+    // Modelo de seguridad:
+    // 1. Un usuario autenticado solo puede leer su propio registro (por ID de documento o campo userId).
+    // 2. Un usuario normal NUNCA puede listar la colección completa (previene raspado o fuga de datos).
+    // 3. Un usuario autenticado puede crear o actualizar sus propios datos personales,
+    //    pero NO puede auto-aprobarse ni alterar el estado ('status'), 'adminNote', 'approvedBy' o 'approvedAt'.
+    // 4. Las operaciones de listado masivo, cambio de estatus, lista de espera, rechazo y borrado
+    //    son exclusivas del comité organizador a través de las API Routes usando Firebase Admin SDK (que omite estas reglas).
+    // 5. Los patrocinadores no reciben bases de datos ni fotos privadas.
+    
+    match /registrations/{registrationId} {
+      // Lectura individual: sólo el dueño del registro
+      allow get: if request.auth != null && (
+        resource.data.userId == request.auth.uid ||
+        registrationId == request.auth.uid
+      );
+      
+      // Prohibido listar colecciones completas desde el cliente
+      allow list: if false;
+      
+      // Creación: debe coincidir el UID y el estatus inicial debe ser 'pendiente'
+      allow create: if request.auth != null && (
+        request.resource.data.userId == request.auth.uid ||
+        registrationId == request.auth.uid
+      ) && request.resource.data.status == 'pendiente';
+      
+      // Actualización: sólo datos propios y sin poder modificar 'status', 'approvedBy', 'approvedAt'
+      allow update: if request.auth != null && (
+        resource.data.userId == request.auth.uid ||
+        registrationId == request.auth.uid
+      ) && (
+        request.resource.data.userId == resource.data.userId &&
+        request.resource.data.status == resource.data.status
+      );
+      
+      // Borrado prohibido desde cliente
+      allow delete: if false;
+    }
+    
+    // Cualquier otra colección queda bloqueada por defecto
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

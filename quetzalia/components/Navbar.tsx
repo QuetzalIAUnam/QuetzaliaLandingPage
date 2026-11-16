@@ -1,4 +1,5 @@
 import React from "react";
+import AuthStatus from "./AuthStatus";
 
 export default function Navbar() {
   return (
@@ -20,7 +21,9 @@ export default function Navbar() {
           <a href="#inscripcion">Inscripción</a>
         </li>
       </ul>
+      <div className="top-nav-auth">
+        <AuthStatus />
+      </div>
     </nav>
   );
 }
-

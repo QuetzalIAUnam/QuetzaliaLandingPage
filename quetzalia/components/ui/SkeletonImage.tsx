@@ -8,6 +8,7 @@ interface SkeletonImageProps extends Omit<ImageProps, "onLoad"> {
 }
 
 export default function SkeletonImage({
+  alt = "",
   className = "",
   skeletonClassName = "",
   ...props
@@ -24,6 +25,7 @@ export default function SkeletonImage({
         />
       )}
       <Image
+        alt={alt}
         {...props}
         className={`${className} ${loaded ? "sk-visible" : "sk-hidden"}`}
         onLoad={() => setLoaded(true)}

@@ -112,25 +112,36 @@ export default function Agenda() {
 
   // Progresión paso a paso de los elementos de la agenda
   useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    let timer: NodeJS.Timeout | null = null;
+
     if (!inView) {
-      setRevealedCount(0);
-      return;
+      timer = setTimeout(() => {
+        setRevealedCount(0);
+      }, 0);
+      return () => {
+        if (timer) clearTimeout(timer);
+      };
     }
 
-    // Comenzar de inmediato con el primer elemento revelado para evitar pantalla en blanco en saltos
-    setRevealedCount((prev) => (prev === 0 ? 1 : prev));
+    // Comenzar con el primer elemento y revelar progresivamente
+    timer = setTimeout(() => {
+      setRevealedCount((prev) => (prev === 0 ? 1 : prev));
+      interval = setInterval(() => {
+        setRevealedCount((prev) => {
+          if (prev < agendaItems.length) {
+            return prev + 1;
+          }
+          if (interval) clearInterval(interval);
+          return prev;
+        });
+      }, 380);
+    }, 0);
 
-    const interval = setInterval(() => {
-      setRevealedCount((prev) => {
-        if (prev < agendaItems.length) {
-          return prev + 1;
-        }
-        clearInterval(interval);
-        return prev;
-      });
-    }, 380);
-
-    return () => clearInterval(interval);
+    return () => {
+      if (timer) clearTimeout(timer);
+      if (interval) clearInterval(interval);
+    };
   }, [inView]);
 
   return (

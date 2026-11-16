@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import AuthStatus from "./AuthStatus";
 
 interface NavSection {
   id: string;
@@ -145,6 +146,14 @@ export default function MobileFloatingDock() {
                 </li>
               ))}
             </ul>
+
+            {/* Acceso de usuario / Iniciar sesión en el menú móvil flotante */}
+            <div className="mobile-dock-auth-section">
+              <div className="mobile-dock-deco-line" aria-hidden="true" />
+              <div className="mobile-dock-auth-box">
+                <AuthStatus />
+              </div>
+            </div>
           </nav>
         )}
 
