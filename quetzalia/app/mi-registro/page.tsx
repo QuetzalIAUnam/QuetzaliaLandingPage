@@ -247,13 +247,16 @@ export default function MiRegistroPage() {
                 </div>
               </div>
             ) : !registration ? (
-              <div className="space-y-6">
-                <div className="border border-[var(--rule)] p-6 sm:p-8 bg-[var(--bg-alt)]/60 text-center">
-                  <p className="eyebrow text-xs">Pase no vinculado</p>
-                  <h3 className="text-2xl font-display text-[var(--head)] mt-1 mb-2">
+              <div className="space-y-8">
+                {/* Encabezado perfectamente centrado sin encuadre desfasado */}
+                <div className="py-6 px-4 text-center max-w-2xl mx-auto space-y-3">
+                  <p className="eyebrow text-xs uppercase tracking-widest text-[var(--accent-text)]">
+                    Pase no vinculado
+                  </p>
+                  <h3 className="text-2xl sm:text-3xl font-display text-[var(--head)]">
                     No hay un registro activo asociado a tu cuenta
                   </h3>
-                  <p className="max-w-2xl mx-auto text-sm text-[var(--fg)] opacity-90 leading-relaxed">
+                  <p className="max-w-xl mx-auto text-sm sm:text-base text-[var(--fg)] opacity-90 leading-relaxed text-center">
                     Aún no has completado tu solicitud de participación para <strong>Quetzalia 2027</strong> en la FES Acatlán de la UNAM. Elige tu modalidad de participación a continuación para vincular tus datos y generar tu confirmación oficial:
                   </p>
                 </div>
@@ -274,16 +277,23 @@ export default function MiRegistroPage() {
                       <h4 className="text-xl font-display text-[var(--head)] mb-2">
                         Registro como Asistente
                       </h4>
-                      <p className="text-xs text-[var(--fg)] opacity-85 leading-relaxed mb-6">
+                      <p className="text-xs text-[var(--fg)] opacity-85 leading-relaxed">
                         Reserva tu lugar presencial en el auditorio de la FES Acatlán. Incluye acceso completo a ponencias magnas, dinámicas de vinculación y constancia digital oficial de participación con valor curricular.
                       </p>
                     </div>
-                    <Link
-                      href="/registro/asistentes"
-                      className="btn btn-primary text-xs w-full text-center"
-                    >
-                      Completar Registro de Asistente →
-                    </Link>
+                    <div className="pt-6 mt-6 border-t border-[var(--rule)]/40 flex items-center">
+                      <Link
+                        href="/registro/asistentes"
+                        className="auth-btn-ghost group inline-flex items-center gap-2 cursor-pointer no-underline"
+                      >
+                        <span className="auth-btn-text text-xs sm:text-sm font-bold tracking-wider uppercase">
+                          Completar Registro de Asistente
+                        </span>
+                        <span className="text-[var(--accent)] group-hover:translate-x-1.5 transition-transform duration-300 font-bold text-base">
+                          →
+                        </span>
+                      </Link>
+                    </div>
                   </div>
 
                   {/* 2. Ponente */}
@@ -300,16 +310,23 @@ export default function MiRegistroPage() {
                       <h4 className="text-xl font-display text-[var(--head)] mb-2">
                         Postulación de Ponentes
                       </h4>
-                      <p className="text-xs text-[var(--fg)] opacity-85 leading-relaxed mb-6">
+                      <p className="text-xs text-[var(--fg)] opacity-85 leading-relaxed">
                         Comparte tu trayectoria, investigaciones, talleres prácticos o proyectos de innovación en ciencia y tecnología ante la comunidad universitaria.
                       </p>
                     </div>
-                    <Link
-                      href="/registro/speakers"
-                      className="btn btn-ghost text-xs w-full text-center"
-                    >
-                      Postular mi Propuesta →
-                    </Link>
+                    <div className="pt-6 mt-6 border-t border-[var(--rule)]/40 flex items-center">
+                      <Link
+                        href="/registro/speakers"
+                        className="auth-btn-ghost group inline-flex items-center gap-2 cursor-pointer no-underline"
+                      >
+                        <span className="auth-btn-text text-xs sm:text-sm font-bold tracking-wider uppercase">
+                          Postular mi Propuesta
+                        </span>
+                        <span className="text-[var(--accent)] group-hover:translate-x-1.5 transition-transform duration-300 font-bold text-base">
+                          →
+                        </span>
+                      </Link>
+                    </div>
                   </div>
 
                   {/* 3. Patrocinadores */}
@@ -326,16 +343,23 @@ export default function MiRegistroPage() {
                       <h4 className="text-xl font-display text-[var(--head)] mb-2">
                         Patrocinadores e Instituciones
                       </h4>
-                      <p className="text-xs text-[var(--fg)] opacity-85 leading-relaxed mb-6">
+                      <p className="text-xs text-[var(--fg)] opacity-85 leading-relaxed">
                         Súmate como empresa o institución aliada. Impulsa becas, visibiliza oportunidades profesionales de talento femenino y potencia tu presencia de marca en la UNAM.
                       </p>
                     </div>
-                    <Link
-                      href="/registro/patrocinadores"
-                      className="btn btn-ghost text-xs w-full text-center"
-                    >
-                      Convenio de Patrocinio →
-                    </Link>
+                    <div className="pt-6 mt-6 border-t border-[var(--rule)]/40 flex items-center">
+                      <Link
+                        href="/registro/patrocinadores"
+                        className="auth-btn-ghost group inline-flex items-center gap-2 cursor-pointer no-underline"
+                      >
+                        <span className="auth-btn-text text-xs sm:text-sm font-bold tracking-wider uppercase">
+                          Convenio de Patrocinio
+                        </span>
+                        <span className="text-[var(--accent)] group-hover:translate-x-1.5 transition-transform duration-300 font-bold text-base">
+                          →
+                        </span>
+                      </Link>
+                    </div>
                   </div>
 
                   {/* 4. Comunidades STEM */}
@@ -352,16 +376,23 @@ export default function MiRegistroPage() {
                       <h4 className="text-xl font-display text-[var(--head)] mb-2">
                         Comunidades y Colectivos
                       </h4>
-                      <p className="text-xs text-[var(--fg)] opacity-85 leading-relaxed mb-6">
+                      <p className="text-xs text-[var(--fg)] opacity-85 leading-relaxed">
                         Registra a tu club de robótica, capítulo IEEE, colectivo de mujeres tecnólogas o grupo estudiantil para tejer una alianza interinstitucional duradera.
                       </p>
                     </div>
-                    <Link
-                      href="/registro/comunidades"
-                      className="btn btn-ghost text-xs w-full text-center"
-                    >
-                      Registrar a mi Comunidad →
-                    </Link>
+                    <div className="pt-6 mt-6 border-t border-[var(--rule)]/40 flex items-center">
+                      <Link
+                        href="/registro/comunidades"
+                        className="auth-btn-ghost group inline-flex items-center gap-2 cursor-pointer no-underline"
+                      >
+                        <span className="auth-btn-text text-xs sm:text-sm font-bold tracking-wider uppercase">
+                          Registrar a mi Comunidad
+                        </span>
+                        <span className="text-[var(--accent)] group-hover:translate-x-1.5 transition-transform duration-300 font-bold text-base">
+                          →
+                        </span>
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </div>

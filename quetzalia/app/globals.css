@@ -2217,6 +2217,7 @@ footer li {
 }
 
 .auth-btn-ghost:hover .auth-btn-text,
+.group:hover .auth-btn-text,
 .auth-btn-text:hover {
   animation: speakerGlintHover 2.0s cubic-bezier(0.35, 0, 0.25, 1) forwards !important;
 }
