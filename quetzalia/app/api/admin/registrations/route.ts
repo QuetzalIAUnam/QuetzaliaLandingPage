@@ -3,6 +3,8 @@ import { adminDb } from "@/lib/firebase-admin";
 import { verifyAdminUser } from "@/lib/server-auth";
 import { MAX_APPROVED, Registration } from "@/lib/types";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: Request) {
   try {
     const authCheck = await verifyAdminUser(req);
