@@ -18,45 +18,10 @@ export async function GET(req: Request) {
     const statusFilter = searchParams.get("status");
     const searchQuery = (searchParams.get("search") || "").toLowerCase().trim();
 
-    let query: FirebaseFirestore.Query = adminDb.collection("registrations");
-
-    if (typeFilter && ["speaker", "sponsor", "community", "attendee"].includes(typeFilter)) {
-      query = query.where("type", "==", typeFilter);
-    }
-
-    if (statusFilter && ["pendiente", "aprobado", "lista_espera", "rechazado"].includes(statusFilter)) {
-      query = query.where("status", "==", statusFilter);
-    }
-
-    // Ordenar por fecha de creación descendente
-    query = query.orderBy("createdAt", "desc");
-
-    const snapshot = await query.get();
-    let registrations: Registration[] = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Registration[];
-
-    // Filtro en memoria para búsqueda por texto libre (nombre, correo u organización)
-    if (searchQuery) {
-      registrations = registrations.filter((reg) => {
-        const full = (reg.fullName || "").toLowerCase();
-        const chosen = (reg.chosenName || "").toLowerCase();
-        const legal = (reg.legalName || "").toLowerCase();
-        const email = (reg.email || "").toLowerCase();
-        const org = (reg.organization || "").toLowerCase();
-        return (
-          full.includes(searchQuery) ||
-          chosen.includes(searchQuery) ||
-          legal.includes(searchQuery) ||
-          email.includes(searchQuery) ||
-          org.includes(searchQuery)
-        );
-      });
-    }
-
-    // Métricas globales desglosadas por perfil (Asistentes, Ponentes, Patrocinadores, Comunidades)
-    const allSnapshot = await adminDb.collection("registrations").get();
+    // Consultar todos los registros una sola vez y procesar filtros y métricas en memoria.
+    // Esto previene errores de "The query requires an index" (índices compuestos de Firestore)
+    // cuando se combinan filtros de tipo/estatus con ordenamiento por fecha.
+    const snapshot = await adminDb.collection("registrations").get();
 
     let totalAttendees = 0;
     let approvedAttendees = 0;
@@ -68,10 +33,17 @@ export async function GET(req: Request) {
     let approvedCommunities = 0;
     let approvedTotal = 0;
 
-    allSnapshot.forEach((doc) => {
-      const data = doc.data();
-      const type = data.type || "attendee";
-      const isApproved = data.status === "aprobado";
+    const filteredRegistrations: Registration[] = [];
+
+    snapshot.forEach((doc) => {
+      const data = doc.data() as Registration;
+      const reg: Registration = {
+        ...data,
+        id: doc.id,
+      };
+
+      const type = reg.type || "attendee";
+      const isApproved = reg.status === "aprobado";
 
       if (isApproved) approvedTotal++;
 
@@ -88,13 +60,52 @@ export async function GET(req: Request) {
         totalCommunities++;
         if (isApproved) approvedCommunities++;
       }
+
+      // Aplicar filtro de tipo
+      if (typeFilter && reg.type !== typeFilter) {
+        return;
+      }
+
+      // Aplicar filtro de estatus
+      if (statusFilter && reg.status !== statusFilter) {
+        return;
+      }
+
+      // Aplicar búsqueda por texto libre
+      if (searchQuery) {
+        const full = (reg.fullName || "").toLowerCase();
+        const chosen = (reg.chosenName || "").toLowerCase();
+        const legal = (reg.legalName || "").toLowerCase();
+        const email = (reg.email || "").toLowerCase();
+        const org = (reg.organization || "").toLowerCase();
+        const title = (reg.talkTitle || "").toLowerCase();
+        if (
+          !full.includes(searchQuery) &&
+          !chosen.includes(searchQuery) &&
+          !legal.includes(searchQuery) &&
+          !email.includes(searchQuery) &&
+          !org.includes(searchQuery) &&
+          !title.includes(searchQuery)
+        ) {
+          return;
+        }
+      }
+
+      filteredRegistrations.push(reg);
+    });
+
+    // Ordenar por fecha de creación descendente en memoria
+    filteredRegistrations.sort((a, b) => {
+      const timeA = new Date(a.createdAt || 0).getTime();
+      const timeB = new Date(b.createdAt || 0).getTime();
+      return timeB - timeA;
     });
 
     return NextResponse.json({
-      registrations,
+      registrations: filteredRegistrations,
       stats: {
-        total: allSnapshot.size,
-        filteredCount: registrations.length,
+        total: snapshot.size,
+        filteredCount: filteredRegistrations.length,
         approvedCount: approvedTotal,
         maxApproved: MAX_APPROVED,
         availableSlots: Math.max(0, MAX_APPROVED - approvedAttendees),

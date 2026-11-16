@@ -33,12 +33,10 @@ export async function POST(req: Request) {
       );
     }
 
-    // 2. Buscar al primer participante en lista de espera (orden cronológico asc)
+    // 2. Buscar participantes en lista de espera y ordenar en memoria por orden cronológico asc
     const waitlistSnapshot = await adminDb
       .collection("registrations")
       .where("status", "==", "lista_espera")
-      .orderBy("createdAt", "asc")
-      .limit(1)
       .get();
 
     if (waitlistSnapshot.empty) {
@@ -48,7 +46,13 @@ export async function POST(req: Request) {
       );
     }
 
-    const firstDoc = waitlistSnapshot.docs[0];
+    const waitlistDocs = [...waitlistSnapshot.docs].sort((a, b) => {
+      const timeA = new Date(a.data().createdAt || 0).getTime();
+      const timeB = new Date(b.data().createdAt || 0).getTime();
+      return timeA - timeB;
+    });
+
+    const firstDoc = waitlistDocs[0];
     const candidate = firstDoc.data() as Registration;
     const now = new Date().toISOString();
 
