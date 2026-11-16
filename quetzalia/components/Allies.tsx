@@ -5,7 +5,6 @@ import React, { useEffect, useRef, useState, useMemo } from "react";
 import Link from "next/link";
 import PhotoArch from "./ui/PhotoArch";
 import SectionHead from "./ui/SectionHead";
-import rawSpeakers from "@/data/speakers.json";
 
 interface SpeakerItem {
   id: string;
@@ -16,7 +15,6 @@ interface SpeakerItem {
   talk: string;
   linkedin?: string;
   photoUrl?: string;
-  placeholderText?: string;
 }
 
 interface SponsorItem {
@@ -34,29 +32,15 @@ interface CommunityItem {
   logoUrl?: string;
 }
 
-const DEFAULT_SPONSORS: SponsorItem[] = [
-  { id: "sp-1", name: "Ixalli" },
-  { id: "sp-2", name: "NVIDIA" },
-  { id: "sp-3", name: "Oracle Cloud" },
-  { id: "sp-4", name: "UNAM - MAC" },
-];
-
-const DEFAULT_COMMUNITIES: CommunityItem[] = [
-  { id: "com-1", name: "Club de Algoritmia UNAM" },
-  { id: "com-2", name: "Mujeres en STEM FES" },
-  { id: "com-3", name: "IEEE WIE México" },
-  { id: "com-4", name: "Colectivo Código Rosa" },
-];
-
 export default function Allies() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const [inView, setInView] = useState(false);
   const [expandedTalks, setExpandedTalks] = useState<Record<string, boolean>>({});
 
-  // Carga inicial con los datos oficiales garantizados para que nunca quede vacía
-  const [speakers, setSpeakers] = useState<SpeakerItem[]>(rawSpeakers as SpeakerItem[]);
-  const [sponsors, setSponsors] = useState<SponsorItem[]>(DEFAULT_SPONSORS);
-  const [communities, setCommunities] = useState<CommunityItem[]>(DEFAULT_COMMUNITIES);
+  // Los datos provienen estrictamente de la base de datos (Firestore)
+  const [speakers, setSpeakers] = useState<SpeakerItem[]>([]);
+  const [sponsors, setSponsors] = useState<SponsorItem[]>([]);
+  const [communities, setCommunities] = useState<CommunityItem[]>([]);
 
   // Estrellas fijas titilantes al 100% de ancho de la sección
   const stars = useMemo(
@@ -106,7 +90,7 @@ export default function Allies() {
     setExpandedTalks((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  // Cargar datos reales aprobados desde la base de datos sin romper los predeterminados
+  // Cargar datos reales aprobados directamente desde la base de datos (Firestore)
   useEffect(() => {
     let isMounted = true;
     fetch("/api/public/showcase")
@@ -116,28 +100,12 @@ export default function Allies() {
       })
       .then((data) => {
         if (!isMounted) return;
-
-        // Combinar datos aprobados de la BD con los predeterminados
-        if (data.speakers && data.speakers.length > 0) {
-          const dbIds = new Set(data.speakers.map((s: SpeakerItem) => s.id));
-          const fallbackFiltered = (rawSpeakers as SpeakerItem[]).filter((s) => !dbIds.has(s.id));
-          setSpeakers([...data.speakers, ...fallbackFiltered]);
-        }
-
-        if (data.sponsors && data.sponsors.length > 0) {
-          const dbSponsorIds = new Set(data.sponsors.map((s: SponsorItem) => s.id));
-          const fallbackSponsors = DEFAULT_SPONSORS.filter((s) => !dbSponsorIds.has(s.id));
-          setSponsors([...data.sponsors, ...fallbackSponsors]);
-        }
-
-        if (data.communities && data.communities.length > 0) {
-          const dbComIds = new Set(data.communities.map((c: CommunityItem) => c.id));
-          const fallbackCom = DEFAULT_COMMUNITIES.filter((c) => !dbComIds.has(c.id));
-          setCommunities([...data.communities, ...fallbackCom]);
-        }
+        setSpeakers(data.speakers || []);
+        setSponsors(data.sponsors || []);
+        setCommunities(data.communities || []);
       })
       .catch((err) => {
-        console.warn("Showcase API usando catálogo oficial:", err);
+        console.warn("Showcase API en espera de datos aprobados:", err);
       });
 
     return () => {
@@ -145,7 +113,7 @@ export default function Allies() {
     };
   }, []);
 
-  // Observador de visibilidad para activar las animaciones de las tarjetas y nombres
+  // Observador de visibilidad para animaciones de entrada
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
@@ -158,8 +126,10 @@ export default function Allies() {
 
       if (isVisible) {
         setInView(true);
-      } else if (rect.bottom < 0 || rect.top > windowHeight) {
-        setInView(false);
+      } else {
+        if (rect.bottom < 0 || rect.top > windowHeight) {
+          setInView(false);
+        }
       }
     };
 
@@ -195,6 +165,8 @@ export default function Allies() {
       window.removeEventListener("resize", checkVisibility);
     };
   }, []);
+
+  const hasApprovedShowcase = speakers.length > 0 || sponsors.length > 0 || communities.length > 0;
 
   return (
     <section className="section alt relative overflow-hidden" id="aliadas" ref={sectionRef}>
@@ -256,208 +228,176 @@ export default function Allies() {
       </div>
 
       <div className="wrap relative z-10">
-        {/* Encabezado General Centrado */}
+        {/* Encabezado General: Alianzas y Colectivos */}
         <SectionHead
-          eyebrow="Voces, Alianzas y Colectivos"
-          title="Mujeres que ya están construyendo el futuro"
-          lead="Conoce a las ponentes confirmadas de la industria y la academia, así como a las marcas e iniciativas STEM que impulsan el encuentro Quetzalia 2027 en la FES Acatlán de la UNAM."
-          className="text-center mx-auto items-center mb-12"
+          eyebrow="Redes y Convocatorias"
+          title="Alianzas y Colectivos"
+          lead={
+            hasApprovedShowcase
+              ? "Conoce a las ponentes confirmadas de la industria y la academia, así como a las marcas e iniciativas STEM que impulsan el encuentro Quetzalia 2027 en la FES Acatlán de la UNAM."
+              : "Quetzalia 2027 abre sus convocatorias oficiales para ponentes, marcas patrocinadoras y comunidades aliadas de todo el país."
+          }
+          className="text-center mx-auto items-center mb-8"
         />
 
         {/* Layout en 2 Columnas Balanceadas */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-          {/* ================= COLUMNA 1: PONENTES (7 columnas en desktop) ================= */}
-          <div className="lg:col-span-7 flex flex-col">
-            <div className="text-center mb-6">
-              <p className="eyebrow mb-1">Voces y Ponencias</p>
-              <h3 className="text-2xl sm:text-3xl font-display text-[var(--head)] leading-snug">
-                Ponentes Confirmadas
-              </h3>
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start text-center py-4">
+          {/* ================= COLUMNA 1: PONENTES ================= */}
+          <div className="space-y-4 px-2 sm:px-6">
+            <p className="text-xs uppercase tracking-widest font-bold text-[var(--accent)]">
+              Voces y Ponencias
+            </p>
+            <h3 className="text-2xl sm:text-3xl font-display text-[var(--head)] leading-snug">
+              Mujeres que construyen el futuro
+            </h3>
 
-            <div className={`people ${inView ? "in-view" : ""} !grid-cols-1 sm:!grid-cols-2 gap-6`}>
-              {speakers.map((person, idx) => (
-                <article
-                  className="person"
-                  key={person.id}
-                  style={{ "--speaker-delay": `${idx * 220}ms` } as React.CSSProperties}
-                >
-                  <PhotoArch
-                    ariaLabel={`Fotografía de ${person.name}`}
-                    style={{ aspectRatio: "1" }}
+            {speakers.length === 0 ? (
+              <div className="space-y-4">
+                <p className="text-sm sm:text-base text-[var(--fg)] opacity-90 leading-relaxed max-w-md mx-auto">
+                  El escenario de Quetzalia 2027 en la FES Acatlán de la UNAM está listo para amplificar tu trayectoria. Sé parte de las mujeres que lideran la vanguardia en ciencia y tecnología compartiendo tu ponencia o taller.
+                </p>
+                <div className="pt-2 flex justify-center">
+                  <Link
+                    href="/registro/speakers"
+                    className="auth-btn-ghost auth-btn-lg inline-flex items-center gap-2 cursor-pointer group"
                   >
-                    {person.photoUrl ? (
-                      <img
-                        src={person.photoUrl}
-                        alt={person.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span>{person.placeholderText || person.name.charAt(0)}</span>
-                    )}
-                  </PhotoArch>
+                    <span className="auth-btn-text text-sm sm:text-base">
+                      Postula tu propuesta como Ponente →
+                    </span>
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className={`people ${inView ? "in-view" : ""} !grid-cols-1 gap-4`}>
+                {speakers.map((person, idx) => (
+                  <article
+                    className="person"
+                    key={person.id}
+                    style={{ "--speaker-delay": `${idx * 260}ms` } as React.CSSProperties}
+                  >
+                    <PhotoArch ariaLabel={`Fotografía de ${person.name}`} style={{ aspectRatio: "1" }}>
+                      {person.photoUrl ? (
+                        <img src={person.photoUrl} alt={person.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span>{person.name.charAt(0)}</span>
+                      )}
+                    </PhotoArch>
 
-                  <div className="person-content">
-                    <div className="speaker-chips-row">
-                      <div className="speaker-chips">
-                        <span className="speaker-chip chip-pink">{person.type || "Ponencia"}</span>
-                        <span className="speaker-chip chip-salmon">{person.org}</span>
+                    <div className="person-content">
+                      <div className="speaker-chips-row">
+                        <div className="speaker-chips">
+                          <span className="speaker-chip chip-pink">{person.type || "Ponencia"}</span>
+                          <span className="speaker-chip chip-salmon">{person.org}</span>
+                        </div>
+
+                        <button
+                          type="button"
+                          className="mobile-talk-toggle"
+                          onClick={() => toggleTalk(person.id)}
+                          aria-expanded={!!expandedTalks[person.id]}
+                          aria-controls={`talk-body-${person.id}`}
+                        >
+                          <span>{expandedTalks[person.id] ? "Ocultar" : "Ver charla"}</span>
+                        </button>
                       </div>
 
-                      <button
-                        type="button"
-                        className="mobile-talk-toggle"
-                        onClick={() => toggleTalk(person.id)}
-                        aria-expanded={!!expandedTalks[person.id]}
-                        aria-controls={`talk-body-${person.id}`}
+                      <h4 className="speaker-name text-lg font-bold">{person.name}</h4>
+
+                      <div
+                        id={`talk-body-${person.id}`}
+                        className={`speaker-talk-body ${expandedTalks[person.id] ? "is-expanded" : ""}`}
                       >
-                        <span>
-                          {expandedTalks[person.id] ? "Ocultar" : "Ver charla"}
-                        </span>
-                        <svg
-                          className={`toggle-chevron ${
-                            expandedTalks[person.id] ? "rotated" : ""
-                          }`}
-                          width="13"
-                          height="13"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          aria-hidden="true"
+                        <p className="speaker-talk-title">“{person.talk}”</p>
+                        <p className="speaker-desc">{person.desc}</p>
+                      </div>
+
+                      {person.linkedin && (
+                        <a
+                          href={person.linkedin}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="speaker-linkedin-btn mt-2"
                         >
-                          <polyline points="6 9 12 15 18 9" />
-                        </svg>
-                      </button>
+                          <span>LinkedIn</span>
+                        </a>
+                      )}
                     </div>
-
-                    <h4 className="speaker-name">{person.name}</h4>
-
-                    <div
-                      id={`talk-body-${person.id}`}
-                      className={`speaker-talk-body ${
-                        expandedTalks[person.id] ? "is-expanded" : ""
-                      }`}
-                    >
-                      <p className="speaker-talk-title">“{person.talk}”</p>
-                      <p className="speaker-desc">{person.desc}</p>
-                    </div>
-
-                    {person.linkedin && (
-                      <a
-                        href={person.linkedin}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="speaker-linkedin-btn"
-                        aria-label={`LinkedIn de ${person.name}`}
-                        title={`LinkedIn de ${person.name}`}
-                      >
-                        <svg
-                          className="linkedin-icon"
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                          aria-hidden="true"
-                        >
-                          <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.45a1.66 1.66 0 1 0 0 3.32 1.66 1.66 0 0 0 0-3.32Z" />
-                        </svg>
-                        <span>LinkedIn</span>
-                      </a>
-                    )}
-                  </div>
-                </article>
-              ))}
-            </div>
-
-            {/* Convocatoria Ponentes */}
-            <div className="mt-8 pt-5 border-t border-[var(--rule)] text-center">
-              <p className="text-sm text-[var(--fg)] opacity-90 mb-3 max-w-md mx-auto">
-                ¿Tienes una investigación, proyecto o taller que quieras compartir en Quetzalia 2027?
-              </p>
-              <Link
-                href="/registro/speakers"
-                className="btn btn-ghost text-xs tracking-widest uppercase inline-flex items-center gap-2"
-              >
-                Postula tu propuesta como Ponente →
-              </Link>
-            </div>
+                  </article>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* ================= COLUMNA 2: ALIANZAS Y COLECTIVOS (5 columnas en desktop) ================= */}
-          <div className="lg:col-span-5 flex flex-col lg:border-l lg:border-[var(--rule)] lg:pl-10">
-            <div className="text-center mb-6">
-              <p className="eyebrow mb-1">Alianzas y Colectivos</p>
-              <h3 className="text-2xl sm:text-3xl font-display text-[var(--head)] leading-snug">
-                Patrocinadores y STEM
-              </h3>
-            </div>
-
-            <p className="text-sm text-[var(--fg)] opacity-90 leading-relaxed text-center mb-6 max-w-sm mx-auto">
-              Sumamos a instituciones, empresas comprometidas con la equidad en tecnología y colectivos estudiantiles que fortalecen la comunidad.
+          {/* ================= COLUMNA 2: MARCAS Y COMUNIDADES ================= */}
+          <div className="space-y-4 px-2 sm:px-6 md:border-l md:border-[var(--rule)]">
+            <p className="text-xs uppercase tracking-widest font-bold text-[var(--accent)]">
+              Alianzas y Colectivos
             </p>
+            <h3 className="text-2xl sm:text-3xl font-display text-[var(--head)] leading-snug">
+              Marcas Patrocinadoras y Comunidades STEM
+            </h3>
 
-            {/* Marcas Patrocinadoras */}
-            <div className="mb-6">
-              <h4 className="text-xs uppercase tracking-widest font-bold text-[var(--accent)] mb-3 text-center">
-                Marcas e Instituciones
-              </h4>
-              <ul className="allies !grid-cols-2">
-                {sponsors.map((s) => (
-                  <li key={s.id} className="font-semibold text-sm">
-                    {s.logoUrl ? (
-                      <img
-                        src={s.logoUrl}
-                        alt={s.name}
-                        className="max-h-10 max-w-full object-contain mx-auto"
-                      />
-                    ) : (
-                      <span>{s.name}</span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {sponsors.length === 0 && communities.length === 0 ? (
+              <div className="space-y-4">
+                <p className="text-sm sm:text-base text-[var(--fg)] opacity-90 leading-relaxed max-w-md mx-auto">
+                  Abrimos este espacio para sumar fuerzas: invitamos tanto a empresas e instituciones que apuesten por el talento femenino en STEM, como a colectivos estudiantiles y clubes de ciencia que construyen en comunidad.
+                </p>
+                <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
+                  <Link
+                    href="/registro/patrocinadores"
+                    className="auth-btn-ghost auth-btn-lg inline-flex items-center gap-2 cursor-pointer group"
+                  >
+                    <span className="auth-btn-text text-sm sm:text-base">
+                      Súmate como Patrocinador →
+                    </span>
+                  </Link>
+                  <Link
+                    href="/registro/comunidades"
+                    className="auth-btn-ghost auth-btn-lg inline-flex items-center gap-2 cursor-pointer group"
+                  >
+                    <span className="auth-btn-text text-sm sm:text-base">
+                      Registra a tu Comunidad →
+                    </span>
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-6 text-left">
+                {sponsors.length > 0 && (
+                  <div>
+                    <h4 className="text-xs uppercase tracking-widest font-bold text-[var(--accent)] mb-3 text-center">
+                      Marcas Patrocinadoras
+                    </h4>
+                    <ul className="allies !grid-cols-2">
+                      {sponsors.map((s) => (
+                        <li key={s.id} className="font-semibold text-sm">
+                          {s.logoUrl ? (
+                            <img src={s.logoUrl} alt={s.name} className="max-h-10 max-w-full object-contain mx-auto" />
+                          ) : (
+                            <span>{s.name}</span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
-            {/* Comunidades STEM */}
-            <div className="mb-8">
-              <h4 className="text-xs uppercase tracking-widest font-bold text-[var(--accent)] mb-3 text-center">
-                Comunidades y Colectivos STEM
-              </h4>
-              <ul className="allies !grid-cols-2">
-                {communities.map((c) => (
-                  <li key={c.id} className="font-semibold text-sm">
-                    {c.logoUrl ? (
-                      <img
-                        src={c.logoUrl}
-                        alt={c.name}
-                        className="max-h-10 max-w-full object-contain mx-auto"
-                      />
-                    ) : (
-                      <span>{c.name}</span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Convocatorias Patrocinadores y Comunidades */}
-            <div className="pt-5 border-t border-[var(--rule)] flex flex-wrap items-center justify-center gap-3">
-              <Link
-                href="/registro/patrocinadores"
-                className="btn btn-primary text-xs tracking-widest uppercase inline-flex items-center gap-1.5"
-              >
-                Súmate como Patrocinador →
-              </Link>
-              <Link
-                href="/registro/comunidades"
-                className="btn btn-ghost text-xs tracking-widest uppercase inline-flex items-center gap-1.5"
-              >
-                Registra a tu Comunidad →
-              </Link>
-            </div>
+                {communities.length > 0 && (
+                  <div>
+                    <h4 className="text-xs uppercase tracking-widest font-bold text-[var(--accent)] mb-3 text-center">
+                      Comunidades STEM
+                    </h4>
+                    <ul className="allies !grid-cols-2">
+                      {communities.map((c) => (
+                        <li key={c.id} className="font-semibold text-sm">
+                          <span>{c.name}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

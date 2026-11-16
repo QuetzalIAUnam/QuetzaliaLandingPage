@@ -9,7 +9,7 @@ import ConsentSection, { CURRENT_CONSENT_VERSION } from "@/components/ConsentSec
 import Greca from "@/components/ui/Greca";
 
 export default function RegistroComunidadesPage() {
-  const { user, loginWithGoogle, logout } = useAuth();
+  const { user, loginWithGoogle } = useAuth();
 
   const [organization, setOrganization] = useState(""); // Nombre de la comunidad
   const [fullName, setFullName] = useState(""); // Representante
@@ -47,31 +47,16 @@ export default function RegistroComunidadesPage() {
       return;
     }
 
-    let currentUser = user;
-    if (!currentUser) {
-      try {
-        setSubmitting(true);
-        currentUser = await loginWithGoogle();
-      } catch (err: unknown) {
-        console.error(err);
-        setErrorMsg("Para validar el registro y generar tu folio de seguimiento, inicia sesión con Google.");
-        setSubmitting(false);
-        return;
-      }
-    }
-
-    if (!currentUser) {
+    if (!user) {
       setErrorMsg("Por seguridad, debes iniciar sesión con tu cuenta de Google antes de enviar el formulario.");
-      setSubmitting(false);
       return;
     }
 
-    const finalEmail = (email || currentUser.email || "").trim();
-    const finalFullName = (fullName || currentUser.displayName || "").trim();
+    const finalEmail = displayEmail.trim();
+    const finalFullName = displayFullName.trim();
 
     if (!finalEmail || !finalFullName || !organization.trim() || !phone.trim() || !talkMaterials.trim()) {
       setErrorMsg("Por favor completa los campos requeridos.");
-      setSubmitting(false);
       return;
     }
 
@@ -79,10 +64,10 @@ export default function RegistroComunidadesPage() {
       setSubmitting(true);
       const reg = await saveRegistration(
         {
-          userId: currentUser.uid,
+          userId: user.uid,
           type: "community",
           fullName: finalFullName,
-          organization: organization.trim(),
+          organization: organization.trim(), // Nombre de la comunidad
           email: finalEmail,
           phone: phone.trim(),
           talkTitle: memberCount ? `Comunidad (~${memberCount} integrantes)` : "Comunidad STEM",
@@ -91,7 +76,7 @@ export default function RegistroComunidadesPage() {
           consentVersion: CURRENT_CONSENT_VERSION,
           consentTimestamp: new Date().toISOString(),
         },
-        currentUser.uid
+        user.uid
       );
       setSubmittedReg(reg);
     } catch (err: unknown) {
@@ -190,172 +175,157 @@ export default function RegistroComunidadesPage() {
           </blockquote>
         </div>
 
-        {/* Banner de inicio de sesión / autocompletado */}
         {!user ? (
-          <div className="p-4 bg-[var(--bg-alt)]/60 border border-[var(--rule)] flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left mb-8 max-w-3xl mx-auto shadow-xs">
-            <div className="space-y-0.5">
-              <p className="text-sm font-semibold text-[var(--head)]">
-                ¿Prefieres autocompletar con Google?
-              </p>
-              <p className="text-xs text-[var(--fg)] opacity-85">
-                Inicia sesión para vincular tu nombre y correo oficial en un solo clic.
-              </p>
+          /* Autenticación SIN cuadros, con el botón idéntico al del header (solo icono y texto con destello hover) */
+          <div className="my-14 py-4 text-center space-y-4 max-w-md mx-auto">
+            <p className="text-sm sm:text-base text-[var(--fg)] opacity-90">
+              Para registrar a tu comunidad y dar seguimiento:
+            </p>
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={() => loginWithGoogle()}
+                className="auth-btn-ghost auth-btn-lg cursor-pointer"
+                aria-label="Registrar con Google"
+              >
+                <svg className="google-icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                  <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.4 9 5 12 5z" />
+                  <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z" />
+                  <path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.8s.2-2.1.4-2.8L1.9 6.3C.7 8.7 0 10.3 0 12s.7 3.3 1.9 5.7l3.7-2.9z" />
+                  <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.4-6.4-5.2L1.9 16C3.7 19.7 7.5 23 12 23z" />
+                </svg>
+                <span className="auth-btn-text">
+                  Registrar con Google
+                </span>
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => loginWithGoogle()}
-              className="auth-btn-ghost text-xs py-2 px-4 inline-flex items-center gap-2 cursor-pointer whitespace-nowrap"
-            >
-              <svg className="google-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-                <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.4 9 5 12 5z" />
-                <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z" />
-                <path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.8s.2-2.1.4-2.8L1.9 6.3C.7 8.7 0 10.3 0 12s.7 3.3 1.9 5.7l3.7-2.9z" />
-                <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.4-6.4-5.2L1.9 16C3.7 19.7 7.5 23 12 23z" />
-              </svg>
-              <span>Autocompletar con Google</span>
-            </button>
           </div>
         ) : (
-          <div className="p-3.5 bg-emerald-50 text-emerald-900 border border-emerald-300 text-xs flex flex-wrap items-center justify-between gap-2 mb-8 max-w-3xl mx-auto">
-            <span>Conectado como <strong>{user.displayName || user.email}</strong> ({user.email})</span>
-            <button
-              type="button"
-              onClick={() => logout()}
-              className="underline text-emerald-800 hover:text-emerald-950 font-semibold cursor-pointer"
-            >
-              Cambiar cuenta
-            </button>
-          </div>
-        )}
+          <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl mx-auto">
+            <div className="border border-[var(--rule)] bg-[var(--card)] p-6 space-y-4">
+              <h2 className="text-lg font-display text-[var(--head)] border-b border-[var(--rule)] pb-2">
+                Datos de la Comunidad
+              </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl mx-auto">
-          <div className="border border-[var(--rule)] bg-[var(--card)] p-6 space-y-4">
-            <h2 className="text-lg font-display text-[var(--head)] border-b border-[var(--rule)] pb-2">
-              Datos de la Comunidad
-            </h2>
-
-            <div>
-              <label className="form-label" htmlFor="organization">
-                Nombre de la Comunidad o Colectivo *
-              </label>
-              <input
-                id="organization"
-                type="text"
-                required
-                value={organization}
-                onChange={(e) => setOrganization(e.target.value)}
-                placeholder="Ej. Mujeres en IA FES Acatlán / Club de Robótica STEM"
-                className="form-input"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="form-label" htmlFor="fullName">
-                  Nombre de la Representante / Coordinadora *
+                <label className="form-label" htmlFor="organization">
+                  Nombre de la Comunidad o Colectivo *
                 </label>
                 <input
-                  id="fullName"
+                  id="organization"
                   type="text"
                   required
-                  value={displayFullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Nombre completo"
+                  value={organization}
+                  onChange={(e) => setOrganization(e.target.value)}
+                  placeholder="Ej. Mujeres en IA FES Acatlán / Club de Robótica STEM"
                   className="form-input"
                 />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="form-label" htmlFor="fullName">
+                    Nombre de la Representante / Coordinadora *
+                  </label>
+                  <input
+                    id="fullName"
+                    type="text"
+                    required
+                    value={displayFullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Nombre completo"
+                    className="form-input"
+                  />
+                </div>
+
+                <div>
+                  <label className="form-label" htmlFor="memberCount">
+                    Número Aproximado de Integrantes *
+                  </label>
+                  <input
+                    id="memberCount"
+                    type="number"
+                    min="1"
+                    required
+                    value={memberCount}
+                    onChange={(e) => setMemberCount(e.target.value)}
+                    placeholder="Ej. 25"
+                    className="form-input"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="form-label" htmlFor="email">
+                    Correo Electrónico de Contacto *
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    required
+                    value={displayEmail}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="form-input"
+                  />
+                </div>
+
+                <div>
+                  <label className="form-label" htmlFor="phone">
+                    Teléfono Móvil (WhatsApp de contacto) *
+                  </label>
+                  <input
+                    id="phone"
+                    type="tel"
+                    required
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+52 55 1234 5678"
+                    className="form-input"
+                  />
+                </div>
               </div>
 
               <div>
-                <label className="form-label" htmlFor="memberCount">
-                  Número Aproximado de Integrantes *
+                <label className="form-label" htmlFor="talkMaterials">
+                  Breve Semblanza y Actividades de la Comunidad *
                 </label>
-                <input
-                  id="memberCount"
-                  type="number"
-                  min="1"
+                <textarea
+                  id="talkMaterials"
+                  rows={4}
                   required
-                  value={memberCount}
-                  onChange={(e) => setMemberCount(e.target.value)}
-                  placeholder="Ej. 25"
-                  className="form-input"
+                  value={talkMaterials}
+                  onChange={(e) => setTalkMaterials(e.target.value)}
+                  placeholder="Misión del grupo, redes sociales o proyectos en los que trabajan."
+                  className="form-textarea"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="form-label" htmlFor="email">
-                  Correo Electrónico de Contacto *
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  required
-                  value={displayEmail}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="form-input"
-                />
+            {/* Consentimientos */}
+            <ConsentSection
+              consent={consent}
+              onChange={setConsent}
+              requiredError={consentError}
+            />
+
+            {errorMsg && (
+              <div className="p-4 bg-rose-50 text-rose-800 border border-rose-400 text-sm font-medium">
+                {errorMsg}
               </div>
+            )}
 
-              <div>
-                <label className="form-label" htmlFor="phone">
-                  Teléfono Móvil (WhatsApp de contacto) *
-                </label>
-                <input
-                  id="phone"
-                  type="tel"
-                  required
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+52 55 1234 5678"
-                  className="form-input"
-                />
-              </div>
+            <div className="pt-4 flex justify-end">
+              <button
+                type="submit"
+                disabled={submitting}
+                className="btn btn-primary w-full sm:w-auto cursor-pointer"
+              >
+                {submitting ? "Registrando comunidad..." : "Enviar Registro de Comunidad"}
+              </button>
             </div>
-
-            <div>
-              <label className="form-label" htmlFor="talkMaterials">
-                Breve Semblanza y Actividades de la Comunidad *
-              </label>
-              <textarea
-                id="talkMaterials"
-                rows={4}
-                required
-                value={talkMaterials}
-                onChange={(e) => setTalkMaterials(e.target.value)}
-                placeholder="Misión del grupo, redes sociales o proyectos en los que trabajan."
-                className="form-textarea"
-              />
-            </div>
-          </div>
-
-          {/* Consentimientos */}
-          <ConsentSection
-            consent={consent}
-            onChange={setConsent}
-            requiredError={consentError}
-          />
-
-          {errorMsg && (
-            <div className="p-4 bg-rose-50 text-rose-800 border border-rose-400 text-sm font-medium">
-              {errorMsg}
-            </div>
-          )}
-
-          <div className="pt-4 flex justify-end">
-            <button
-              type="submit"
-              disabled={submitting}
-              className="btn btn-primary w-full sm:w-auto cursor-pointer"
-            >
-              {submitting
-                ? "Registrando comunidad..."
-                : !user
-                ? "Registrar Comunidad con Google →"
-                : "Confirmar Registro de Comunidad →"}
-            </button>
-          </div>
-        </form>
+          </form>
+        )}
       </main>
 
       <Greca />

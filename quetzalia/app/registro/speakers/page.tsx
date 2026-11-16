@@ -12,7 +12,7 @@ import ConsentSection, { CURRENT_CONSENT_VERSION } from "@/components/ConsentSec
 import Greca from "@/components/ui/Greca";
 
 export default function RegistroSpeakersPage() {
-  const { user, loginWithGoogle, logout } = useAuth();
+  const { user, loginWithGoogle } = useAuth();
 
   const [legalName, setLegalName] = useState("");
   const [chosenName, setChosenName] = useState("");
@@ -82,31 +82,16 @@ export default function RegistroSpeakersPage() {
       return;
     }
 
-    let currentUser = user;
-    if (!currentUser) {
-      try {
-        setSubmitting(true);
-        currentUser = await loginWithGoogle();
-      } catch (err: unknown) {
-        console.error(err);
-        setErrorMsg("Para validar tu postulación y generar tu folio de speaker, inicia sesión con Google.");
-        setSubmitting(false);
-        return;
-      }
-    }
-
-    if (!currentUser) {
+    if (!user) {
       setErrorMsg("Por seguridad, debes iniciar sesión con tu cuenta de Google antes de enviar el formulario.");
-      setSubmitting(false);
       return;
     }
 
-    const finalEmail = (email || currentUser.email || "").trim();
-    const finalChosenName = (chosenName || currentUser.displayName || "").trim();
+    const finalEmail = displayEmail.trim();
+    const finalChosenName = displayChosenName.trim();
 
     if (!finalEmail || !legalName.trim() || !phone.trim() || !organization.trim() || !talkTitle.trim() || !talkMaterials.trim()) {
       setErrorMsg("Por favor completa todos los campos obligatorios.");
-      setSubmitting(false);
       return;
     }
 
@@ -117,13 +102,13 @@ export default function RegistroSpeakersPage() {
       // Si seleccionó foto, subir a carpeta privada 'speakers/private/{userId}/photo.jpg'
       if (photoFile) {
         setUploadingPhoto(true);
-        const uploadRes = await uploadPrivateSpeakerPhoto(photoFile, currentUser.uid);
+        const uploadRes = await uploadPrivateSpeakerPhoto(photoFile, user.uid);
         uploadedPhotoPath = uploadRes.path;
       }
 
       const reg = await saveRegistration(
         {
-          userId: currentUser.uid,
+          userId: user.uid,
           type: "speaker",
           fullName: finalChosenName || legalName,
           chosenName: finalChosenName,
@@ -138,7 +123,7 @@ export default function RegistroSpeakersPage() {
           consentVersion: CURRENT_CONSENT_VERSION,
           consentTimestamp: new Date().toISOString(),
         },
-        currentUser.uid
+        user.uid
       );
       setSubmittedReg(reg);
     } catch (err: unknown) {
@@ -252,45 +237,33 @@ export default function RegistroSpeakersPage() {
           </blockquote>
         </div>
 
-        {/* Banner de inicio de sesión con Google integrado */}
         {!user ? (
-          <div className="p-4 bg-[var(--bg-alt)]/60 border border-[var(--rule)] flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left mb-8 max-w-3xl mx-auto shadow-xs">
-            <div className="space-y-0.5">
-              <p className="text-sm font-semibold text-[var(--head)]">
-                ¿Prefieres autocompletar con Google?
-              </p>
-              <p className="text-xs text-[var(--fg)] opacity-85">
-                Inicia sesión para vincular tu nombre y correo oficial en un solo clic.
-              </p>
+          /* Autenticación SIN cuadros, con el botón idéntico al del header (solo icono y texto con destello hover) */
+          <div className="my-14 py-4 text-center space-y-4 max-w-md mx-auto">
+            <p className="text-sm sm:text-base text-[var(--fg)] opacity-90">
+              Ingresa con tu cuenta de Google para postular tu propuesta y dar seguimiento:
+            </p>
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={() => loginWithGoogle()}
+                className="auth-btn-ghost auth-btn-lg cursor-pointer"
+                aria-label="Postular con Google"
+              >
+                <svg className="google-icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                  <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.4 9 5 12 5z" />
+                  <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z" />
+                  <path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.8s.2-2.1.4-2.8L1.9 6.3C.7 8.7 0 10.3 0 12s.7 3.3 1.9 5.7l3.7-2.9z" />
+                  <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.4-6.4-5.2L1.9 16C3.7 19.7 7.5 23 12 23z" />
+                </svg>
+                <span className="auth-btn-text">
+                  Postular con Google
+                </span>
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => loginWithGoogle()}
-              className="auth-btn-ghost text-xs py-2 px-4 inline-flex items-center gap-2 cursor-pointer whitespace-nowrap"
-            >
-              <svg className="google-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-                <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.4 9 5 12 5z" />
-                <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z" />
-                <path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.8s.2-2.1.4-2.8L1.9 6.3C.7 8.7 0 10.3 0 12s.7 3.3 1.9 5.7l3.7-2.9z" />
-                <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.4-6.4-5.2L1.9 16C3.7 19.7 7.5 23 12 23z" />
-              </svg>
-              <span>Autocompletar con Google</span>
-            </button>
           </div>
         ) : (
-          <div className="p-3.5 bg-emerald-50 text-emerald-900 border border-emerald-300 text-xs flex flex-wrap items-center justify-between gap-2 mb-8 max-w-3xl mx-auto shadow-xs">
-            <span>Conectada como <strong>{user.displayName || user.email}</strong> ({user.email})</span>
-            <button
-              type="button"
-              onClick={() => logout()}
-              className="underline text-emerald-800 hover:text-emerald-950 font-semibold cursor-pointer"
-            >
-              Cambiar cuenta
-            </button>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl mx-auto">
+          <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl mx-auto">
             {/* Nota legal reforzada para Speakers */}
             <div className="form-legal-box text-sm">
               <p className="font-semibold text-[var(--head)] mb-1">
@@ -481,12 +454,11 @@ export default function RegistroSpeakersPage() {
                   ? "Subiendo fotografía..."
                   : submitting
                     ? "Enviando postulación..."
-                    : !user
-                    ? "Postular Propuesta con Google →"
-                    : "Enviar Postulación de Ponente →"}
+                    : "Enviar Postulación de Ponente"}
               </button>
             </div>
           </form>
+        )}
       </main>
 
       <Greca />

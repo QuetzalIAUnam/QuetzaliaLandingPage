@@ -8,7 +8,7 @@ import { ConsentRecord, Registration } from "@/lib/types";
 import ConsentSection, { CURRENT_CONSENT_VERSION } from "./ConsentSection";
 
 export default function Signup() {
-  const { user, registration, loading: authLoading, loginWithGoogle, logout } = useAuth();
+  const { user, registration, loading: authLoading, loginWithGoogle } = useAuth();
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -59,31 +59,16 @@ export default function Signup() {
       return;
     }
 
-    let currentUser = user;
-    if (!currentUser) {
-      try {
-        setSubmitting(true);
-        currentUser = await loginWithGoogle();
-      } catch (err: unknown) {
-        console.error(err);
-        setErrorMsg("Para validar tu pase de acceso y vincular tu constancia digital oficial, ingresa con tu cuenta de Google.");
-        setSubmitting(false);
-        return;
-      }
-    }
-
-    if (!currentUser) {
+    if (!user) {
       setErrorMsg("Debes iniciar sesión con tu cuenta de Google para completar tu registro.");
-      setSubmitting(false);
       return;
     }
 
-    const finalEmail = (email || currentUser.email || "").trim();
-    const finalFullName = (fullName || currentUser.displayName || "").trim();
+    const finalEmail = (email || user.email || "").trim();
+    const finalFullName = (fullName || user.displayName || "").trim();
 
     if (!finalEmail || !finalFullName || !organization.trim() || !majorOrArea.trim()) {
       setErrorMsg("Por favor completa los campos de tu escuela y carrera.");
-      setSubmitting(false);
       return;
     }
 
@@ -91,7 +76,7 @@ export default function Signup() {
       setSubmitting(true);
       const reg = await saveRegistration(
         {
-          userId: currentUser.uid,
+          userId: user.uid,
           type: "attendee",
           fullName: finalFullName,
           email: finalEmail,
@@ -102,7 +87,7 @@ export default function Signup() {
           consentVersion: CURRENT_CONSENT_VERSION,
           consentTimestamp: new Date().toISOString(),
         },
-        currentUser.uid
+        user.uid
       );
       setSubmittedReg(reg);
     } catch (err: unknown) {
@@ -118,7 +103,7 @@ export default function Signup() {
   return (
     <section className="section" id="inscripcion">
       <div className="wrap stack signup">
-        <div className="sec-head !mb-4">
+        <div className="sec-head !mb-3">
           <p className="eyebrow">Inscripción y Convocatorias</p>
           <h2>Reserva tu lugar</h2>
           <p className="lead">
@@ -166,14 +151,50 @@ export default function Signup() {
         </blockquote>
 
         {/* Flujo Principal: Registro de Asistente General sin salir de la página */}
-        <div className="w-full max-w-2xl mx-auto text-center mt-4">
+        <div className="w-full max-w-2xl mx-auto text-center mt-2">
           {authLoading ? (
             <div className="py-6 text-center max-w-md mx-auto space-y-2">
               <div className="auth-spinner mx-auto" />
               <p className="text-xs text-[var(--fg)]">Verificando sesión...</p>
             </div>
+          ) : !user ? (
+            /* Estado 1: No autenticado -> Pide iniciar sesión con Google primero (centrado, integrado y sin separaciones excesivas) */
+            <div className="my-2 py-2 text-center space-y-2.5 max-w-md mx-auto">
+              <div className="space-y-1">
+                <h4 className="text-xl sm:text-2xl font-display text-[var(--head)] leading-snug">
+                  Inicia sesión para completar tu registro
+                </h4>
+                <p className="text-sm text-[var(--fg)] leading-relaxed opacity-90">
+                  Para validar tu pase de acceso y vincular tu constancia digital oficial, ingresa con tu cuenta de Google:
+                </p>
+              </div>
+
+              <div className="flex justify-center pt-1">
+                <button
+                  type="button"
+                  onClick={handleGoogleLogin}
+                  disabled={isLoggingIn}
+                  className="auth-btn-ghost auth-btn-lg cursor-pointer disabled:opacity-50"
+                  aria-label="Acceder con Google"
+                >
+                  <svg className="google-icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                    <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.4 9 5 12 5z" />
+                    <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z" />
+                    <path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.8s.2-2.1.4-2.8L1.9 6.3C.7 8.7 0 10.3 0 12s.7 3.3 1.9 5.7l3.7-2.9z" />
+                    <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.4-6.4-5.2L1.9 16C3.7 19.7 7.5 23 12 23z" />
+                  </svg>
+                  <span className="auth-btn-text">
+                    {isLoggingIn ? "Conectando..." : "Acceder con Google"}
+                  </span>
+                </button>
+              </div>
+
+              {errorMsg && (
+                <p className="text-xs text-rose-600 font-semibold pt-1">{errorMsg}</p>
+              )}
+            </div>
           ) : activeReg ? (
-            /* Estado 1: Usuario con registro ya existente o recién enviado */
+            /* Estado 2: Usuario autenticado con registro ya existente o recién enviado */
             <div className="w-full max-w-xl mx-auto p-8 border-2 border-[var(--head)] bg-[var(--card)] shadow-xl space-y-4 text-center">
               <div className="flex items-center justify-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xl">
@@ -213,47 +234,8 @@ export default function Signup() {
               </div>
             </div>
           ) : (
-            /* Estado 2: Formulario de Registro SIEMPRE VISIBLE */
+            /* Estado 3: Usuario autenticado sin registro -> Muestra formulario inline sin salir de la página */
             <form onSubmit={handleSubmit} className="w-full max-w-2xl mx-auto space-y-6 text-left">
-              {/* Banner de inicio de sesión con Google integrado */}
-              {!user ? (
-                <div className="p-4 bg-[var(--bg-alt)]/60 border border-[var(--rule)] flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left shadow-xs">
-                  <div className="space-y-0.5">
-                    <p className="text-sm font-semibold text-[var(--head)]">
-                      ¿Tienes cuenta de Google?
-                    </p>
-                    <p className="text-xs text-[var(--fg)] opacity-85">
-                      Inicia sesión para autocompletar tus datos y vincular tu constancia oficial en un clic.
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleGoogleLogin}
-                    disabled={isLoggingIn}
-                    className="auth-btn-ghost text-xs py-2 px-4 inline-flex items-center gap-2 cursor-pointer whitespace-nowrap disabled:opacity-50"
-                  >
-                    <svg className="google-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-                      <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.4 9 5 12 5z" />
-                      <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z" />
-                      <path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.8s.2-2.1.4-2.8L1.9 6.3C.7 8.7 0 10.3 0 12s.7 3.3 1.9 5.7l3.7-2.9z" />
-                      <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.4-6.4-5.2L1.9 16C3.7 19.7 7.5 23 12 23z" />
-                    </svg>
-                    <span>{isLoggingIn ? "Conectando..." : "Autocompletar con Google"}</span>
-                  </button>
-                </div>
-              ) : (
-                <div className="p-3.5 bg-emerald-50 text-emerald-900 border border-emerald-300 text-xs flex flex-wrap items-center justify-between gap-2 shadow-xs">
-                  <span>Conectada como <strong>{user.displayName || user.email}</strong> ({user.email})</span>
-                  <button
-                    type="button"
-                    onClick={() => logout()}
-                    className="underline text-emerald-800 hover:text-emerald-950 font-semibold cursor-pointer"
-                  >
-                    Cambiar cuenta
-                  </button>
-                </div>
-              )}
-
               <div className="border border-[var(--rule)] bg-[var(--card)] p-6 space-y-4">
                 <h4 className="text-base font-display text-[var(--head)] border-b border-[var(--rule)] pb-2">
                   Tus Datos de Asistente
@@ -276,7 +258,7 @@ export default function Signup() {
 
                 <div>
                   <label className="form-label" htmlFor="attendee-email">
-                    Correo Electrónico *
+                    Correo Electrónico (vinculado a tu cuenta de Google) *
                   </label>
                   <input
                     id="attendee-email"
@@ -284,8 +266,7 @@ export default function Signup() {
                     required
                     value={displayEmail}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="tu-correo@ejemplo.com"
-                    className="form-input"
+                    className="form-input bg-[var(--bg-alt)]"
                   />
                 </div>
 
@@ -361,11 +342,7 @@ export default function Signup() {
                   disabled={submitting}
                   className="btn btn-primary w-full sm:w-auto cursor-pointer"
                 >
-                  {submitting
-                    ? "Reservando tu lugar..."
-                    : !user
-                    ? "Confirmar Registro con Google →"
-                    : "Confirmar Mi Registro de Asistente →"}
+                  {submitting ? "Reservando tu lugar..." : "Confirmar Mi Registro de Asistente"}
                 </button>
               </div>
             </form>
