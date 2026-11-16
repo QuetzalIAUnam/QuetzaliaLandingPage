@@ -9,10 +9,11 @@ import { ConsentRecord, Registration } from "@/lib/types";
 import { compressImage } from "@/lib/image-compressor";
 import { uploadCommunityLogo } from "@/lib/storage-client";
 import ConsentSection, { CURRENT_CONSENT_VERSION } from "@/components/ConsentSection";
+import ExistingRegistrationNotice from "@/components/ExistingRegistrationNotice";
 import Greca from "@/components/ui/Greca";
 
 export default function RegistroComunidadesPage() {
-  const { user, isAdmin, loginWithGoogle } = useAuth();
+  const { user, registration, isAdmin, loginWithGoogle, logout } = useAuth();
 
   const [organization, setOrganization] = useState(""); // Nombre de la comunidad
   const [fullName, setFullName] = useState(""); // Representante
@@ -290,6 +291,12 @@ export default function RegistroComunidadesPage() {
               </button>
             </div>
           </div>
+        ) : registration && !submittedReg ? (
+          <ExistingRegistrationNotice
+            registration={registration}
+            requestedType="community"
+            onLogout={logout}
+          />
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl mx-auto">
             <div className="border border-[var(--rule)] bg-[var(--card)] p-6 space-y-4">

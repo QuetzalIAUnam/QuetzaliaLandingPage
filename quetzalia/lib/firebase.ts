@@ -133,6 +133,22 @@ export async function saveRegistration(
   data: Omit<Registration, "id" | "status" | "createdAt" | "updatedAt">,
   userId: string
 ): Promise<Registration> {
+  // Regla de Negocio: Verificar si el usuario ya cuenta con un registro activo previo
+  const existing = await getUserRegistration(userId);
+  if (existing) {
+    const typeLabel =
+      existing.type === "speaker"
+        ? "Ponente"
+        : existing.type === "community"
+        ? "Comunidad"
+        : existing.type === "sponsor"
+        ? "Patrocinador"
+        : "Asistente";
+    throw new Error(
+      `Esta cuenta ya tiene un registro activo como ${typeLabel} (Folio: ${existing.id}). Cada cuenta de Google solo puede registrarse una vez. Para registrar otra postulación o colectivo, debes iniciar sesión con una cuenta diferente.`
+    );
+  }
+
   const now = new Date().toISOString();
   const registrationRecord: Registration = {
     ...data,

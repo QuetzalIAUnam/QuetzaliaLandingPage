@@ -9,10 +9,11 @@ import { ConsentRecord, Registration } from "@/lib/types";
 import { uploadPrivateSpeakerPhoto } from "@/lib/storage-client";
 import { compressImage } from "@/lib/image-compressor";
 import ConsentSection, { CURRENT_CONSENT_VERSION } from "@/components/ConsentSection";
+import ExistingRegistrationNotice from "@/components/ExistingRegistrationNotice";
 import Greca from "@/components/ui/Greca";
 
 export default function RegistroSpeakersPage() {
-  const { user, isAdmin, loginWithGoogle } = useAuth();
+  const { user, registration, isAdmin, loginWithGoogle, logout } = useAuth();
 
   const [legalName, setLegalName] = useState("");
   const [chosenName, setChosenName] = useState("");
@@ -305,6 +306,12 @@ export default function RegistroSpeakersPage() {
               </button>
             </div>
           </div>
+        ) : registration && !submittedReg ? (
+          <ExistingRegistrationNotice
+            registration={registration}
+            requestedType="speaker"
+            onLogout={logout}
+          />
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl mx-auto">
             {/* Nota legal reforzada para Speakers */}

@@ -6,10 +6,11 @@ import { useAuth } from "@/context/AuthContext";
 import { saveRegistration } from "@/lib/firebase";
 import { ConsentRecord, Registration } from "@/lib/types";
 import ConsentSection, { CURRENT_CONSENT_VERSION } from "@/components/ConsentSection";
+import ExistingRegistrationNotice from "@/components/ExistingRegistrationNotice";
 import Greca from "@/components/ui/Greca";
 
 export default function RegistroAsistentesPage() {
-  const { user, isAdmin, loginWithGoogle } = useAuth();
+  const { user, registration, isAdmin, loginWithGoogle, logout } = useAuth();
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -216,6 +217,12 @@ export default function RegistroAsistentesPage() {
               </button>
             </div>
           </div>
+        ) : registration && !submittedReg ? (
+          <ExistingRegistrationNotice
+            registration={registration}
+            requestedType="attendee"
+            onLogout={logout}
+          />
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="border border-[var(--rule)] bg-[var(--card)] p-6 space-y-4">

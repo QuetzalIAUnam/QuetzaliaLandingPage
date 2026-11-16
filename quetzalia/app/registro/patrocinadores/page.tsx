@@ -9,10 +9,11 @@ import { ConsentRecord, Registration } from "@/lib/types";
 import { compressImage } from "@/lib/image-compressor";
 import { uploadSponsorLogo } from "@/lib/storage-client";
 import ConsentSection, { CURRENT_CONSENT_VERSION } from "@/components/ConsentSection";
+import ExistingRegistrationNotice from "@/components/ExistingRegistrationNotice";
 import Greca from "@/components/ui/Greca";
 
 export default function RegistroPatrocinadoresPage() {
-  const { user, isAdmin, loginWithGoogle } = useAuth();
+  const { user, registration, isAdmin, loginWithGoogle, logout } = useAuth();
 
   const [organization, setOrganization] = useState("");
   const [fullName, setFullName] = useState("");
@@ -275,6 +276,12 @@ export default function RegistroPatrocinadoresPage() {
               </button>
             </div>
           </div>
+        ) : registration && !submittedReg ? (
+          <ExistingRegistrationNotice
+            registration={registration}
+            requestedType="sponsor"
+            onLogout={logout}
+          />
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl mx-auto">
             {/* Aviso de marca y protección de datos para patrocinadores */}

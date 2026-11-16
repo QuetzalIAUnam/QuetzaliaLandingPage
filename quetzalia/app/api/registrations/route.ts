@@ -58,6 +58,32 @@ export async function POST(req: Request) {
       );
     }
 
+    // Regla de Negocio: Verificar si el usuario ya tiene un registro previo diferente o preexistente
+    const existingDoc = await adminDb.collection("registrations").doc(authUser.uid).get();
+    if (existingDoc.exists) {
+      const existing = existingDoc.data() as Registration;
+      const isConcurrenInitialWrite =
+        existing.type === type &&
+        Math.abs(new Date(existing.createdAt || 0).getTime() - new Date().getTime()) < 30000;
+
+      if (!isConcurrenInitialWrite) {
+        const typeLabel =
+          existing.type === "speaker"
+            ? "Ponente"
+            : existing.type === "community"
+            ? "Comunidad"
+            : existing.type === "sponsor"
+            ? "Patrocinador"
+            : "Asistente";
+        return NextResponse.json(
+          {
+            error: `Esta cuenta ya cuenta con un registro activo como ${typeLabel} (Folio: ${existing.id}). Cada cuenta de Google solo puede registrarse una vez. Para registrar otra postulación o colectivo, por favor utiliza una cuenta de correo diferente.`,
+          },
+          { status: 409 }
+        );
+      }
+    }
+
     if (!consent || !consent.privacyNotice) {
       return NextResponse.json(
         { error: "Es obligatorio aceptar el Aviso de Privacidad Integral." },
