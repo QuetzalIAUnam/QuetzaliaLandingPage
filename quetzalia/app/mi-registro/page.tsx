@@ -7,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import Greca from "@/components/ui/Greca";
 
 export default function MiRegistroPage() {
-  const { user, registration, loading, loginWithGoogle, logout } = useAuth();
+  const { user, registration, loading, isAdmin, loginWithGoogle, logout } = useAuth();
   const [deleting, setDeleting] = useState(false);
 
   const handleDeleteMyRegistration = async () => {
@@ -143,12 +143,18 @@ export default function MiRegistroPage() {
                   )}
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] uppercase font-bold tracking-widest px-2.5 py-0.5 bg-emerald-100 text-emerald-900 border border-emerald-300">
-                        ✓ Sesión vinculada con Google
-                      </span>
+                      {isAdmin ? (
+                        <span className="text-[10px] uppercase font-bold tracking-widest px-2.5 py-0.5 bg-amber-100 text-amber-900 border border-amber-400">
+                          ★ Comité Organizador / Administrador
+                        </span>
+                      ) : (
+                        <span className="text-[10px] uppercase font-bold tracking-widest px-2.5 py-0.5 bg-emerald-100 text-emerald-900 border border-emerald-300">
+                          ✓ Sesión vinculada con Google
+                        </span>
+                      )}
                     </div>
                     <h2 className="text-2xl sm:text-3xl font-display text-[var(--head)] mt-1.5">
-                      {user.displayName || "Participante"}
+                      {user.displayName || (isAdmin ? "Miembro del Comité" : "Participante")}
                     </h2>
                     <p className="text-sm text-[var(--fg)] opacity-85 font-medium mt-0.5">
                       {user.email}
@@ -156,17 +162,91 @@ export default function MiRegistroPage() {
                   </div>
                 </div>
 
-                <button
-                  onClick={() => logout()}
-                  className="btn btn-ghost text-xs px-5 py-2.5 shrink-0 self-start sm:self-center"
-                >
-                  Cerrar sesión
-                </button>
+                <div className="flex items-center gap-3 self-start sm:self-center">
+                  {isAdmin && (
+                    <Link
+                      href="/admin"
+                      className="btn btn-primary text-xs px-4 py-2 text-center whitespace-nowrap font-bold"
+                    >
+                      Dashboard →
+                    </Link>
+                  )}
+                  <button
+                    onClick={() => logout()}
+                    className="btn btn-ghost text-xs px-5 py-2.5 shrink-0"
+                  >
+                    Cerrar sesión
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Vista cuando NO hay registro activo */}
-            {!registration ? (
+            {/* Vista Exclusiva para Miembros del Comité */}
+            {isAdmin ? (
+              <div className="border-2 border-[var(--head)] bg-[var(--card)] p-8 sm:p-12 shadow-xl space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-[var(--rule)] pb-6">
+                  <div>
+                    <span className="px-3 py-1 text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-300">
+                      ★ Rol Administrativo Activo
+                    </span>
+                    <h2 className="text-3xl font-display text-[var(--head)] mt-2">
+                      Panel de Control y Gestión Quetzalia
+                    </h2>
+                    <p className="text-sm text-[var(--fg)] opacity-85 mt-1">
+                      Cuenta administrativa autorizada: <strong>{user.email}</strong>
+                    </p>
+                  </div>
+                  <Link
+                    href="/admin"
+                    className="btn btn-primary text-xs px-6 py-3.5 text-center whitespace-nowrap shadow-md cursor-pointer font-bold inline-flex items-center gap-2"
+                  >
+                    <span>⚡ Ir al Dashboard de Administración</span>
+                    <span>→</span>
+                  </Link>
+                </div>
+
+                <div className="p-5 bg-[var(--bg-alt)] border border-[var(--rule)] space-y-3">
+                  <h3 className="font-display text-lg text-[var(--head)]">
+                    Acreditación Institucional Garantizada
+                  </h3>
+                  <p className="text-sm leading-relaxed text-[var(--fg)] opacity-90">
+                    Como integrante del comité organizador de <strong>Quetzalia 2027</strong> en la FES Acatlán de la UNAM, tu acceso y acreditación oficial están garantizados por el Comité.
+                  </p>
+                  <p className="text-xs text-amber-900 bg-amber-50 dark:bg-amber-950/30 p-3 border border-amber-200 dark:border-amber-900 leading-relaxed">
+                    ℹ️ <strong>Control de Cupo (400 Lugares):</strong> Por política organizativa, las cuentas del comité <strong>no deben ni requieren registrarse</strong> como asistentes o ponentes, preservando el cupo íntegro para las estudiantes y la comunidad universitaria.
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-xs">
+                    <div className="p-3 bg-[var(--card)] border border-[var(--rule)]">
+                      <p className="font-bold text-[var(--head)]">🛡️ Control de Cupo</p>
+                      <p className="opacity-75 mt-0.5">Gestión de 400 lugares, lista de espera y promociones.</p>
+                    </div>
+                    <div className="p-3 bg-[var(--card)] border border-[var(--rule)]">
+                      <p className="font-bold text-[var(--head)]">📋 Moderación</p>
+                      <p className="opacity-75 mt-0.5">Revisión de ponencias, colectivos y convenios de patrocinio.</p>
+                    </div>
+                    <div className="p-3 bg-[var(--card)] border border-[var(--rule)]">
+                      <p className="font-bold text-[var(--head)]">✉️ Comunicados Oficiales</p>
+                      <p className="opacity-75 mt-0.5">Envío de plantillas y avisos a las asistentes.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-2 flex flex-col sm:flex-row gap-4 justify-between items-center">
+                  <Link
+                    href="/admin"
+                    className="btn btn-primary text-xs w-full sm:w-auto text-center font-bold"
+                  >
+                    Abrir Dashboard Administrativo →
+                  </Link>
+                  <Link
+                    href="/"
+                    className="text-xs text-[var(--accent)] font-semibold hover:underline"
+                  >
+                    ← Volver a la página principal de Quetzalia
+                  </Link>
+                </div>
+              </div>
+            ) : !registration ? (
               <div className="space-y-6">
                 <div className="border border-[var(--rule)] p-6 sm:p-8 bg-[var(--bg-alt)]/60 text-center">
                   <p className="eyebrow text-xs">Pase no vinculado</p>

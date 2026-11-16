@@ -12,7 +12,7 @@ import ConsentSection, { CURRENT_CONSENT_VERSION } from "@/components/ConsentSec
 import Greca from "@/components/ui/Greca";
 
 export default function RegistroSpeakersPage() {
-  const { user, loginWithGoogle } = useAuth();
+  const { user, isAdmin, loginWithGoogle } = useAuth();
 
   const [legalName, setLegalName] = useState("");
   const [chosenName, setChosenName] = useState("");
@@ -241,7 +241,25 @@ export default function RegistroSpeakersPage() {
           </blockquote>
         </div>
 
-        {!user ? (
+        {isAdmin ? (
+          <div className="border-2 border-[var(--head)] bg-[var(--card)] p-8 sm:p-12 text-center space-y-4 max-w-xl mx-auto shadow-xl">
+            <span className="px-3 py-1 text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-300">
+              ★ Miembro del Comité Organizador
+            </span>
+            <h2 className="text-2xl font-display text-[var(--head)]">Acceso de Administración</h2>
+            <p className="text-sm text-[var(--fg)] opacity-90 leading-relaxed">
+              Tu cuenta (<strong>{user?.email}</strong>) forma parte del comité de Quetzalia. Los miembros del comité revisan y aprueban las propuestas de ponencias desde el panel administrativo.
+            </p>
+            <div className="pt-4 flex flex-col sm:flex-row gap-3 justify-center">
+              <Link href="/admin" className="btn btn-primary text-xs">
+                Ir al Dashboard de Administración →
+              </Link>
+              <Link href="/mi-registro" className="btn btn-ghost text-xs">
+                Ver Mi Perfil de Comité
+              </Link>
+            </div>
+          </div>
+        ) : !user ? (
           /* Autenticación SIN cuadros, con el botón idéntico al del header (solo icono y texto con destello hover) */
           <div className="my-14 py-4 text-center space-y-4 max-w-md mx-auto">
             <p className="text-sm sm:text-base text-[var(--fg)] opacity-90">

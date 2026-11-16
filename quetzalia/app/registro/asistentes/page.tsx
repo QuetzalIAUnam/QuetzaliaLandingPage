@@ -9,7 +9,7 @@ import ConsentSection, { CURRENT_CONSENT_VERSION } from "@/components/ConsentSec
 import Greca from "@/components/ui/Greca";
 
 export default function RegistroAsistentesPage() {
-  const { user, loginWithGoogle } = useAuth();
+  const { user, isAdmin, loginWithGoogle } = useAuth();
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -162,7 +162,25 @@ export default function RegistroAsistentesPage() {
           </p>
         </div>
 
-        {!user ? (
+        {isAdmin ? (
+          <div className="border-2 border-[var(--head)] bg-[var(--card)] p-8 sm:p-12 text-center space-y-4 max-w-xl mx-auto shadow-xl">
+            <span className="px-3 py-1 text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-300">
+              ★ Miembro del Comité Organizador
+            </span>
+            <h2 className="text-2xl font-display text-[var(--head)]">Acceso de Administración</h2>
+            <p className="text-sm text-[var(--fg)] opacity-90 leading-relaxed">
+              Tu cuenta (<strong>{user?.email}</strong>) forma parte del comité de Quetzalia. Los miembros del comité no deben registrarse como asistentes para no ocupar los 400 lugares de cupo estudiantil.
+            </p>
+            <div className="pt-4 flex flex-col sm:flex-row gap-3 justify-center">
+              <Link href="/admin" className="btn btn-primary text-xs">
+                Ir al Dashboard de Administración →
+              </Link>
+              <Link href="/mi-registro" className="btn btn-ghost text-xs">
+                Ver Mi Perfil de Comité
+              </Link>
+            </div>
+          </div>
+        ) : !user ? (
           <div className="w-full max-w-xl mx-auto flex flex-col items-center justify-center text-center p-8 sm:p-10 border-2 border-[var(--accent)] bg-[var(--card)] shadow-lg space-y-5 my-8">
             <div className="w-14 h-14 mx-auto rounded-full bg-[var(--bg-alt)] border-2 border-[var(--accent)] flex items-center justify-center shadow-xs">
               <svg className="google-icon" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">

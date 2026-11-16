@@ -49,6 +49,7 @@ export async function POST(req: Request) {
         `speakers/private/${registrationId}/photo.jpg`,
         `speakers/public/${registrationId}/photo.jpg`,
         `sponsors/logos/${registrationId}/logo.jpg`,
+        `communities/logos/${registrationId}/logo.jpg`,
       ].filter(Boolean) as string[];
 
       await Promise.all(

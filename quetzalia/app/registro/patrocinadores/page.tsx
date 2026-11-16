@@ -2,14 +2,17 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import { saveRegistration } from "@/lib/firebase";
 import { ConsentRecord, Registration } from "@/lib/types";
+import { compressImage } from "@/lib/image-compressor";
+import { uploadSponsorLogo } from "@/lib/storage-client";
 import ConsentSection, { CURRENT_CONSENT_VERSION } from "@/components/ConsentSection";
 import Greca from "@/components/ui/Greca";
 
 export default function RegistroPatrocinadoresPage() {
-  const { user, loginWithGoogle } = useAuth();
+  const { user, isAdmin, loginWithGoogle } = useAuth();
 
   const [organization, setOrganization] = useState("");
   const [fullName, setFullName] = useState("");
@@ -17,6 +20,13 @@ export default function RegistroPatrocinadoresPage() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [talkMaterials, setTalkMaterials] = useState(""); // Propuesta / interés de patrocinio
+
+  // Manejo de logotipo corporativo
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [logoStats, setLogoStats] = useState<string | null>(null);
+  const [logoCompressing, setLogoCompressing] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   const [consent, setConsent] = useState<ConsentRecord>({
     privacyNotice: false,
@@ -35,6 +45,33 @@ export default function RegistroPatrocinadoresPage() {
 
   const displayEmail = email || user?.email || "";
   const displayFullName = fullName || user?.displayName || "";
+
+  // Selección y compresión en navegador del logotipo de patrocinador
+  const handleLogoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setErrorMsg(null);
+    setLogoStats(null);
+    setLogoCompressing(true);
+
+    try {
+      const result = await compressImage(file);
+      setLogoFile(result.file);
+      setLogoPreview(URL.createObjectURL(result.file));
+      setLogoStats(
+        `Original: ${(result.originalSize / (1024 * 1024) > 1 ? (result.originalSize / (1024 * 1024)).toFixed(1) + " MB" : (result.originalSize / 1024).toFixed(0) + " KB")} → Optimizada: ${(
+          result.compressedSize / 1024
+        ).toFixed(0)} KB (${result.width}x${result.height}px)`
+      );
+    } catch (err: unknown) {
+      const error = err as Error;
+      setErrorMsg(error.message || "Error al procesar el logotipo corporativo.");
+      e.target.value = "";
+    } finally {
+      setLogoCompressing(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,6 +99,15 @@ export default function RegistroPatrocinadoresPage() {
 
     try {
       setSubmitting(true);
+      let uploadedLogoPath: string | undefined = undefined;
+
+      // Subir logotipo a Storage si se adjuntó
+      if (logoFile) {
+        setUploadingLogo(true);
+        const uploadRes = await uploadSponsorLogo(logoFile, user.uid);
+        uploadedLogoPath = uploadRes.path;
+      }
+
       const reg = await saveRegistration(
         {
           userId: user.uid,
@@ -72,6 +118,7 @@ export default function RegistroPatrocinadoresPage() {
           phone: phone.trim(),
           organization: organization.trim(),
           talkMaterials: talkMaterials.trim(), // Notas / propuesta de patrocinio
+          photoPath: uploadedLogoPath,
           consent,
           consentVersion: CURRENT_CONSENT_VERSION,
           consentTimestamp: new Date().toISOString(),
@@ -84,6 +131,7 @@ export default function RegistroPatrocinadoresPage() {
       setErrorMsg("Ocurrió un error al registrar la solicitud de patrocinio. Intenta nuevamente.");
     } finally {
       setSubmitting(false);
+      setUploadingLogo(false);
     }
   };
 
@@ -116,6 +164,12 @@ export default function RegistroPatrocinadoresPage() {
               <p><strong>Estatus:</strong> <span className="px-2 py-0.5 font-bold uppercase text-xs bg-amber-100 text-amber-900 border border-amber-300">Pendiente de revisión</span></p>
               <p><strong>Organización / Empresa:</strong> {submittedReg.organization}</p>
               <p><strong>Contacto registrado:</strong> {submittedReg.fullName} ({submittedReg.email})</p>
+              {submittedReg.photoPath && (
+                <p>
+                  <strong>Logotipo corporativo:</strong>{" "}
+                  <span className="text-emerald-700 font-semibold">Almacenado de forma segura (sponsors/logos/)</span>
+                </p>
+              )}
               <p><strong>Fecha y hora:</strong> {new Date(submittedReg.createdAt).toLocaleString("es-MX")}</p>
             </div>
 
@@ -178,7 +232,25 @@ export default function RegistroPatrocinadoresPage() {
           </blockquote>
         </div>
 
-        {!user ? (
+        {isAdmin ? (
+          <div className="border-2 border-[var(--head)] bg-[var(--card)] p-8 sm:p-12 text-center space-y-4 max-w-xl mx-auto shadow-xl">
+            <span className="px-3 py-1 text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-300">
+              ★ Miembro del Comité Organizador
+            </span>
+            <h2 className="text-2xl font-display text-[var(--head)]">Acceso de Administración</h2>
+            <p className="text-sm text-[var(--fg)] opacity-90 leading-relaxed">
+              Tu cuenta (<strong>{user?.email}</strong>) forma parte del comité de Quetzalia. Los miembros del comité gestionan y revisan las alianzas y patrocinios desde el panel de administración.
+            </p>
+            <div className="pt-4 flex flex-col sm:flex-row gap-3 justify-center">
+              <Link href="/admin" className="btn btn-primary text-xs">
+                Ir al Dashboard de Administración →
+              </Link>
+              <Link href="/mi-registro" className="btn btn-ghost text-xs">
+                Ver Mi Perfil de Comité
+              </Link>
+            </div>
+          </div>
+        ) : !user ? (
           /* Autenticación SIN cuadros, con el botón idéntico al del header (solo icono y texto con destello hover) */
           <div className="my-14 py-4 text-center space-y-4 max-w-md mx-auto">
             <p className="text-sm sm:text-base text-[var(--fg)] opacity-90">
@@ -307,6 +379,51 @@ export default function RegistroPatrocinadoresPage() {
                   className="form-textarea"
                 />
               </div>
+
+              {/* Subida de Logotipo Corporativo */}
+              <div className="border-t border-[var(--rule)] pt-4 mt-2">
+                <label className="form-label" htmlFor="logoUpload">
+                  Logotipo Corporativo Oficial (Opcional en registro inicial)
+                </label>
+                <p className="text-xs text-[var(--fg)] opacity-80 mb-2">
+                  Formatos admitidos: JPG, PNG o WebP (hasta 15 MB). La imagen se optimiza al instante en tu navegador a máx 1200 px para reproducirse fielmente en cartelería, sitio web y acreditaciones. Su publicación está sujeta a la firma del Formato 06.
+                </p>
+                <input
+                  id="logoUpload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoSelect}
+                  disabled={logoCompressing || submitting}
+                  className="form-input text-xs cursor-pointer"
+                />
+
+                {logoCompressing && (
+                  <div className="mt-2 text-xs font-semibold text-amber-800 animate-pulse">
+                    ⚡ Optimizando logotipo corporativo...
+                  </div>
+                )}
+
+                {logoPreview && !logoCompressing && (
+                  <div className="mt-3 flex items-center gap-4 p-3 bg-[var(--bg-alt)] border border-[var(--rule)]">
+                    <div className="relative w-20 h-16 rounded-md overflow-hidden border-2 border-[var(--accent)] shrink-0 bg-white p-1">
+                      <Image
+                        src={logoPreview}
+                        alt="Vista previa del logotipo"
+                        fill
+                        className="object-contain"
+                        unoptimized
+                      />
+                    </div>
+                    <div className="text-xs">
+                      <p className="font-semibold text-[var(--head)]">Logotipo listo para subir</p>
+                      <p className="text-[11px] opacity-75">{logoStats}</p>
+                      <p className="text-[10px] text-emerald-800 font-semibold mt-0.5">
+                        🔒 Queda resguardado de forma privada hasta la formalización del Formato 06.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Consentimientos */}
@@ -325,10 +442,14 @@ export default function RegistroPatrocinadoresPage() {
             <div className="pt-4 flex justify-end">
               <button
                 type="submit"
-                disabled={submitting}
+                disabled={submitting || uploadingLogo || logoCompressing}
                 className="btn btn-primary w-full sm:w-auto cursor-pointer"
               >
-                {submitting ? "Registrando propuesta..." : "Enviar Registro de Patrocinador"}
+                {uploadingLogo
+                  ? "Subiendo logotipo y guardando..."
+                  : submitting
+                    ? "Registrando propuesta..."
+                    : "Enviar Registro de Patrocinador"}
               </button>
             </div>
           </form>

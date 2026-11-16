@@ -15,6 +15,7 @@ interface AuthContextType {
   user: User | null;
   registration: Registration | null;
   loading: boolean;
+  isAdmin: boolean;
   loginWithGoogle: () => Promise<User>;
   logout: () => Promise<void>;
   refreshRegistration: () => Promise<void>;
@@ -24,6 +25,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   registration: null,
   loading: true,
+  isAdmin: false,
   loginWithGoogle: async () => { throw new Error("AuthContext no inicializado"); },
   logout: async () => {},
   refreshRegistration: async () => {},
@@ -32,6 +34,7 @@ const AuthContext = createContext<AuthContextType>({
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [registration, setRegistration] = useState<Registration | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -46,6 +49,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (currentUser) {
+        // Verificar si la cuenta es miembro del comité organizador
+        currentUser.getIdToken().then(async (token) => {
+          try {
+            const res = await fetch("/api/registrations/me", {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            if (res.ok) {
+              const data = await res.json();
+              setIsAdmin(!!data.isAdmin);
+            }
+          } catch (adminCheckErr) {
+            console.warn("No se pudo verificar rol de comité:", adminCheckErr);
+          }
+        });
+
         // Suscribirse a los cambios en tiempo real del registro del usuario
         try {
           unsubscribeRegistration = subscribeToUserRegistration(
@@ -64,6 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } else {
         setRegistration(null);
+        setIsAdmin(false);
         setLoading(false);
       }
     });
@@ -119,6 +138,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         registration,
         loading,
+        isAdmin,
         loginWithGoogle,
         logout,
         refreshRegistration,

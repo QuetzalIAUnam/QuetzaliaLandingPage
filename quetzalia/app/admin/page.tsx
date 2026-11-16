@@ -1781,13 +1781,17 @@ export default function AdminDashboardPage() {
                 </div>
               )}
 
-              {/* Gestión de Fotografía y Garantía de Retiro en 72h */}
+              {/* Gestión de Fotografía o Logotipo y Garantía de Retiro en 72h */}
               {selectedReg.photoPath && (
                 <div className="border border-[var(--accent)] p-4 bg-[var(--bg-alt)]/30 space-y-3 text-xs">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-bold text-[var(--head)] uppercase tracking-wider">
-                        Fotografía de semblanza:
+                        {selectedReg.type === "sponsor"
+                          ? "Logotipo oficial de la empresa:"
+                          : selectedReg.type === "community"
+                          ? "Emblema / Logotipo del colectivo:"
+                          : "Fotografía de semblanza:"}
                       </p>
                       <p className="font-mono text-[11px] opacity-80 mt-0.5">
                         Ruta: {selectedReg.photoPath}
@@ -1797,6 +1801,10 @@ export default function AdminDashboardPage() {
                       {selectedReg.photoPath.includes("public") ? (
                         <span className="px-2 py-0.5 font-bold uppercase text-[10px] bg-emerald-100 text-emerald-900 border border-emerald-400">
                           Publicada en Agenda Oficial
+                        </span>
+                      ) : selectedReg.photoPath.includes("sponsors") || selectedReg.photoPath.includes("communities") ? (
+                        <span className="px-2 py-0.5 font-bold uppercase text-[10px] bg-emerald-100 text-emerald-900 border border-emerald-400">
+                          Archivo de Imagen en Storage
                         </span>
                       ) : (
                         <span className="px-2 py-0.5 font-bold uppercase text-[10px] bg-amber-100 text-amber-900 border border-amber-400">

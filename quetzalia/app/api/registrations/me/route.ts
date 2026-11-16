@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { adminDb, adminStorage } from "@/lib/firebase-admin";
-import { verifyAuthUser } from "@/lib/server-auth";
+import { verifyAuthUser, getAllAdminEmails } from "@/lib/server-auth";
 import { Registration } from "@/lib/types";
 import { removeApprovedContact } from "@/lib/resend-broadcast";
 
@@ -14,14 +14,18 @@ export async function GET(req: Request) {
       );
     }
 
+    const userEmail = (authUser.email || "").toLowerCase().trim();
+    const adminEmails = await getAllAdminEmails();
+    const isAdmin = adminEmails.includes(userEmail);
+
     const docSnap = await adminDb.collection("registrations").doc(authUser.uid).get();
 
     if (!docSnap.exists) {
-      return NextResponse.json({ exists: false, registration: null }, { status: 200 });
+      return NextResponse.json({ exists: false, registration: null, isAdmin }, { status: 200 });
     }
 
     return NextResponse.json(
-      { exists: true, registration: { id: docSnap.id, ...docSnap.data() } },
+      { exists: true, registration: { id: docSnap.id, ...docSnap.data() }, isAdmin },
       { status: 200 }
     );
   } catch (error: unknown) {
@@ -55,7 +59,7 @@ export async function DELETE(req: Request) {
         }).catch((err) => console.warn("Error al remover de Resend:", err));
       }
 
-      // Eliminar fotografías de Storage
+      // Eliminar fotografías y logotipos de Storage
       try {
         const bucket = adminStorage.bucket();
         const files = [
@@ -63,6 +67,7 @@ export async function DELETE(req: Request) {
           `speakers/private/${authUser.uid}/photo.jpg`,
           `speakers/public/${authUser.uid}/photo.jpg`,
           `sponsors/logos/${authUser.uid}/logo.jpg`,
+          `communities/logos/${authUser.uid}/logo.jpg`,
         ].filter(Boolean) as string[];
 
         await Promise.all(

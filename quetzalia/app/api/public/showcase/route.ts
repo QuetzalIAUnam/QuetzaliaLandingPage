@@ -55,7 +55,7 @@ export async function GET() {
           id: doc.id,
           name: data.organization || data.legalName || "Marca Patrocinadora",
           legalName: data.legalName,
-          logoUrl: data.logoPath || undefined,
+          logoUrl: data.photoPath || data.logoPath || undefined,
         });
       } else if (type === "community") {
         communities.push({
@@ -63,7 +63,7 @@ export async function GET() {
           name: data.organization || "Colectivo STEM",
           representative: data.fullName,
           desc: data.talkMaterials || "",
-          logoUrl: data.logoPath || undefined,
+          logoUrl: data.photoPath || data.logoPath || undefined,
         });
       }
     });

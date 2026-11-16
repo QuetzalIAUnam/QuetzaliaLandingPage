@@ -67,6 +67,38 @@ export async function uploadSponsorLogo(
   return { path: filePath, url };
 }
 
+// Subida de logotipo o emblema de comunidad o colectivo
+export async function uploadCommunityLogo(
+  file: File,
+  communityId: string
+): Promise<{ path: string; url: string }> {
+  const fileToUpload =
+    file.type === "image/jpeg" && file.size < 800 * 1024
+      ? file
+      : (await compressImage(file)).file;
+
+  const filePath = `communities/logos/${communityId}/logo.jpg`;
+  const storageRef = ref(storage, filePath);
+
+  const snapshot = await uploadBytes(storageRef, fileToUpload, {
+    contentType: "image/jpeg",
+    customMetadata: {
+      communityId,
+      uploadedAt: new Date().toISOString(),
+      compressedSize: fileToUpload.size.toString(),
+    },
+  });
+
+  let url = "";
+  try {
+    url = await getDownloadURL(snapshot.ref);
+  } catch (urlErr) {
+    console.warn("Advertencia al obtener URL de descarga para logotipo de comunidad:", urlErr);
+  }
+
+  return { path: filePath, url };
+}
+
 // Obtener URL de descarga segura para una ruta
 export async function getStorageFileUrl(filePath: string): Promise<string | null> {
   try {
