@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,400;0,500;0,600;1,400&family=Limelight&display=swap");
 @import "tailwindcss";
 
 :root {
@@ -16,8 +15,8 @@
   --band: #613954;
   --band-fg: #F5E4E9;
   --band-accent: #F4B3D9;
-  --display: 'Limelight', 'Poiret One', Georgia, serif;
-  --body: 'Jost', 'Futura', 'Century Gothic', system-ui, sans-serif;
+  --display: var(--font-display, 'Limelight', 'Poiret One', Georgia, serif);
+  --body: var(--font-body, 'Jost', 'Futura', 'Century Gothic', system-ui, sans-serif);
   --maxw: 1120px;
 }
 
@@ -50,8 +49,8 @@
 }
 
 @theme {
-  --font-display: 'Limelight', 'Poiret One', Georgia, serif;
-  --font-body: 'Jost', 'Futura', 'Century Gothic', system-ui, sans-serif;
+  --font-display: var(--font-display, 'Limelight', 'Poiret One', Georgia, serif);
+  --font-body: var(--font-body, 'Jost', 'Futura', 'Century Gothic', system-ui, sans-serif);
   --color-bg: var(--bg);
   --color-bg-alt: var(--bg-alt);
   --color-fg: var(--fg);
