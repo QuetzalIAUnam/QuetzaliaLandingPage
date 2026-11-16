@@ -15,7 +15,7 @@ interface AuthContextType {
   user: User | null;
   registration: Registration | null;
   loading: boolean;
-  loginWithGoogle: () => Promise<void>;
+  loginWithGoogle: () => Promise<User>;
   logout: () => Promise<void>;
   refreshRegistration: () => Promise<void>;
 }
@@ -24,7 +24,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   registration: null,
   loading: true,
-  loginWithGoogle: async () => {},
+  loginWithGoogle: async () => { throw new Error("AuthContext no inicializado"); },
   logout: async () => {},
   refreshRegistration: async () => {},
 });
@@ -76,10 +76,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const loginWithGoogle = async () => {
+  const loginWithGoogle = async (): Promise<User> => {
     try {
       setLoading(true);
-      await signInWithGoogle();
+      const loggedUser = await signInWithGoogle();
+      setUser(loggedUser);
+      return loggedUser;
     } catch (error) {
       console.error("Error durante login con Google:", error);
       throw error;

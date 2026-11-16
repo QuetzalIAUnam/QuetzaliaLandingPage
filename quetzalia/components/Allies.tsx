@@ -221,16 +221,20 @@ export default function Allies() {
         {sparks.map((sp, idx) => (
           <span
             key={`spark-${idx}`}
-            className="spark"
+            className="allies-spark"
             style={{
+              position: "absolute",
               top: sp.top,
               left: sp.left,
               width: `${sp.size}px`,
               height: `${sp.size}px`,
+              backgroundColor: "var(--accent)",
+              clipPath: "polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%)",
+              animation: `twinkle ${sp.duration} ease-in-out infinite`,
               animationDelay: sp.delay,
-              animationDuration: sp.duration,
               opacity: 0.8,
               filter: "drop-shadow(0 0 6px var(--accent))",
+              pointerEvents: "none",
             }}
           />
         ))}
