@@ -400,56 +400,77 @@ export default function MiRegistroPage() {
               <div className="space-y-6">
                 <div className="border-2 border-[var(--head)] p-6 sm:p-8 bg-[var(--card)] shadow-md">
                   <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--rule)] pb-4 mb-6">
-                  <div>
-                    <span className="eyebrow">Tipo de registro</span>
-                    <h3 className="text-2xl font-display text-[var(--head)] capitalize">
-                      {registration.type}
-                    </h3>
+                    <div>
+                      <span className="eyebrow">Tipo de registro</span>
+                      <h3 className="text-2xl font-display text-[var(--head)] capitalize">
+                        {registration.type}
+                      </h3>
+                    </div>
+                    <div>
+                      <span className="eyebrow">Estado de la solicitud</span>
+                      <div className="mt-1">
+                        {registration.status === "pendiente" && (
+                          <span className="px-4 py-1.5 font-bold uppercase tracking-wider text-xs bg-amber-100 text-amber-900 border border-amber-400">
+                            Pendiente de revisión
+                          </span>
+                        )}
+                        {registration.status === "aprobado" && (
+                          <span className="px-4 py-1.5 font-bold uppercase tracking-wider text-xs bg-emerald-100 text-emerald-900 border border-emerald-400">
+                            Aprobado
+                          </span>
+                        )}
+                        {registration.status === "lista_espera" && (
+                          <span className="px-4 py-1.5 font-bold uppercase tracking-wider text-xs bg-purple-100 text-purple-900 border border-purple-400">
+                            En lista de espera
+                          </span>
+                        )}
+                        {registration.status === "rechazado" && (
+                          <span className="px-4 py-1.5 font-bold uppercase tracking-wider text-xs bg-rose-100 text-rose-900 border border-rose-400">
+                            No aceptado
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <span className="eyebrow">Estado de la solicitud</span>
-                    <div className="mt-1">
-                      {registration.status === "pendiente" && (
-                        <span className="px-4 py-1.5 font-bold uppercase tracking-wider text-xs bg-amber-100 text-amber-900 border border-amber-400">
-                          Pendiente de revisión
-                        </span>
-                      )}
-                      {registration.status === "aprobado" && (
-                        <span className="px-4 py-1.5 font-bold uppercase tracking-wider text-xs bg-emerald-100 text-emerald-900 border border-emerald-400">
-                          Aprobado
-                        </span>
-                      )}
-                      {registration.status === "lista_espera" && (
-                        <span className="px-4 py-1.5 font-bold uppercase tracking-wider text-xs bg-purple-100 text-purple-900 border border-purple-400">
-                          En lista de espera
-                        </span>
-                      )}
-                      {registration.status === "rechazado" && (
-                        <span className="px-4 py-1.5 font-bold uppercase tracking-wider text-xs bg-rose-100 text-rose-900 border border-rose-400">
-                          No aceptado
-                        </span>
-                      )}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
+                    <div>
+                      <p className="font-semibold text-[var(--head)]">Nombre registrado:</p>
+                      <p>{registration.fullName || registration.chosenName || "—"}</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-[var(--head)]">Organización / Afiliación:</p>
+                      <p>{registration.organization || "—"}</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-[var(--head)]">Fecha de solicitud:</p>
+                      <p>{new Date(registration.createdAt).toLocaleString("es-MX")}</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-[var(--head)]">Versión de consentimiento:</p>
+                      <p className="font-mono text-xs">{registration.consentVersion || "v1.0"}</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
+                {/* Zona de Pruebas: Eliminar Registro */}
+                <div className="border border-red-300 dark:border-red-900/60 bg-red-50/50 dark:bg-red-950/20 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div>
-                    <p className="font-semibold text-[var(--head)]">Nombre registrado:</p>
-                    <p>{registration.fullName || registration.chosenName || "—"}</p>
+                    <h3 className="text-sm font-bold text-red-900 dark:text-red-300">
+                      Zona de Pruebas: Eliminar Postulación
+                    </h3>
+                    <p className="text-xs text-red-800 dark:text-red-400 mt-0.5">
+                      ¿Deseas probar el flujo de registro desde cero? Puedes borrar tu postulación actual de la base de datos para volver a registrarte.
+                    </p>
                   </div>
-                  <div>
-                    <p className="font-semibold text-[var(--head)]">Organización / Afiliación:</p>
-                    <p>{registration.organization || "—"}</p>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-[var(--head)]">Fecha de solicitud:</p>
-                    <p>{new Date(registration.createdAt).toLocaleString("es-MX")}</p>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-[var(--head)]">Versión de consentimiento:</p>
-                    <p className="font-mono text-xs">{registration.consentVersion || "v1.0"}</p>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={handleDeleteMyRegistration}
+                    disabled={deleting}
+                    className="px-3.5 py-2 text-xs font-bold uppercase tracking-wider bg-red-800 hover:bg-red-900 text-white transition-colors cursor-pointer disabled:opacity-50 whitespace-nowrap"
+                  >
+                    {deleting ? "Eliminando..." : "🗑️ Eliminar mi registro"}
+                  </button>
 
                   {registration.photoPath && (
                     <div className="sm:col-span-2 pt-2 border-t border-[var(--rule)] flex items-center gap-4">
@@ -477,28 +498,7 @@ export default function MiRegistroPage() {
                   )}
                 </div>
               </div>
-
-              {/* Zona de Pruebas: Eliminar Registro */}
-              <div className="border border-red-300 dark:border-red-900/60 bg-red-50/50 dark:bg-red-950/20 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                  <h3 className="text-sm font-bold text-red-900 dark:text-red-300">
-                    Zona de Pruebas: Eliminar Postulación
-                  </h3>
-                  <p className="text-xs text-red-800 dark:text-red-400 mt-0.5">
-                    ¿Deseas probar el flujo de registro desde cero? Puedes borrar tu postulación actual de la base de datos para volver a registrarte.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleDeleteMyRegistration}
-                  disabled={deleting}
-                  className="px-3.5 py-2 text-xs font-bold uppercase tracking-wider bg-red-800 hover:bg-red-900 text-white transition-colors cursor-pointer disabled:opacity-50 whitespace-nowrap"
-                >
-                  {deleting ? "Eliminando..." : "🗑️ Eliminar mi registro"}
-                </button>
-              </div>
-            </div>
-          )}
+            )}
           </div>
         )}
       </main>

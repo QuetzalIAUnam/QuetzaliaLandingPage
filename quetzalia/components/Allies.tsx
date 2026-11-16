@@ -240,20 +240,22 @@ export default function Allies() {
           className="text-center mx-auto items-center mb-8"
         />
 
-        {/* Layout en 2 Columnas Balanceadas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start text-center py-4">
-          {/* ================= COLUMNA 1: PONENTES ================= */}
-          <div className="space-y-4 px-2 sm:px-6">
-            <p className="text-xs uppercase tracking-widest font-bold text-[var(--accent)]">
-              Voces y Ponencias
-            </p>
-            <h3 className="text-2xl sm:text-3xl font-display text-[var(--head)] leading-snug">
-              Mujeres que construyen el futuro
-            </h3>
+        {/* Layout en Filas (Rows): Fila 1 Ponentes, Fila 2 Comunidades, Fila 3 Marcas Patrocinadoras */}
+        <div className="space-y-16 py-4">
+          {/* ================= FILA 1: VOCES Y PONENCIAS (PONENTES) ================= */}
+          <div className="space-y-6 text-center">
+            <div className="space-y-2 max-w-2xl mx-auto">
+              <p className="text-xs uppercase tracking-widest font-bold text-[var(--accent)]">
+                Voces y Ponencias
+              </p>
+              <h3 className="text-2xl sm:text-3xl md:text-4xl font-display text-[var(--head)] leading-snug">
+                Mujeres que construyen el futuro
+              </h3>
+            </div>
 
             {speakers.length === 0 ? (
-              <div className="space-y-4">
-                <p className="text-sm sm:text-base text-[var(--fg)] opacity-90 leading-relaxed max-w-md mx-auto">
+              <div className="p-8 sm:p-10 border border-[var(--rule)] bg-[var(--card)]/80 max-w-2xl mx-auto space-y-4 shadow-sm backdrop-blur-xs">
+                <p className="text-sm sm:text-base text-[var(--fg)] opacity-90 leading-relaxed max-w-xl mx-auto">
                   El escenario de Quetzalia 2027 en la FES Acatlán de la UNAM está listo para amplificar tu trayectoria. Sé parte de las mujeres que lideran la vanguardia en ciencia y tecnología compartiendo tu ponencia o taller.
                 </p>
                 <div className="pt-2 flex justify-center">
@@ -268,7 +270,7 @@ export default function Allies() {
                 </div>
               </div>
             ) : (
-              <div className={`people ${inView ? "in-view" : ""} !grid-cols-1 gap-4`}>
+              <div className={`people ${inView ? "in-view" : ""} grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6`}>
                 {speakers.map((person, idx) => (
                   <article
                     className="person"
@@ -328,29 +330,25 @@ export default function Allies() {
             )}
           </div>
 
-          {/* ================= COLUMNA 2: MARCAS Y COMUNIDADES ================= */}
-          <div className="space-y-4 px-2 sm:px-6 md:border-l md:border-[var(--rule)]">
-            <p className="text-xs uppercase tracking-widest font-bold text-[var(--accent)]">
-              Alianzas y Colectivos
-            </p>
-            <h3 className="text-2xl sm:text-3xl font-display text-[var(--head)] leading-snug">
-              Marcas Patrocinadoras y Comunidades STEM
-            </h3>
+          <div className="w-full border-t border-[var(--rule)]/60" />
 
-            {sponsors.length === 0 && communities.length === 0 ? (
-              <div className="space-y-4">
-                <p className="text-sm sm:text-base text-[var(--fg)] opacity-90 leading-relaxed max-w-md mx-auto">
-                  Abrimos este espacio para sumar fuerzas: invitamos tanto a empresas e instituciones que apuesten por el talento femenino en STEM, como a colectivos estudiantiles y clubes de ciencia que construyen en comunidad.
+          {/* ================= FILA 2: COMUNIDADES Y COLECTIVOS STEM ================= */}
+          <div className="space-y-6 text-center">
+            <div className="space-y-2 max-w-2xl mx-auto">
+              <p className="text-xs uppercase tracking-widest font-bold text-[var(--accent)]">
+                Redes Universitarias
+              </p>
+              <h3 className="text-2xl sm:text-3xl md:text-4xl font-display text-[var(--head)] leading-snug">
+                Comunidades y Colectivos STEM
+              </h3>
+            </div>
+
+            {communities.length === 0 ? (
+              <div className="p-8 sm:p-10 border border-[var(--rule)] bg-[var(--card)]/80 max-w-2xl mx-auto space-y-4 shadow-sm backdrop-blur-xs">
+                <p className="text-sm sm:text-base text-[var(--fg)] opacity-90 leading-relaxed max-w-xl mx-auto">
+                  Espacio reservado para clubes de robótica, capítulos IEEE, colectivos de mujeres tecnólogas y agrupaciones estudiantiles. Suma a tu colectivo para visibilizar sus causas y proyectos en el encuentro.
                 </p>
-                <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
-                  <Link
-                    href="/registro/patrocinadores"
-                    className="auth-btn-ghost auth-btn-lg inline-flex items-center gap-2 cursor-pointer group"
-                  >
-                    <span className="auth-btn-text text-sm sm:text-base">
-                      Súmate como Patrocinador →
-                    </span>
-                  </Link>
+                <div className="pt-2 flex justify-center">
                   <Link
                     href="/registro/comunidades"
                     className="auth-btn-ghost auth-btn-lg inline-flex items-center gap-2 cursor-pointer group"
@@ -362,40 +360,95 @@ export default function Allies() {
                 </div>
               </div>
             ) : (
-              <div className="space-y-6 text-left">
-                {sponsors.length > 0 && (
-                  <div>
-                    <h4 className="text-xs uppercase tracking-widest font-bold text-[var(--accent)] mb-3 text-center">
-                      Marcas Patrocinadoras
-                    </h4>
-                    <ul className="allies !grid-cols-2">
-                      {sponsors.map((s) => (
-                        <li key={s.id} className="font-semibold text-sm">
-                          {s.logoUrl ? (
-                            <img src={s.logoUrl} alt={s.name} className="max-h-10 max-w-full object-contain mx-auto" />
-                          ) : (
-                            <span>{s.name}</span>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+              <div className="space-y-6">
+                <ul className="allies">
+                  {communities.map((c) => (
+                    <li key={c.id} className="font-semibold text-sm flex flex-col items-center justify-center p-4">
+                      {c.logoUrl ? (
+                        <img
+                          src={c.logoUrl}
+                          alt={c.name}
+                          className="max-h-14 max-w-full object-contain mb-2"
+                        />
+                      ) : null}
+                      <span className="text-[var(--head)]">{c.name}</span>
+                      {c.representative && (
+                        <span className="text-xs text-[var(--fg)] opacity-75 mt-0.5">
+                          Coord: {c.representative}
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+                <div className="pt-2 flex justify-center">
+                  <Link
+                    href="/registro/comunidades"
+                    className="auth-btn-ghost inline-flex items-center gap-2 cursor-pointer text-xs"
+                  >
+                    <span className="auth-btn-text">
+                      ¿Representas un colectivo? Registra a tu Comunidad →
+                    </span>
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
 
-                {communities.length > 0 && (
-                  <div>
-                    <h4 className="text-xs uppercase tracking-widest font-bold text-[var(--accent)] mb-3 text-center">
-                      Comunidades STEM
-                    </h4>
-                    <ul className="allies !grid-cols-2">
-                      {communities.map((c) => (
-                        <li key={c.id} className="font-semibold text-sm">
-                          <span>{c.name}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+          <div className="w-full border-t border-[var(--rule)]/60" />
+
+          {/* ================= FILA 3: MARCAS PATROCINADORAS E INSTITUCIONES ================= */}
+          <div className="space-y-6 text-center">
+            <div className="space-y-2 max-w-2xl mx-auto">
+              <p className="text-xs uppercase tracking-widest font-bold text-[var(--accent)]">
+                Alianzas Estratégicas
+              </p>
+              <h3 className="text-2xl sm:text-3xl md:text-4xl font-display text-[var(--head)] leading-snug">
+                Marcas Patrocinadoras e Instituciones
+              </h3>
+            </div>
+
+            {sponsors.length === 0 ? (
+              <div className="p-8 sm:p-10 border border-[var(--rule)] bg-[var(--card)]/80 max-w-2xl mx-auto space-y-4 shadow-sm backdrop-blur-xs">
+                <p className="text-sm sm:text-base text-[var(--fg)] opacity-90 leading-relaxed max-w-xl mx-auto">
+                  Espacio reservado para empresas, fundaciones e instituciones comprometidas con impulsar becas, mentorías y oportunidades profesionales para mujeres en ciencia y tecnología.
+                </p>
+                <div className="pt-2 flex justify-center">
+                  <Link
+                    href="/registro/patrocinadores"
+                    className="auth-btn-ghost auth-btn-lg inline-flex items-center gap-2 cursor-pointer group"
+                  >
+                    <span className="auth-btn-text text-sm sm:text-base">
+                      Súmate como Patrocinador →
+                    </span>
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <ul className="allies">
+                  {sponsors.map((s) => (
+                    <li key={s.id} className="font-semibold text-sm flex flex-col items-center justify-center p-4">
+                      {s.logoUrl ? (
+                        <img
+                          src={s.logoUrl}
+                          alt={s.name}
+                          className="max-h-16 max-w-full object-contain mb-2"
+                        />
+                      ) : null}
+                      <span className="text-[var(--head)]">{s.name}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="pt-2 flex justify-center">
+                  <Link
+                    href="/registro/patrocinadores"
+                    className="auth-btn-ghost inline-flex items-center gap-2 cursor-pointer text-xs"
+                  >
+                    <span className="auth-btn-text">
+                      ¿Te interesa una alianza corporativa? Sumar a mi Empresa →
+                    </span>
+                  </Link>
+                </div>
               </div>
             )}
           </div>
