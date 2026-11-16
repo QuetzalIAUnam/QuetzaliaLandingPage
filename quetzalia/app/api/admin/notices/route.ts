@@ -20,8 +20,6 @@ import {
   OFFICIAL_TEMPLATES_CATALOG,
 } from "@/lib/email-templates";
 
-export const dynamic = "force-dynamic";
-
 /**
  * GET /api/admin/notices?templateId=xxx&type=yyy
  * Previsualización de plantillas oficiales para el panel del comité

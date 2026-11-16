@@ -6,8 +6,6 @@ import {
   getEnvAdminEmails,
 } from "@/lib/server-auth";
 
-export const dynamic = "force-dynamic";
-
 // GET /api/admin/users: Lista administradores autorizados
 export async function GET(req: Request) {
   try {

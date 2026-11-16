@@ -4,8 +4,6 @@ import { verifyAdminUser } from "@/lib/server-auth";
 import { sendBroadcastNotice } from "@/lib/resend-broadcast";
 import { renderBroadcastEmail } from "@/lib/email-templates";
 
-export const dynamic = "force-dynamic";
-
 /**
  * GET /api/admin/broadcast
  * Consulta el historial de broadcasts enviados y la métrica de asistentes aprobados
