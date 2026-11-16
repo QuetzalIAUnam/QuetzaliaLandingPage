@@ -9,11 +9,23 @@ import { Registration, MAX_APPROVED, BroadcastRecord } from "@/lib/types";
 import { AdminUserRecord } from "@/lib/server-auth";
 import Greca from "@/components/ui/Greca";
 
+interface ProfileStat {
+  total: number;
+  approved: number;
+}
+
 interface StatsData {
   total: number;
+  filteredCount?: number;
   approvedCount: number;
   maxApproved: number;
   availableSlots: number;
+  breakdown?: {
+    attendee: ProfileStat;
+    speaker: ProfileStat;
+    sponsor: ProfileStat;
+    community: ProfileStat;
+  };
 }
 
 export default function AdminDashboardPage() {
@@ -31,6 +43,12 @@ export default function AdminDashboardPage() {
     approvedCount: 0,
     maxApproved: MAX_APPROVED,
     availableSlots: MAX_APPROVED,
+    breakdown: {
+      attendee: { total: 0, approved: 0 },
+      speaker: { total: 0, approved: 0 },
+      sponsor: { total: 0, approved: 0 },
+      community: { total: 0, approved: 0 },
+    },
   });
   const [loadingData, setLoadingData] = useState(true);
   const [unauthorizedError, setUnauthorizedError] = useState<string | null>(null);
@@ -762,59 +780,177 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        {/* Métricas y Cupo */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-5 border border-[var(--rule)] bg-[var(--card)]">
-            <p className="eyebrow text-xs">Total Registros</p>
-            <p className="text-3xl font-display text-[var(--head)] mt-1">{stats.total}</p>
-          </div>
-
-          <div className="p-5 border border-[var(--rule)] bg-[var(--card)]">
-            <p className="eyebrow text-xs">Aprobados / Cupo</p>
-            <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-3xl font-display text-[var(--head)]">{stats.approvedCount}</span>
-              <span className="text-sm text-[var(--fg)] opacity-70">/ {stats.maxApproved}</span>
+        {/* Métricas Globales y Control de Cupo */}
+        <div className="space-y-4">
+          {/* Fila 1: Cupo del Auditorio FES Acatlán (400 Asistentes) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="p-5 border border-[var(--rule)] bg-[var(--card)]">
+              <p className="eyebrow text-xs">Total Solicitudes</p>
+              <div className="flex items-baseline gap-2 mt-1">
+                <p className="text-3xl font-display text-[var(--head)]">{stats.total}</p>
+                <span className="text-xs text-[var(--fg)] opacity-70">registros</span>
+              </div>
             </div>
-            {/* Barra de progreso de cupo */}
-            <div className="w-full bg-[var(--bg-alt)] h-2 mt-3 rounded-full overflow-hidden">
-              <div
-                className={`h-full ${
-                  stats.approvedCount >= stats.maxApproved ? "bg-rose-500" : "bg-[var(--accent)]"
+
+            <div className="p-5 border border-[var(--rule)] bg-[var(--card)]">
+              <p className="eyebrow text-xs">Asistentes / Cupo Auditorio</p>
+              <div className="flex items-baseline gap-2 mt-1">
+                <span className="text-3xl font-display text-[var(--head)]">
+                  {stats.breakdown?.attendee.approved ?? stats.approvedCount}
+                </span>
+                <span className="text-sm text-[var(--fg)] opacity-70">/ {stats.maxApproved}</span>
+              </div>
+              {/* Barra de progreso de cupo */}
+              <div className="w-full bg-[var(--bg-alt)] h-2 mt-3 rounded-full overflow-hidden">
+                <div
+                  className={`h-full ${
+                    (stats.breakdown?.attendee.approved ?? stats.approvedCount) >= stats.maxApproved
+                      ? "bg-rose-500"
+                      : "bg-[var(--accent)]"
+                  }`}
+                  style={{
+                    width: `${Math.min(
+                      100,
+                      ((stats.breakdown?.attendee.approved ?? stats.approvedCount) / stats.maxApproved) * 100
+                    )}%`,
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className="p-5 border border-[var(--rule)] bg-[var(--card)]">
+              <p className="eyebrow text-xs">Lugares Disponibles (Asistentes)</p>
+              <p
+                className={`text-3xl font-display mt-1 ${
+                  stats.availableSlots === 0 ? "text-rose-600 font-bold" : "text-emerald-700"
                 }`}
-                style={{ width: `${Math.min(100, (stats.approvedCount / stats.maxApproved) * 100)}%` }}
-              />
-            </div>
-          </div>
-
-          <div className="p-5 border border-[var(--rule)] bg-[var(--card)]">
-            <p className="eyebrow text-xs">Lugares Disponibles</p>
-            <p
-              className={`text-3xl font-display mt-1 ${
-                stats.availableSlots === 0 ? "text-rose-600 font-bold" : "text-emerald-700"
-              }`}
-            >
-              {stats.availableSlots}
-            </p>
-          </div>
-
-          <div className="p-5 border border-[var(--accent)] bg-[var(--bg-alt)] flex flex-col justify-between">
-            <div>
-              <p className="eyebrow text-xs">Liberación de Lugares</p>
-              <p className="text-xs text-[var(--fg)] mt-1">
-                Promueve en orden cronológico al primer registro en lista de espera.
+              >
+                {stats.availableSlots}
               </p>
             </div>
-            <button
-              onClick={handlePromoteNext}
-              disabled={actionLoading === "promote" || stats.availableSlots === 0}
-              className="mt-3 btn btn-primary text-xs w-full cursor-pointer disabled:opacity-50"
+
+            <div className="p-5 border border-[var(--accent)] bg-[var(--bg-alt)] flex flex-col justify-between">
+              <div>
+                <p className="eyebrow text-xs">Liberación de Lugares</p>
+                <p className="text-xs text-[var(--fg)] mt-1">
+                  Promueve en orden cronológico al primer registro en lista de espera.
+                </p>
+              </div>
+              <button
+                onClick={handlePromoteNext}
+                disabled={actionLoading === "promote" || stats.availableSlots === 0}
+                className="mt-3 btn btn-primary text-xs w-full cursor-pointer disabled:opacity-50"
+              >
+                {actionLoading === "promote"
+                  ? "Promoviendo..."
+                  : stats.availableSlots === 0
+                  ? "Sin cupo disponible"
+                  : "⚡ Promover de Lista de Espera"}
+              </button>
+            </div>
+          </div>
+
+          {/* Fila 2: Desglose por Modalidad de Participación (Tarjetas con filtro interactivo) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* 1. Asistentes */}
+            <div
+              onClick={() => setFilterType(filterType === "attendee" ? "" : "attendee")}
+              className={`p-4 border transition-all cursor-pointer ${
+                filterType === "attendee"
+                  ? "border-blue-600 bg-blue-50/50 dark:bg-blue-950/30 ring-2 ring-blue-500"
+                  : "border-[var(--rule)] bg-[var(--card)] hover:border-blue-400"
+              }`}
             >
-              {actionLoading === "promote"
-                ? "Promoviendo..."
-                : stats.availableSlots === 0
-                ? "Sin cupo disponible"
-                : "⚡ Promover de Lista de Espera"}
-            </button>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-blue-300">
+                  👩‍💻 Asistentes
+                </span>
+                <span className="text-xs px-2 py-0.5 font-bold bg-blue-100 text-blue-900 border border-blue-300">
+                  {stats.breakdown?.attendee.approved ?? 0} aprobados
+                </span>
+              </div>
+              <p className="text-2xl font-display text-[var(--head)] mt-2">
+                {stats.breakdown?.attendee.total ?? 0}
+              </p>
+              <p className="text-xs text-[var(--fg)] opacity-75 mt-0.5">
+                registrados en total {filterType === "attendee" ? "(Filtro activo)" : "• Clic para filtrar"}
+              </p>
+            </div>
+
+            {/* 2. Ponentes (Speakers) */}
+            <div
+              onClick={() => setFilterType(filterType === "speaker" ? "" : "speaker")}
+              className={`p-4 border transition-all cursor-pointer ${
+                filterType === "speaker"
+                  ? "border-purple-600 bg-purple-50/50 dark:bg-purple-950/30 ring-2 ring-purple-500"
+                  : "border-[var(--rule)] bg-[var(--card)] hover:border-purple-400"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-purple-700 dark:text-purple-300">
+                  🎙️ Ponentes (Speakers)
+                </span>
+                <span className="text-xs px-2 py-0.5 font-bold bg-purple-100 text-purple-900 border border-purple-300">
+                  {stats.breakdown?.speaker.approved ?? 0} confirmadas
+                </span>
+              </div>
+              <p className="text-2xl font-display text-[var(--head)] mt-2">
+                {stats.breakdown?.speaker.total ?? 0}
+              </p>
+              <p className="text-xs text-[var(--fg)] opacity-75 mt-0.5">
+                propuestas de ponencia {filterType === "speaker" ? "(Filtro activo)" : "• Clic para filtrar"}
+              </p>
+            </div>
+
+            {/* 3. Patrocinadores */}
+            <div
+              onClick={() => setFilterType(filterType === "sponsor" ? "" : "sponsor")}
+              className={`p-4 border transition-all cursor-pointer ${
+                filterType === "sponsor"
+                  ? "border-amber-600 bg-amber-50/50 dark:bg-amber-950/30 ring-2 ring-amber-500"
+                  : "border-[var(--rule)] bg-[var(--card)] hover:border-amber-400"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">
+                  🏢 Patrocinadores
+                </span>
+                <span className="text-xs px-2 py-0.5 font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                  {stats.breakdown?.sponsor.approved ?? 0} aliados
+                </span>
+              </div>
+              <p className="text-2xl font-display text-[var(--head)] mt-2">
+                {stats.breakdown?.sponsor.total ?? 0}
+              </p>
+              <p className="text-xs text-[var(--fg)] opacity-75 mt-0.5">
+                empresas aliadas {filterType === "sponsor" ? "(Filtro activo)" : "• Clic para filtrar"}
+              </p>
+            </div>
+
+            {/* 4. Comunidades STEM */}
+            <div
+              onClick={() => setFilterType(filterType === "community" ? "" : "community")}
+              className={`p-4 border transition-all cursor-pointer ${
+                filterType === "community"
+                  ? "border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/30 ring-2 ring-emerald-500"
+                  : "border-[var(--rule)] bg-[var(--card)] hover:border-emerald-400"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
+                  🌐 Comunidades STEM
+                </span>
+                <span className="text-xs px-2 py-0.5 font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
+                  {stats.breakdown?.community.approved ?? 0} aliadas
+                </span>
+              </div>
+              <p className="text-2xl font-display text-[var(--head)] mt-2">
+                {stats.breakdown?.community.total ?? 0}
+              </p>
+              <p className="text-xs text-[var(--fg)] opacity-75 mt-0.5">
+                colectivos y clubes {filterType === "community" ? "(Filtro activo)" : "• Clic para filtrar"}
+              </p>
+            </div>
           </div>
         </div>
 
@@ -855,6 +991,63 @@ export default function AdminDashboardPage() {
         {/* PESTAÑA 1: GESTIÓN DE REGISTROS */}
         {activeTab === "registrations" && (
           <div className="space-y-6">
+            {/* Píldoras de Filtro Rápido por Perfil */}
+            <div className="flex flex-wrap items-center gap-2 border-b border-[var(--rule)] pb-4">
+              <span className="text-xs font-bold uppercase tracking-wider text-[var(--head)] mr-2">
+                Filtrar por perfil:
+              </span>
+              <button
+                onClick={() => setFilterType("")}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-none border transition-all cursor-pointer ${
+                  filterType === ""
+                    ? "bg-[var(--head)] text-white border-[var(--head)] font-bold shadow-xs"
+                    : "bg-[var(--card)] text-[var(--head)] border-[var(--rule)] hover:bg-[var(--bg-alt)]"
+                }`}
+              >
+                📋 Todos ({stats.total})
+              </button>
+              <button
+                onClick={() => setFilterType("attendee")}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-none border transition-all cursor-pointer ${
+                  filterType === "attendee"
+                    ? "bg-blue-800 text-white border-blue-800 font-bold shadow-xs"
+                    : "bg-[var(--card)] text-[var(--head)] border-[var(--rule)] hover:bg-[var(--bg-alt)]"
+                }`}
+              >
+                👩‍💻 Asistentes ({stats.breakdown?.attendee.total || 0})
+              </button>
+              <button
+                onClick={() => setFilterType("speaker")}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-none border transition-all cursor-pointer ${
+                  filterType === "speaker"
+                    ? "bg-purple-800 text-white border-purple-800 font-bold shadow-xs"
+                    : "bg-[var(--card)] text-[var(--head)] border-[var(--rule)] hover:bg-[var(--bg-alt)]"
+                }`}
+              >
+                🎙️ Ponentes ({stats.breakdown?.speaker.total || 0})
+              </button>
+              <button
+                onClick={() => setFilterType("sponsor")}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-none border transition-all cursor-pointer ${
+                  filterType === "sponsor"
+                    ? "bg-amber-800 text-white border-amber-800 font-bold shadow-xs"
+                    : "bg-[var(--card)] text-[var(--head)] border-[var(--rule)] hover:bg-[var(--bg-alt)]"
+                }`}
+              >
+                🏢 Patrocinadores ({stats.breakdown?.sponsor.total || 0})
+              </button>
+              <button
+                onClick={() => setFilterType("community")}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-none border transition-all cursor-pointer ${
+                  filterType === "community"
+                    ? "bg-emerald-800 text-white border-emerald-800 font-bold shadow-xs"
+                    : "bg-[var(--card)] text-[var(--head)] border-[var(--rule)] hover:bg-[var(--bg-alt)]"
+                }`}
+              >
+                🌐 Comunidades STEM ({stats.breakdown?.community.total || 0})
+              </button>
+            </div>
+
             {/* Barra de Filtros y Búsqueda */}
             <div className="p-4 border border-[var(--rule)] bg-[var(--card)] flex flex-wrap gap-4 items-center justify-between">
               <div className="flex flex-wrap gap-3 items-center flex-1 min-w-[280px]">
@@ -930,20 +1123,67 @@ export default function AdminDashboardPage() {
                     registrations.map((reg) => (
                       <tr key={reg.id} className="hover:bg-[var(--bg-alt)]/20 transition-colors">
                         <td className="py-3 px-4">
-                          <span className="px-2 py-0.5 text-xs font-semibold uppercase tracking-wider bg-[var(--bg-alt)] border border-[var(--rule)] text-[var(--head)]">
-                            {reg.type}
-                          </span>
+                          {reg.type === "attendee" && (
+                            <span className="px-2.5 py-1 text-xs font-bold uppercase tracking-wider bg-blue-100 text-blue-900 border border-blue-300 dark:bg-blue-950 dark:text-blue-200 dark:border-blue-800">
+                              👩‍💻 Asistente
+                            </span>
+                          )}
+                          {reg.type === "speaker" && (
+                            <span className="px-2.5 py-1 text-xs font-bold uppercase tracking-wider bg-purple-100 text-purple-900 border border-purple-300 dark:bg-purple-950 dark:text-purple-200 dark:border-purple-800">
+                              🎙️ Ponente
+                            </span>
+                          )}
+                          {reg.type === "sponsor" && (
+                            <span className="px-2.5 py-1 text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-300 dark:bg-amber-950 dark:text-amber-200 dark:border-amber-800">
+                              🏢 Patrocinio
+                            </span>
+                          )}
+                          {reg.type === "community" && (
+                            <span className="px-2.5 py-1 text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-emerald-950 dark:text-emerald-200 dark:border-emerald-800">
+                              🌐 Comunidad
+                            </span>
+                          )}
                         </td>
                         <td className="py-3 px-4">
-                          <p className="font-semibold text-[var(--head)]">
+                          <p className="font-semibold text-[var(--head)] text-base">
                             {reg.chosenName || reg.fullName}
                           </p>
                           {reg.organization && (
-                            <p className="text-xs opacity-75">{reg.organization}</p>
+                            <p className="text-xs text-[var(--fg)] opacity-90 font-medium mt-0.5">
+                              {reg.type === "sponsor"
+                                ? `🏢 Empresa: ${reg.organization}`
+                                : reg.type === "community"
+                                ? `🌐 Colectivo: ${reg.organization}`
+                                : reg.type === "speaker"
+                                ? `🏛️ Institución: ${reg.organization}`
+                                : `Institución: ${reg.organization}`}
+                            </p>
                           )}
                           {reg.talkTitle && (
-                            <p className="text-xs italic text-[var(--accent-text)] truncate max-w-xs mt-0.5">
-                              Ponencia: {reg.talkTitle}
+                            <p className="text-xs italic text-[var(--accent-text)] truncate max-w-sm mt-0.5 font-medium">
+                              {reg.type === "speaker"
+                                ? `🎙️ Ponencia: "${reg.talkTitle}"`
+                                : reg.type === "sponsor"
+                                ? `💼 Propuesta: ${reg.talkTitle}`
+                                : reg.type === "community"
+                                ? `🌱 Enfoque: ${reg.talkTitle}`
+                                : `Carrera/Nivel: ${reg.talkTitle}`}
+                            </p>
+                          )}
+                          {reg.talkMaterials && (
+                            <p className="text-xs text-[var(--fg)] opacity-75 truncate max-w-sm mt-0.5">
+                              {reg.talkMaterials.startsWith("http") ? (
+                                <a
+                                  href={reg.talkMaterials}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="underline text-[var(--accent)] hover:opacity-80"
+                                >
+                                  🔗 Ver propuesta / enlace
+                                </a>
+                              ) : (
+                                `Modalidad / Detalles: ${reg.talkMaterials}`
+                              )}
                             </p>
                           )}
                         </td>

@@ -55,21 +55,55 @@ export async function GET(req: Request) {
       });
     }
 
-    // Contar total de aprobados para control de cupo
-    const approvedSnapshot = await adminDb
-      .collection("registrations")
-      .where("status", "==", "aprobado")
-      .count()
-      .get();
-    const approvedCount = approvedSnapshot.data().count;
+    // Métricas globales desglosadas por perfil (Asistentes, Ponentes, Patrocinadores, Comunidades)
+    const allSnapshot = await adminDb.collection("registrations").get();
+
+    let totalAttendees = 0;
+    let approvedAttendees = 0;
+    let totalSpeakers = 0;
+    let approvedSpeakers = 0;
+    let totalSponsors = 0;
+    let approvedSponsors = 0;
+    let totalCommunities = 0;
+    let approvedCommunities = 0;
+    let approvedTotal = 0;
+
+    allSnapshot.forEach((doc) => {
+      const data = doc.data();
+      const type = data.type || "attendee";
+      const isApproved = data.status === "aprobado";
+
+      if (isApproved) approvedTotal++;
+
+      if (type === "attendee") {
+        totalAttendees++;
+        if (isApproved) approvedAttendees++;
+      } else if (type === "speaker") {
+        totalSpeakers++;
+        if (isApproved) approvedSpeakers++;
+      } else if (type === "sponsor") {
+        totalSponsors++;
+        if (isApproved) approvedSponsors++;
+      } else if (type === "community") {
+        totalCommunities++;
+        if (isApproved) approvedCommunities++;
+      }
+    });
 
     return NextResponse.json({
       registrations,
       stats: {
-        total: registrations.length,
-        approvedCount,
+        total: allSnapshot.size,
+        filteredCount: registrations.length,
+        approvedCount: approvedTotal,
         maxApproved: MAX_APPROVED,
-        availableSlots: Math.max(0, MAX_APPROVED - approvedCount),
+        availableSlots: Math.max(0, MAX_APPROVED - approvedAttendees),
+        breakdown: {
+          attendee: { total: totalAttendees, approved: approvedAttendees },
+          speaker: { total: totalSpeakers, approved: approvedSpeakers },
+          sponsor: { total: totalSponsors, approved: approvedSponsors },
+          community: { total: totalCommunities, approved: approvedCommunities },
+        },
       },
     });
   } catch (error: unknown) {
