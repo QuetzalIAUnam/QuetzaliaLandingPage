@@ -64,13 +64,13 @@ export default function PrivacidadPage() {
             </p>
             <p>
               El presente Aviso de Privacidad regula el tratamiento de los datos personales recabados con motivo del evento <strong>Quetzalia: Encuentro de Mujeres en STEM</strong>. 
-              El responsable directo de la recopilación, almacenamiento y protección de los datos personales es el <strong>[nombre del comité]</strong>, actuando en su carácter de particulares organizadores y miembros de la comunidad académica, con domicilio legal para oír y recibir todo tipo de notificaciones ubicado en <strong>[domicilio del responsable]</strong>, y correo electrónico de contacto oficial:{" "}
-              <a href="mailto:[correo de privacidad]" className="text-[var(--accent)] font-mono underline">
-                [correo de privacidad]
-              </a>.
+              El responsable directo de la recopilación, almacenamiento y protección de los datos personales es el <strong>Comité Organizador de Quetzalia STEM</strong>, actuando en su carácter de particulares organizadores y miembros de la comunidad académica, con domicilio legal para oír y recibir todo tipo de notificaciones ubicado en <strong>FES Acatlán, UNAM (Av. Alcanfores y San Juan Totoltepec s/n, Naucalpan de Juárez, Estado de México, C.P. 53150)</strong>, y correo electrónico de contacto oficial:{" "}
+              <a href="mailto:registro@quetzalia.dev" className="text-[var(--accent)] font-mono underline">
+                registro@quetzalia.dev
+              </a> (con atención de respuestas a: <a href="mailto:923475@pcpuma.acatlan.unam.mx" className="text-[var(--accent)] font-mono underline">923475@pcpuma.acatlan.unam.mx</a>).
             </p>
             <p className="text-xs opacity-85">
-              * Nota de alcance legal: La organización y custodia de los datos recabados en este sitio web (<strong>[dominio]</strong>) es realizada de manera directa e independiente por el comité organizador de Quetzalia como particulares. No representa ni compromete legalmente a la Universidad Nacional Autónoma de México (UNAM) ni a terceras entidades corporativas o patrocinadoras.
+              * Nota de alcance legal: La organización y custodia de los datos recabados en este sitio web (<strong>quetzalia.dev</strong>) es realizada de manera directa e independiente por el comité organizador de Quetzalia como particulares. No representa ni compromete legalmente a la Universidad Nacional Autónoma de México (UNAM) ni a terceras entidades corporativas o patrocinadoras.
             </p>
           </div>
 
@@ -171,7 +171,7 @@ export default function PrivacidadPage() {
                 El titular otorga o niega su consentimiento para cada una de estas finalidades de manera independiente en el formulario de inscripción:
               </p>
               <ul className="list-disc list-inside space-y-1.5 pl-2 text-sm opacity-90">
-                <li><strong>Publicación de imagen básica:</strong> Difusión de la fotografía de semblanza, nombre y trayectoria de ponentes en la página web oficial (<strong>[dominio]</strong>) y redes sociales durante un plazo máximo de 12 meses.</li>
+                <li><strong>Publicación de imagen básica:</strong> Difusión de la fotografía de semblanza, nombre y trayectoria de ponentes en la página web oficial (<strong>quetzalia.dev</strong>) y redes sociales durante un plazo máximo de 12 meses.</li>
                 <li><strong>Grabación y transmisión audiovisual:</strong> Registro en video y retransmisión en directo de conferencias y talleres.</li>
                 <li><strong>Materiales didácticos:</strong> Publicación y descarga libre de diapositivas o recursos compartidos por ponentes.</li>
                 <li><strong>Vinculación laboral y becas:</strong> Puesta a disposición de su correo de contacto a empresas patrocinadoras oficiales para envío de convocatorias, vacantes de empleo y becas STEM.</li>
@@ -250,11 +250,11 @@ export default function PrivacidadPage() {
               El presente aviso de privacidad puede sufrir modificaciones, cambios o actualizaciones derivadas de nuevos requerimientos legales o de nuestras necesidades organizativas. Nos comprometemos a mantener informadas a las personas registradas sobre los cambios que pueda sufrir este documento a través de su publicación permanente en la dirección electrónica:
             </p>
             <p className="font-mono text-xs bg-[var(--bg-alt)] p-3 border border-[var(--rule)]">
-              https://[dominio]/privacidad
+              https://www.quetzalia.dev/privacidad
             </p>
             <p className="text-xs opacity-75">
               Última actualización: Enero 2027 · Versión 2027.1. Contacto:{" "}
-              <span className="font-mono">[correo de privacidad]</span>.
+              <a href="mailto:registro@quetzalia.dev" className="font-mono underline text-[var(--accent)]">registro@quetzalia.dev</a>.
             </p>
           </section>
         </article>

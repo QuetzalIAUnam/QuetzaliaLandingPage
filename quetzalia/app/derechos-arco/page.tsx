@@ -133,14 +133,14 @@ export default function DerechosArcoPage() {
               2. Procedimiento para Presentar una Solicitud ARCO
             </h2>
             <p>
-              Para iniciar una solicitud de ejercicio de Derechos ARCO o revocación del consentimiento, el titular o su representante legal debidamente acreditado deberá remitir un escrito libre dirigido al <strong>[nombre del comité]</strong> a través de nuestro correo oficial de privacidad:
+              Para iniciar una solicitud de ejercicio de Derechos ARCO o revocación del consentimiento, el titular o su representante legal debidamente acreditado deberá remitir un escrito libre dirigido al <strong>Comité Organizador de Quetzalia STEM</strong> a través de nuestro correo oficial de privacidad:
             </p>
 
             <div className="p-4 bg-[var(--bg-alt)] border border-[var(--rule)] text-sm space-y-2">
               <p>
                 <strong>Correo electrónico receptor:</strong>{" "}
-                <a href="mailto:[correo de privacidad]" className="text-[var(--accent)] font-mono underline font-bold">
-                  [correo de privacidad]
+                <a href="mailto:registro@quetzalia.dev" className="text-[var(--accent)] font-mono underline font-bold">
+                  registro@quetzalia.dev
                 </a>
               </p>
               <p>
@@ -153,7 +153,7 @@ export default function DerechosArcoPage() {
             </h3>
             <ol className="list-decimal list-inside space-y-2 text-sm pl-2">
               <li>
-                <strong>Nombre completo del titular</strong> y dirección de correo electrónico con la que se registró en el evento a través de <strong>[dominio]</strong>.
+                <strong>Nombre completo del titular</strong> y dirección de correo electrónico con la que se registró en el evento a través de <strong>quetzalia.dev</strong>.
               </li>
               <li>
                 <strong>Acreditación de identidad:</strong> Copia digitalizada de una identificación oficial vigente (INE, pasaporte, credencial UNAM o documento oficial equivalente). En caso de representante legal, adjuntar instrumento público o carta poder simple firmada ante dos testigos.
@@ -224,7 +224,7 @@ export default function DerechosArcoPage() {
               </h3>
               <ol className="list-decimal list-inside space-y-2 text-xs sm:text-sm">
                 <li>
-                  Envía un correo a <span className="font-mono font-bold text-[var(--accent)]">[correo de privacidad]</span>.
+                  Envía un correo a <a href="mailto:registro@quetzalia.dev" className="font-mono font-bold text-[var(--accent)] underline">registro@quetzalia.dev</a>.
                 </li>
                 <li>
                   Asunto exacto: <strong>&quot;SOLICITUD URGENTE DE RETIRO DE IMAGEN / MATERIALES&quot;</strong>.
@@ -239,7 +239,7 @@ export default function DerechosArcoPage() {
             </div>
 
             <p className="text-xs opacity-85">
-              * Nota de alcance técnico: La eliminación aplica para todos los sitios y repositorios controlados directamente por el comité en <strong>[dominio]</strong>. No aplica de forma retroactiva respecto de memorias impresas que hubiesen sido legalmente distribuidas con anterioridad a la fecha del retiro.
+              * Nota de alcance técnico: La eliminación aplica para todos los sitios y repositorios controlados directamente por el comité en <strong>quetzalia.dev</strong>. No aplica de forma retroactiva respecto de memorias impresas que hubiesen sido legalmente distribuidas con anterioridad a la fecha del retiro.
             </p>
           </section>
 
@@ -249,13 +249,13 @@ export default function DerechosArcoPage() {
               Unidad de Atención y Privacidad de Quetzalia STEM
             </p>
             <p>
-              Responsable: <strong>[nombre del comité]</strong>
+              Responsable: <strong>Comité Organizador de Quetzalia STEM</strong>
             </p>
             <p>
-              Domicilio de recepción documental: <strong>[domicilio del responsable]</strong>
+              Domicilio de recepción documental: <strong>FES Acatlán, UNAM (Av. Alcanfores y San Juan Totoltepec s/n, Naucalpan de Juárez, Estado de México, C.P. 53150)</strong>
             </p>
             <p>
-              Correo electrónico: <strong>[correo de privacidad]</strong> · Sitio: <strong>[dominio]</strong>
+              Correo electrónico: <strong>registro@quetzalia.dev</strong> · Sitio: <strong>quetzalia.dev</strong>
             </p>
           </div>
         </article>

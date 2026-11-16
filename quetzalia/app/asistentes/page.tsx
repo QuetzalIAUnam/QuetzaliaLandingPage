@@ -128,7 +128,7 @@ export default function AsistentesPage() {
               4. Constancias de Asistencia con Valor Curricular
             </h2>
             <p>
-              El <strong>[nombre del comité]</strong> expedirá constancias digitales oficiales de asistencia con valor curricular a quienes cumplan con los siguientes requisitos:
+              El <strong>Comité Organizador de Quetzalia STEM</strong> expedirá constancias digitales oficiales de asistencia con valor curricular a quienes cumplan con los siguientes requisitos:
             </p>
 
             <div className="grid gap-3 sm:grid-cols-2 text-sm pt-1">
@@ -204,7 +204,7 @@ export default function AsistentesPage() {
 
           {/* Pie de documento */}
           <div className="pt-2 text-center text-xs opacity-70 border-t border-[var(--rule)]">
-            Encuentro Quetzalia 2027 · Contacto organizador: <span className="font-mono">[correo de privacidad]</span> · Sitio oficial: <span className="font-mono">[dominio]</span>
+            Encuentro Quetzalia 2027 · Contacto organizador: <a href="mailto:registro@quetzalia.dev" className="font-mono underline">registro@quetzalia.dev</a> · Sitio oficial: <span className="font-mono">quetzalia.dev</span>
           </div>
         </article>
       </main>

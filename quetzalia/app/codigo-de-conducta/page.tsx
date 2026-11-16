@@ -66,7 +66,7 @@ export default function CodigoDeConductaPage() {
               El encuentro <strong>Quetzalia</strong> nace con el firme objetivo de crear un entorno seguro, enriquecedor, igualitario e inspirador para las mujeres y disidencias que estudian, ejercen e impulsan la ciencia, la tecnología, la ingeniería y las matemáticas (STEM) en la <strong>FES Acatlán, UNAM</strong>.
             </p>
             <p>
-              El <strong>[nombre del comité]</strong> y todas las personas que forman parte de esta comunidad nos comprometemos a garantizar una experiencia libre de discriminación, acoso y cualquier forma de violencia, independientemente del género, identidad o expresión de género, orientación sexual, discapacidad, apariencia física, origen étnico, edad, nivel académico o trayectoria técnica.
+              El <strong>Comité Organizador de Quetzalia STEM</strong> y todas las personas que forman parte de esta comunidad nos comprometemos a garantizar una experiencia libre de discriminación, acoso y cualquier forma de violencia, independientemente del género, identidad o expresión de género, orientación sexual, discapacidad, apariencia física, origen étnico, edad, nivel académico o trayectoria técnica.
             </p>
           </div>
 
@@ -86,7 +86,7 @@ export default function CodigoDeConductaPage() {
               <li>Equipo voluntario, staff y personal del comité organizador.</li>
             </ul>
             <p className="text-xs opacity-85">
-              Aplica tanto en todos los espacios físicos de la sede (auditorios, salas de cómputo, pasillos, explanadas y áreas de acreditación) como en los canales digitales del evento (plataformas de transmisión, redes sociales y sitio web oficial en <strong>[dominio]</strong>).
+              Aplica tanto en todos los espacios físicos de la sede (auditorios, salas de cómputo, pasillos, explanadas y áreas de acreditación) como en los canales digitales del evento (plataformas de transmisión, redes sociales y sitio web oficial en <strong>quetzalia.dev</strong>).
             </p>
           </section>
 
@@ -177,13 +177,13 @@ export default function CodigoDeConductaPage() {
               </p>
               <ol className="list-decimal list-inside space-y-2">
                 <li>
-                  <strong>Reporte presencial:</strong> Acude de inmediato con cualquier integrante del <strong>[nombre del comité]</strong> o del equipo de voluntariado, quienes portarán gafetes e insignias distintivas de organización.
+                  <strong>Reporte presencial:</strong> Acude de inmediato con cualquier integrante del <strong>Comité Organizador de Quetzalia STEM</strong> o del equipo de voluntariado, quienes portarán gafetes e insignias distintivas de organización.
                 </li>
                 <li>
                   <strong>Reporte digital confidencial:</strong> Envía un correo con el asunto <strong>&quot;REPORTE URGENTE DE CÓDIGO DE CONDUCTA&quot;</strong> a:{" "}
-                  <a href="mailto:[correo de privacidad]" className="text-[var(--accent)] font-mono underline font-bold">
-                    [correo de privacidad]
-                  </a>.
+                  <a href="mailto:registro@quetzalia.dev" className="text-[var(--accent)] font-mono underline font-bold">
+                    registro@quetzalia.dev
+                  </a> (o al buzón institucional: <a href="mailto:923475@pcpuma.acatlan.unam.mx" className="text-[var(--accent)] font-mono underline font-bold">923475@pcpuma.acatlan.unam.mx</a>).
                 </li>
               </ol>
               <p className="text-xs opacity-90 pt-1">
