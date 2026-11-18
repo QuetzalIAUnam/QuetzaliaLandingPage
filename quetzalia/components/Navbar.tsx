@@ -23,6 +23,9 @@ export default function Navbar() {
           <a href="#aliadas">Aliadas</a>
         </li>
         <li>
+          <a href="#comite">Comité</a>
+        </li>
+        <li>
           <a href="#inscripcion">Inscripción</a>
         </li>
       </ul>

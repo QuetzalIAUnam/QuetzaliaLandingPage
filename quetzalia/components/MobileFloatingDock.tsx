@@ -14,6 +14,7 @@ const SECTIONS: NavSection[] = [
   { id: "evento", label: "El evento" },
   { id: "agenda", label: "Agenda" },
   { id: "aliadas", label: "Aliadas" },
+  { id: "comite", label: "Comité" },
   { id: "preguntas", label: "Preguntas" },
   { id: "inscripcion", label: "Inscripción", isCta: true },
 ];
