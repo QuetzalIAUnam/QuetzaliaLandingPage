@@ -3,6 +3,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import SectionHead from "./ui/SectionHead";
 
+interface CommitteeArticle {
+  title: string;
+  source: string;
+  description: string;
+  url: string;
+}
+
 interface CommitteeMember {
   name: string;
   role: string;
@@ -10,6 +17,7 @@ interface CommitteeMember {
   institution: string;
   bio: string;
   linkedin: string;
+  article?: CommitteeArticle;
 }
 
 const COMMITTEE_MEMBERS: CommitteeMember[] = [
@@ -20,6 +28,12 @@ const COMMITTEE_MEMBERS: CommitteeMember[] = [
     institution: "FES Acatlán, UNAM",
     bio: "Estudiante de Matemáticas Aplicadas y Computación (MAC) en la FES Acatlán y seleccionada en la 1.ª generación de Estudiantes Embajadores de Google en México. Apasionada por la intersección entre matemáticas, educación e inteligencia artificial ética y pedagógica, impulsando el liderazgo de más mujeres en STEM.",
     linkedin: "https://www.linkedin.com/in/jazmin-gil-de-gaona-88b5712a1/",
+    article: {
+      source: "UNAM Global Revista",
+      title: "Jazmín Gil: Inteligencia artificial y aprendizaje",
+      description: "Reportaje oficial de la UNAM sobre su labor como embajadora Google y cómo aprovecha la IA como apoyo pedagógico y ético en los estudios universitarios.",
+      url: "https://unamglobal.unam.mx/global_revista/jazmin-gil-inteligencia-artificial-aprendizaje/",
+    },
   },
   {
     name: "Alyn Márquez",
@@ -143,6 +157,57 @@ export default function Committee() {
                   <p className="text-xs sm:text-sm text-[var(--fg)] opacity-90 leading-relaxed pt-1">
                     {member.bio}
                   </p>
+
+                  {/* Artículo / Reportaje destacado si existe */}
+                  {member.article && (
+                    <div className="mt-3 p-3 sm:p-3.5 rounded-lg border border-[var(--accent)]/30 bg-[var(--bg-alt)]/60 hover:bg-[var(--bg-alt)]/90 transition-all duration-200">
+                      <div className="flex items-center justify-between gap-2 mb-1.5">
+                        <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[var(--accent-text)]">
+                          <svg
+                            className="w-3.5 h-3.5 shrink-0"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                            aria-hidden="true"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"
+                            />
+                          </svg>
+                          {member.article.source}
+                        </span>
+                        <span className="text-[10px] text-[var(--fg)] opacity-70 font-mono">
+                          Artículo oficial
+                        </span>
+                      </div>
+
+                      <h4 className="text-xs sm:text-sm font-semibold text-[var(--head)] leading-snug">
+                        {member.article.title}
+                      </h4>
+
+                      <p className="text-[11px] sm:text-xs text-[var(--fg)] opacity-85 leading-relaxed mt-1">
+                        {member.article.description}
+                      </p>
+
+                      <div className="mt-2.5 pt-2 border-t border-[var(--rule)]/40 flex items-center justify-end">
+                        <a
+                          href={member.article.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--accent-text)] hover:underline group/link"
+                          title="Leer artículo completo en UNAM Global"
+                        >
+                          <span>Leer reportaje completo</span>
+                          <span className="transition-transform duration-200 group-hover/link:translate-x-0.5">
+                            ↗
+                          </span>
+                        </a>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Enlace a LinkedIn */}
