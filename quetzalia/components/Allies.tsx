@@ -38,7 +38,6 @@ interface CommunityItem {
   logoUrl?: string;
   communityMotto?: string;
   communityGoal?: string;
-  communityActivities?: string;
   socials?: SocialLinks;
 }
 
@@ -880,19 +879,6 @@ export default function Allies() {
                 {selectedCommunity.desc || "Colectivo aliado comprometido con visibilizar y empoderar el liderazgo de las mujeres en ciencia y tecnología en Quetzalia 2027."}
               </div>
             </div>
-
-            {/* Actividades en su Stand / Feria STEM */}
-            {selectedCommunity.communityActivities && (
-              <div className="border-t border-[var(--rule)] pt-4 space-y-1.5 text-left">
-                <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--head)] flex items-center gap-1.5">
-                  <span>✨</span>
-                  <span>En nuestro espacio / stand encontrarás:</span>
-                </h4>
-                <p className="text-xs sm:text-sm text-[var(--fg)] leading-relaxed bg-[var(--bg-alt)]/40 p-3 border border-[var(--rule)]">
-                  {selectedCommunity.communityActivities}
-                </p>
-              </div>
-            )}
 
             {/* Redes y Canales Oficiales */}
             <div className="border-t border-[var(--rule)] pt-4 space-y-3">

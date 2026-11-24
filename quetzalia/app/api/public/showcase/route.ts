@@ -45,7 +45,6 @@ export async function GET() {
       logoUrl?: string;
       communityMotto?: string;
       communityGoal?: string;
-      communityActivities?: string;
       socials?: {
         linkedin?: string;
         instagram?: string;
@@ -113,7 +112,6 @@ export async function GET() {
           logoUrl: data.photoPath || data.logoPath || undefined,
           communityMotto: data.communityMotto || undefined,
           communityGoal: data.communityGoal || undefined,
-          communityActivities: data.communityActivities || undefined,
           socials: {
             linkedin,
             instagram,

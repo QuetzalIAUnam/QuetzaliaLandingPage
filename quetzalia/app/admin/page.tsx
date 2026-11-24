@@ -1170,6 +1170,34 @@ export default function AdminDashboardPage() {
                                 : `Carrera/Nivel: ${reg.talkTitle}`}
                             </p>
                           )}
+                          {/* Insignias y lema en la lista */}
+                          {reg.badges && reg.badges.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {reg.badges.slice(0, 2).map((b, idx) => (
+                                <span
+                                  key={idx}
+                                  className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-900 dark:text-amber-200 border border-amber-500/30 font-medium"
+                                >
+                                  🏅 {b}
+                                </span>
+                              ))}
+                              {reg.badges.length > 2 && (
+                                <span className="text-[9px] opacity-70 self-center">
+                                  +{reg.badges.length - 2}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                          {reg.tagline && (
+                            <p className="text-[10px] italic font-serif text-[var(--head)] opacity-85 truncate max-w-sm mt-0.5">
+                              “{reg.tagline}”
+                            </p>
+                          )}
+                          {reg.communityMotto && (
+                            <p className="text-[10px] italic font-serif text-[var(--accent-text)] truncate max-w-sm mt-0.5">
+                              “{reg.communityMotto}”
+                            </p>
+                          )}
                           {reg.talkMaterials && (
                             <p className="text-xs text-[var(--fg)] opacity-75 truncate max-w-sm mt-0.5">
                               {reg.talkMaterials.startsWith("http") ? (
@@ -1791,6 +1819,91 @@ export default function AdminDashboardPage() {
                   </p>
                 </div>
               )}
+
+              {/* Datos enriquecidos / Tu Esencia (Ponentes) */}
+              {selectedReg.type === "speaker" &&
+                (selectedReg.tagline ||
+                  (selectedReg.badges && selectedReg.badges.length > 0) ||
+                  selectedReg.inspirationQuote) && (
+                  <div className="border border-[var(--rule)] p-4 bg-[var(--bg-alt)]/30 space-y-3 rounded-lg text-sm">
+                    <p className="font-bold text-[var(--head)] uppercase tracking-wider text-xs flex items-center gap-1.5">
+                      <span>✨</span>
+                      <span>Tu Esencia Quetzalia (Ficha Enriquecida):</span>
+                    </p>
+
+                    {selectedReg.tagline && (
+                      <div>
+                        <p className="text-xs font-semibold text-[var(--head)]">Lema personal / Frase STEM:</p>
+                        <p className="italic font-serif text-[var(--accent-text)] text-sm mt-0.5">
+                          “{selectedReg.tagline}”
+                        </p>
+                      </div>
+                    )}
+
+                    {selectedReg.badges && selectedReg.badges.length > 0 && (
+                      <div>
+                        <p className="text-xs font-semibold text-[var(--head)] mb-1">
+                          Condecoraciones / Distinciones:
+                        </p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {selectedReg.badges.map((b, idx) => (
+                            <span
+                              key={idx}
+                              className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-900 dark:text-amber-200 border border-amber-500/40 font-semibold"
+                            >
+                              <span>🏅</span>
+                              <span>{b}</span>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedReg.inspirationQuote && (
+                      <div>
+                        <p className="text-xs font-semibold text-[var(--head)]">
+                          Mensaje para inspirar a más mujeres en STEM:
+                        </p>
+                        <p className="italic text-xs bg-[var(--card)] p-2.5 border border-[var(--rule)] text-[var(--fg)] mt-0.5 rounded">
+                          “{selectedReg.inspirationQuote}”
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+              {/* Datos enriquecidos (Comunidades) */}
+              {selectedReg.type === "community" &&
+                (selectedReg.communityMotto || selectedReg.communityGoal) && (
+                  <div className="border border-[var(--rule)] p-4 bg-[var(--bg-alt)]/30 space-y-3 rounded-lg text-sm">
+                    <p className="font-bold text-[var(--head)] uppercase tracking-wider text-xs flex items-center gap-1.5">
+                      <span>💜</span>
+                      <span>Propósito e Inspiración Colectiva:</span>
+                    </p>
+
+                    {selectedReg.communityMotto && (
+                      <div>
+                        <p className="text-xs font-semibold text-[var(--head)]">
+                          Grito de guerra / Lema de comunidad:
+                        </p>
+                        <p className="italic font-serif text-[var(--accent-text)] text-sm mt-0.5">
+                          “{selectedReg.communityMotto}”
+                        </p>
+                      </div>
+                    )}
+
+                    {selectedReg.communityGoal && (
+                      <div>
+                        <p className="text-xs font-semibold text-[var(--head)]">
+                          Misión en Quetzalia 2027:
+                        </p>
+                        <p className="text-xs bg-[var(--card)] p-2.5 border border-[var(--rule)] text-[var(--fg)] mt-0.5 rounded">
+                          {selectedReg.communityGoal}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
 
               {/* Redes Sociales Registradas */}
               {(() => {

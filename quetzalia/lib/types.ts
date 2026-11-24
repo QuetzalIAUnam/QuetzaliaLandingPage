@@ -53,7 +53,6 @@ export interface Registration {
   inspirationQuote?: string;
   communityMotto?: string;
   communityGoal?: string;
-  communityActivities?: string;
   consent: ConsentRecord;
   consentVersion: string;
   consentTimestamp: string;

@@ -25,7 +25,6 @@ export default function RegistroComunidadesPage() {
   // Ficha enriquecida de comunidad
   const [communityMotto, setCommunityMotto] = useState("");
   const [communityGoal, setCommunityGoal] = useState("");
-  const [communityActivities, setCommunityActivities] = useState("");
 
   // Redes sociales y presencia digital (opcionales)
   const [instagram, setInstagram] = useState("");
@@ -140,7 +139,6 @@ export default function RegistroComunidadesPage() {
           photoPath: uploadedLogoPath,
           communityMotto: communityMotto.trim() || undefined,
           communityGoal: communityGoal.trim() || undefined,
-          communityActivities: communityActivities.trim() || undefined,
           ...(Object.keys(cleanSocials).length > 0 ? { socials: cleanSocials } : {}),
           ...(cleanSocials.linkedin ? { linkedin: cleanSocials.linkedin } : {}),
           ...(cleanSocials.instagram ? { instagram: cleanSocials.instagram } : {}),
@@ -451,21 +449,6 @@ export default function RegistroComunidadesPage() {
                     value={communityGoal}
                     onChange={(e) => setCommunityGoal(e.target.value)}
                     placeholder="Ej. “Despertar vocaciones científicas desde edades tempranas, crear redes de mentoría seguras y visibilizar el talento femenino en computación y ciencias exactas.”"
-                    className="form-textarea text-xs sm:text-sm"
-                  />
-                </div>
-
-                {/* Qué encontrarán en su stand */}
-                <div className="space-y-1.5 pt-2 border-t border-[var(--rule)]">
-                  <label className="form-label" htmlFor="communityActivities">
-                    ¿Qué dinámicas o actividades encontrarán las asistentes en su stand/feria STEM?
-                  </label>
-                  <textarea
-                    id="communityActivities"
-                    rows={2}
-                    value={communityActivities}
-                    onChange={(e) => setCommunityActivities(e.target.value)}
-                    placeholder="Ej. “Demostraciones en vivo de robots autónomos, stickers de científicas, dinámicas para aprender a programar y asesoría para unirse a nuestros semilleros.”"
                     className="form-textarea text-xs sm:text-sm"
                   />
                 </div>
