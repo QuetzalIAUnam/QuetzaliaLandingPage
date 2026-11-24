@@ -17,6 +17,9 @@ interface SpeakerItem {
   talk: string;
   linkedin?: string;
   photoUrl?: string;
+  tagline?: string;
+  badges?: string[];
+  inspirationQuote?: string;
   socials?: SocialLinks;
 }
 
@@ -33,6 +36,9 @@ interface CommunityItem {
   representative?: string;
   desc?: string;
   logoUrl?: string;
+  communityMotto?: string;
+  communityGoal?: string;
+  communityActivities?: string;
   socials?: SocialLinks;
 }
 
@@ -78,19 +84,21 @@ export default function Allies() {
   const [inView, setInView] = useState(false);
   const [expandedTalks, setExpandedTalks] = useState<Record<string, boolean>>({});
   const [selectedCommunity, setSelectedCommunity] = useState<CommunityItem | null>(null);
+  const [selectedSpeaker, setSelectedSpeaker] = useState<SpeakerItem | null>(null);
 
-  // Cerrar modal con tecla Escape
+  // Cerrar modales con tecla Escape
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setSelectedCommunity(null);
+        setSelectedSpeaker(null);
       }
     };
-    if (selectedCommunity) {
+    if (selectedCommunity || selectedSpeaker) {
       window.addEventListener("keydown", handleKeyDown);
     }
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedCommunity]);
+  }, [selectedCommunity, selectedSpeaker]);
 
   // Los datos provienen estrictamente de la base de datos (Firestore)
   const [speakers, setSpeakers] = useState<SpeakerItem[]>([]);
@@ -351,12 +359,16 @@ export default function Allies() {
                       style={{ "--speaker-delay": `${idx * 260}ms` } as React.CSSProperties}
                     >
                       {/* Marco acotado y centrado para la foto con proporciones estrictas */}
-                      <div className="w-full flex justify-center mb-3">
+                      <div
+                        className="w-full flex justify-center mb-3 cursor-pointer group/photo"
+                        onClick={() => setSelectedSpeaker(person)}
+                        title="Clic para ver semblanza completa"
+                      >
                         <PhotoArch
                           src={person.photoUrl}
                           alt={`Fotografía oficial de ${person.name}`}
                           ariaLabel={`Fotografía de ${person.name}`}
-                          className="w-full max-w-[260px] aspect-square rounded-t-full overflow-hidden shadow-inner border border-[var(--rule)] group-hover:border-[var(--accent)] transition-colors"
+                          className="w-full max-w-[260px] aspect-square rounded-t-full overflow-hidden shadow-inner border border-[var(--rule)] group-hover:border-[var(--accent)] group-hover/photo:scale-102 transition-all"
                           style={{ aspectRatio: "1" }}
                         >
                           {!person.photoUrl && (
@@ -387,13 +399,44 @@ export default function Allies() {
                               aria-expanded={!!expandedTalks[person.id]}
                               aria-controls={`talk-body-${person.id}`}
                             >
-                              <span>{expandedTalks[person.id] ? "Ocultar" : "Ver charla"}</span>
+                              <span>{expandedTalks[person.id] ? "Ocultar" : "Resumen"}</span>
                             </button>
                           </div>
 
-                          <h4 className="speaker-name text-lg font-bold text-[var(--head)] group-hover:text-[var(--accent-text)] transition-colors line-clamp-2">
+                          <h4
+                            onClick={() => setSelectedSpeaker(person)}
+                            className="speaker-name text-lg font-bold text-[var(--head)] group-hover:text-[var(--accent-text)] transition-colors line-clamp-2 cursor-pointer"
+                            title="Clic para ver semblanza completa"
+                          >
                             {person.name}
                           </h4>
+
+                          {/* Condecoraciones en la tarjeta */}
+                          {person.badges && person.badges.length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                              {person.badges.slice(0, 2).map((b, bIdx) => (
+                                <span
+                                  key={bIdx}
+                                  className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-900 dark:text-amber-200 border border-amber-500/30 flex items-center gap-1"
+                                >
+                                  <span>🏅</span>
+                                  <span className="truncate max-w-[140px]">{b}</span>
+                                </span>
+                              ))}
+                              {person.badges.length > 2 && (
+                                <span className="text-[10px] opacity-70 self-center font-medium">
+                                  +{person.badges.length - 2}
+                                </span>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Frase personal destacada */}
+                          {person.tagline && (
+                            <p className="text-xs italic text-[var(--accent-text)] line-clamp-1 border-l-2 border-[var(--accent)] pl-2 my-1 font-serif">
+                              “{person.tagline}”
+                            </p>
+                          )}
 
                           <div
                             id={`talk-body-${person.id}`}
@@ -402,6 +445,18 @@ export default function Allies() {
                             <p className="speaker-talk-title">“{person.talk}”</p>
                             <p className="speaker-desc line-clamp-4">{person.desc}</p>
                           </div>
+                        </div>
+
+                        {/* Botón Ver Ficha y Semblanza */}
+                        <div className="pt-3">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedSpeaker(person)}
+                            className="w-full py-2 px-3 rounded-xl border border-[var(--rule)] bg-[var(--bg-alt)]/60 hover:bg-[var(--accent)] hover:text-white text-xs font-semibold text-[var(--head)] transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs group/btn"
+                          >
+                            <span>Ver semblanza y charla</span>
+                            <span className="transition-transform group-hover/btn:translate-x-0.5">→</span>
+                          </button>
                         </div>
 
                         {/* Redes sociales de la ponente */}
@@ -793,18 +848,51 @@ export default function Allies() {
                     Coordinación / Representante: <strong className="text-[var(--head)]">{selectedCommunity.representative}</strong>
                   </p>
                 )}
+
+                {/* Grito de guerra o lema inspirador */}
+                {selectedCommunity.communityMotto && (
+                  <blockquote className="mt-2.5 py-1.5 px-3 bg-[var(--accent)]/10 border-l-2 border-[var(--accent)] text-xs italic text-[var(--head)] font-medium max-w-sm mx-auto">
+                    “{selectedCommunity.communityMotto}”
+                  </blockquote>
+                )}
               </div>
             </div>
+
+            {/* Propósito / Causa en Quetzalia */}
+            {selectedCommunity.communityGoal && (
+              <div className="border-t border-[var(--rule)] pt-4 space-y-1.5 text-left">
+                <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--accent)] flex items-center gap-1.5">
+                  <span>🎯</span>
+                  <span>Misión y Causa en Quetzalia:</span>
+                </h4>
+                <p className="text-xs sm:text-sm text-[var(--fg)] leading-relaxed bg-[var(--bg-alt)]/40 p-3 border border-[var(--rule)]">
+                  {selectedCommunity.communityGoal}
+                </p>
+              </div>
+            )}
 
             {/* Quiénes son y qué hacen */}
             <div className="border-t border-[var(--rule)] pt-4 space-y-2 text-left">
               <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--head)]">
                 Quiénes son y qué hacen:
               </h4>
-              <div className="bg-[var(--bg-alt)]/40 p-4 border border-[var(--rule)] text-sm text-[var(--fg)] leading-relaxed whitespace-pre-wrap max-h-52 overflow-y-auto">
+              <div className="bg-[var(--bg-alt)]/40 p-4 border border-[var(--rule)] text-sm text-[var(--fg)] leading-relaxed whitespace-pre-wrap max-h-48 overflow-y-auto">
                 {selectedCommunity.desc || "Colectivo aliado comprometido con visibilizar y empoderar el liderazgo de las mujeres en ciencia y tecnología en Quetzalia 2027."}
               </div>
             </div>
+
+            {/* Actividades en su Stand / Feria STEM */}
+            {selectedCommunity.communityActivities && (
+              <div className="border-t border-[var(--rule)] pt-4 space-y-1.5 text-left">
+                <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--head)] flex items-center gap-1.5">
+                  <span>✨</span>
+                  <span>En nuestro espacio / stand encontrarás:</span>
+                </h4>
+                <p className="text-xs sm:text-sm text-[var(--fg)] leading-relaxed bg-[var(--bg-alt)]/40 p-3 border border-[var(--rule)]">
+                  {selectedCommunity.communityActivities}
+                </p>
+              </div>
+            )}
 
             {/* Redes y Canales Oficiales */}
             <div className="border-t border-[var(--rule)] pt-4 space-y-3">
@@ -909,6 +997,223 @@ export default function Allies() {
                 className="btn btn-ghost text-xs px-6 py-2 cursor-pointer"
               >
                 Cerrar Ficha
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal / Ficha Oficial de Ponente */}
+      {selectedSpeaker && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="speaker-modal-title"
+          onClick={() => setSelectedSpeaker(null)}
+        >
+          <div
+            className="relative w-full max-w-lg bg-[var(--card)] border-2 border-[var(--accent)] p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Botón cerrar */}
+            <button
+              type="button"
+              onClick={() => setSelectedSpeaker(null)}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full border border-[var(--rule)] bg-[var(--bg-alt)] hover:bg-[var(--accent)] hover:text-white text-[var(--head)] flex items-center justify-center transition-colors cursor-pointer text-sm font-bold"
+              aria-label="Cerrar semblanza"
+            >
+              ✕
+            </button>
+
+            {/* Cabecera / Fotografía con PhotoArch */}
+            <div className="flex flex-col items-center text-center space-y-3">
+              <div className="w-28 h-28 sm:w-36 sm:h-36">
+                <PhotoArch
+                  src={selectedSpeaker.photoUrl}
+                  alt={`Fotografía oficial de ${selectedSpeaker.name}`}
+                  ariaLabel={`Fotografía de ${selectedSpeaker.name}`}
+                  className="w-full h-full aspect-square rounded-t-full overflow-hidden shadow-md border-2 border-[var(--accent)]"
+                >
+                  {!selectedSpeaker.photoUrl && (
+                    <div className="w-full h-full flex flex-col items-center justify-center text-[var(--accent)] p-2">
+                      <span className="font-display text-4xl font-bold">
+                        {selectedSpeaker.name.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                </PhotoArch>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-center gap-2 mb-1">
+                  <span className="speaker-chip chip-pink text-[11px] font-semibold">
+                    {selectedSpeaker.type === "Taller" ? "🛠️ Taller Práctico" : "🎙️ Ponencia"}
+                  </span>
+                  <span className="speaker-chip chip-salmon text-[11px] font-semibold">
+                    {selectedSpeaker.org}
+                  </span>
+                </div>
+                <h3
+                  id="speaker-modal-title"
+                  className="text-2xl sm:text-3xl font-display text-[var(--head)] font-bold"
+                >
+                  {selectedSpeaker.name}
+                </h3>
+              </div>
+            </div>
+
+            {/* Condecoraciones e Insignias */}
+            {selectedSpeaker.badges && selectedSpeaker.badges.length > 0 && (
+              <div className="flex flex-wrap justify-center gap-1.5 pt-1">
+                {selectedSpeaker.badges.map((badge, bIdx) => (
+                  <span
+                    key={`modal-badge-${bIdx}`}
+                    className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-[var(--accent)]/15 to-amber-500/15 border border-[var(--accent)]/40 text-[var(--head)] shadow-xs"
+                  >
+                    <span>🏅</span>
+                    <span>{badge}</span>
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Frase / Lema Personal */}
+            {selectedSpeaker.tagline && (
+              <blockquote className="p-4 bg-[var(--accent)]/10 border-l-4 border-[var(--accent)] text-center text-sm italic font-serif text-[var(--head)] leading-relaxed rounded-r-lg">
+                “{selectedSpeaker.tagline}”
+              </blockquote>
+            )}
+
+            {/* Detalle de la Ponencia / Taller */}
+            <div className="border-t border-[var(--rule)] pt-4 space-y-2 text-left">
+              <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--accent)]">
+                Propuesta de Sesión:
+              </h4>
+              <p className="text-base sm:text-lg font-display text-[var(--head)] font-bold">
+                “{selectedSpeaker.talk}”
+              </p>
+              <div className="bg-[var(--bg-alt)]/50 p-4 border border-[var(--rule)] text-xs sm:text-sm text-[var(--fg)] leading-relaxed whitespace-pre-wrap max-h-48 overflow-y-auto">
+                {selectedSpeaker.desc || "Información y semblanza en proceso de validación oficial ante el comité organizador."}
+              </div>
+            </div>
+
+            {/* Mensaje a las niñas / Inspiración STEM */}
+            {selectedSpeaker.inspirationQuote && (
+              <div className="border-t border-[var(--rule)] pt-4 space-y-1.5 text-left">
+                <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--head)] flex items-center gap-1.5">
+                  <span>💡</span>
+                  <span>Mensaje para futuras científicas e ingenieras:</span>
+                </h4>
+                <div className="p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-lg text-xs sm:text-sm text-[var(--fg)] leading-relaxed italic">
+                  “{selectedSpeaker.inspirationQuote}”
+                </div>
+              </div>
+            )}
+
+            {/* Redes Sociales y Enlaces Oficiales */}
+            <div className="border-t border-[var(--rule)] pt-4 space-y-2.5">
+              <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--head)] text-left">
+                Conecta con la Ponente:
+              </h4>
+              {(() => {
+                const s = selectedSpeaker.socials || {};
+                const li = s.linkedin || selectedSpeaker.linkedin;
+                const ig = s.instagram;
+                const tt = s.tiktok;
+                const tw = s.twitter;
+                const web = s.website;
+
+                if (!li && !ig && !tt && !tw && !web) {
+                  return (
+                    <p className="text-xs text-[var(--fg)] opacity-70 italic text-left">
+                      Esta ponente no ha registrado enlaces adicionales.
+                    </p>
+                  );
+                }
+
+                return (
+                  <div className="flex flex-wrap items-center gap-2">
+                    {li && (
+                      <a
+                        href={formatSocialUrl(li, "linkedin")}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-[#0A66C2]/10 text-[#0A66C2] hover:bg-[#0A66C2] hover:text-white transition-colors"
+                      >
+                        <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
+                        </svg>
+                        <span>LinkedIn</span>
+                      </a>
+                    )}
+                    {ig && (
+                      <a
+                        href={formatSocialUrl(ig, "instagram")}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-[#E1306C]/10 text-[#E1306C] hover:bg-[#E1306C] hover:text-white transition-colors"
+                      >
+                        <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                        </svg>
+                        <span>Instagram</span>
+                      </a>
+                    )}
+                    {tt && (
+                      <a
+                        href={formatSocialUrl(tt, "tiktok")}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-black/10 dark:bg-white/10 text-[var(--head)] hover:bg-[var(--accent)] hover:text-white transition-colors"
+                      >
+                        <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.24 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+                        </svg>
+                        <span>TikTok</span>
+                      </a>
+                    )}
+                    {tw && (
+                      <a
+                        href={formatSocialUrl(tw, "twitter")}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-[var(--bg-alt)] text-[var(--head)] hover:bg-[var(--accent)] hover:text-white transition-colors"
+                      >
+                        <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                        <span>X</span>
+                      </a>
+                    )}
+                    {web && (
+                      <a
+                        href={formatSocialUrl(web, "website")}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-[var(--accent)]/10 text-[var(--accent-text)] hover:bg-[var(--accent)] hover:text-white transition-colors"
+                      >
+                        <svg className="w-4 h-4 stroke-current fill-none" viewBox="0 0 24 24" strokeWidth="2" aria-hidden="true">
+                          <circle cx="12" cy="12" r="10" />
+                          <line x1="2" y1="12" x2="22" y2="12" />
+                          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                        </svg>
+                        <span>Sitio Web</span>
+                      </a>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Pie de modal */}
+            <div className="pt-2 flex justify-center">
+              <button
+                type="button"
+                onClick={() => setSelectedSpeaker(null)}
+                className="btn btn-ghost text-xs px-6 py-2 cursor-pointer"
+              >
+                Cerrar Semblanza
               </button>
             </div>
           </div>

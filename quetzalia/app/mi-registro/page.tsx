@@ -492,6 +492,58 @@ export default function MiRegistroPage() {
                         )}
                       </div>
                     )}
+
+                    {/* Ficha Enriquecida de Ponente */}
+                    {registration.type === "speaker" && (
+                      <>
+                        {registration.tagline && (
+                          <div className="sm:col-span-2 pt-2 border-t border-[var(--rule)]/60">
+                            <p className="font-semibold text-[var(--head)]">Lema personal / Frase STEM:</p>
+                            <p className="text-sm italic font-serif text-[var(--accent-text)]">“{registration.tagline}”</p>
+                          </div>
+                        )}
+                        {registration.badges && registration.badges.length > 0 && (
+                          <div className="sm:col-span-2">
+                            <p className="font-semibold text-[var(--head)] mb-1">Condecoraciones / Insignias:</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {registration.badges.map((b, idx) => (
+                                <span key={idx} className="text-xs px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-900 dark:text-amber-200 border border-amber-500/30">
+                                  🏅 {b}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {registration.inspirationQuote && (
+                          <div className="sm:col-span-2">
+                            <p className="font-semibold text-[var(--head)]">Mensaje para futuras científicas:</p>
+                            <p className="text-xs sm:text-sm text-[var(--fg)] italic bg-[var(--bg-alt)]/40 p-2.5 border border-[var(--rule)]">
+                              “{registration.inspirationQuote}”
+                            </p>
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    {/* Ficha Enriquecida de Comunidad */}
+                    {registration.type === "community" && (
+                      <>
+                        {registration.communityMotto && (
+                          <div className="sm:col-span-2 pt-2 border-t border-[var(--rule)]/60">
+                            <p className="font-semibold text-[var(--head)]">Grito de guerra / Lema de comunidad:</p>
+                            <p className="text-sm italic font-serif text-[var(--accent-text)]">“{registration.communityMotto}”</p>
+                          </div>
+                        )}
+                        {registration.communityGoal && (
+                          <div className="sm:col-span-2">
+                            <p className="font-semibold text-[var(--head)]">Misión en Quetzalia 2027:</p>
+                            <p className="text-xs sm:text-sm text-[var(--fg)] bg-[var(--bg-alt)]/40 p-2.5 border border-[var(--rule)]">
+                              {registration.communityGoal}
+                            </p>
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
                 </div>
 

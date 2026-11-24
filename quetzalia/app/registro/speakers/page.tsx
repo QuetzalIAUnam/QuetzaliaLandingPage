@@ -12,6 +12,18 @@ import ConsentSection, { CURRENT_CONSENT_VERSION } from "@/components/ConsentSec
 import ExistingRegistrationNotice from "@/components/ExistingRegistrationNotice";
 import Greca from "@/components/ui/Greca";
 
+const PRESET_BADGES = [
+  "Google Student Ambassador",
+  "Google AI Fellow",
+  "Canva Ambassador",
+  "Canva Educator",
+  "GitHub Campus Expert",
+  "Women Techmakers",
+  "Microsoft Student Ambassador",
+  "Investigadora / Posgrado",
+  "Mención Honorífica UNAM",
+];
+
 export default function RegistroSpeakersPage() {
   const { user, registration, isAdmin, loginWithGoogle, logout } = useAuth();
 
@@ -23,6 +35,12 @@ export default function RegistroSpeakersPage() {
   const [talkType, setTalkType] = useState<"Ponencia" | "Taller">("Ponencia");
   const [talkTitle, setTalkTitle] = useState("");
   const [talkMaterials, setTalkMaterials] = useState("");
+
+  // Ficha enriquecida / Cuéntanos más sobre ti
+  const [tagline, setTagline] = useState("");
+  const [selectedBadges, setSelectedBadges] = useState<string[]>([]);
+  const [customBadge, setCustomBadge] = useState("");
+  const [inspirationQuote, setInspirationQuote] = useState("");
 
   // Redes sociales y perfiles profesionales (opcionales)
   const [linkedin, setLinkedin] = useState("");
@@ -54,6 +72,24 @@ export default function RegistroSpeakersPage() {
 
   const displayEmail = email || user?.email || "";
   const displayChosenName = chosenName || user?.displayName || "";
+
+  const toggleBadge = (badge: string) => {
+    setSelectedBadges((prev) =>
+      prev.includes(badge) ? prev.filter((b) => b !== badge) : [...prev, badge]
+    );
+  };
+
+  const handleAddCustomBadge = () => {
+    const trimmed = customBadge.trim();
+    if (trimmed && !selectedBadges.includes(trimmed)) {
+      setSelectedBadges([...selectedBadges, trimmed]);
+      setCustomBadge("");
+    }
+  };
+
+  const removeBadge = (badgeToRemove: string) => {
+    setSelectedBadges((prev) => prev.filter((b) => b !== badgeToRemove));
+  };
 
   // Manejo y compresión de fotografía en el cliente
   const handlePhotoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -139,6 +175,9 @@ export default function RegistroSpeakersPage() {
           talkTitle: talkTitle.trim(),
           talkMaterials: talkMaterials.trim(),
           photoPath: uploadedPhotoPath,
+          tagline: tagline.trim() || undefined,
+          badges: selectedBadges.length > 0 ? selectedBadges : undefined,
+          inspirationQuote: inspirationQuote.trim() || undefined,
           ...(Object.keys(cleanSocials).length > 0 ? { socials: cleanSocials } : {}),
           ...(cleanSocials.linkedin ? { linkedin: cleanSocials.linkedin } : {}),
           ...(cleanSocials.instagram ? { instagram: cleanSocials.instagram } : {}),
@@ -554,6 +593,139 @@ export default function RegistroSpeakersPage() {
                       : "Breve semblanza, objetivos de la charla, y requerimientos técnicos (proyector, audio, internet, diapositivas)."
                   }
                   className="form-textarea"
+                />
+              </div>
+            </div>
+
+            {/* Ficha Enriquecida: Tu Esencia Quetzalia */}
+            <div className="border border-[var(--rule)] bg-[var(--card)] p-6 space-y-5">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">✨</span>
+                  <h3 className="text-lg font-display text-[var(--head)]">
+                    Tu Esencia · Cuéntanos más sobre ti
+                  </h3>
+                </div>
+                <p className="text-xs text-[var(--fg)] opacity-85 mt-1 leading-relaxed">
+                  En Quetzalia buscamos que las asistentes conecten con la persona detrás de la ciencia. Esta información dará vida a tu semblanza interactiva cuando hagan clic en tu ponencia.
+                </p>
+              </div>
+
+              {/* Frase / Lema Personal */}
+              <div className="space-y-1.5">
+                <label className="form-label flex items-center justify-between" htmlFor="tagline">
+                  <span>Una frase que te describa o inspire como mujer en STEM</span>
+                  <span className="text-[10px] uppercase font-mono tracking-wider opacity-70">Recomendado</span>
+                </label>
+                <input
+                  id="tagline"
+                  type="text"
+                  value={tagline}
+                  onChange={(e) => setTagline(e.target.value)}
+                  placeholder="Ej. “No llegué sola: abro camino para que volemos todas”"
+                  maxLength={180}
+                  className="form-input italic"
+                />
+                <p className="text-[11px] text-[var(--fg)] opacity-70">
+                  Aparecerá destacada entre comillas en tu tarjeta de ponente. ({tagline.length}/180 caracteres)
+                </p>
+              </div>
+
+              {/* Insignias y Condecoraciones */}
+              <div className="space-y-2.5 pt-2 border-t border-[var(--rule)]">
+                <label className="form-label block">
+                  Condecoraciones, Distinciones o Embajadas (Opcionales)
+                </label>
+                <p className="text-xs text-[var(--fg)] opacity-75">
+                  Selecciona las que apliquen a tu trayectoria para mostrarlas como insignias de honor en tu perfil:
+                </p>
+
+                {/* Chips predefinidos */}
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {PRESET_BADGES.map((b) => {
+                    const isSelected = selectedBadges.includes(b);
+                    return (
+                      <button
+                        key={b}
+                        type="button"
+                        onClick={() => toggleBadge(b)}
+                        className={`text-xs px-3 py-1.5 rounded-full border transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+                          isSelected
+                            ? "bg-[var(--accent)] text-white border-[var(--accent)] shadow-xs font-semibold scale-102"
+                            : "bg-[var(--bg-alt)] text-[var(--fg)] border-[var(--rule)] hover:border-[var(--accent)]/60"
+                        }`}
+                      >
+                        <span>{isSelected ? "✓" : "+"}</span>
+                        <span>{b}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Agregar insignia personalizada */}
+                <div className="pt-2">
+                  <div className="flex gap-2 max-w-md">
+                    <input
+                      type="text"
+                      value={customBadge}
+                      onChange={(e) => setCustomBadge(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAddCustomBadge();
+                        }
+                      }}
+                      placeholder="Otra distinción (ej. ACM Fellow, Premio Estatal de Ciencia)"
+                      className="form-input text-xs py-1.5"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddCustomBadge}
+                      className="btn btn-ghost text-xs px-3 py-1.5 shrink-0 cursor-pointer"
+                    >
+                      + Añadir
+                    </button>
+                  </div>
+                </div>
+
+                {/* Lista de insignias personalizadas seleccionadas */}
+                {selectedBadges.filter((b) => !PRESET_BADGES.includes(b)).length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    <span className="text-[11px] text-[var(--head)] font-semibold self-center mr-1">Tus insignias añadidas:</span>
+                    {selectedBadges
+                      .filter((b) => !PRESET_BADGES.includes(b))
+                      .map((cb) => (
+                        <span
+                          key={cb}
+                          className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-[var(--accent)]/15 text-[var(--head)] border border-[var(--accent)]/30 font-medium"
+                        >
+                          <span>🏅 {cb}</span>
+                          <button
+                            type="button"
+                            onClick={() => removeBadge(cb)}
+                            className="hover:text-rose-600 font-bold ml-1 cursor-pointer"
+                            title="Eliminar"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Consejo a tu yo más joven / niñas */}
+              <div className="space-y-1.5 pt-2 border-t border-[var(--rule)]">
+                <label className="form-label" htmlFor="inspirationQuote">
+                  Un mensaje o consejo para tu “yo” más joven o para las niñas que sueñan con STEM
+                </label>
+                <textarea
+                  id="inspirationQuote"
+                  rows={3}
+                  value={inspirationQuote}
+                  onChange={(e) => setInspirationQuote(e.target.value)}
+                  placeholder="Ej. “Atrévete a preguntar y no permitas que nadie defina el límite de lo que puedes construir. Tu curiosidad es tu mayor superpoder.”"
+                  className="form-textarea text-xs sm:text-sm"
                 />
               </div>
             </div>

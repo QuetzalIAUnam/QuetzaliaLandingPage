@@ -47,6 +47,13 @@ export interface Registration {
   tiktok?: string;
   twitter?: string;
   website?: string;
+  // Datos extendidos / Ficha enriquecida (Ponentes y Comunidades)
+  tagline?: string;
+  badges?: string[];
+  inspirationQuote?: string;
+  communityMotto?: string;
+  communityGoal?: string;
+  communityActivities?: string;
   consent: ConsentRecord;
   consentVersion: string;
   consentTimestamp: string;

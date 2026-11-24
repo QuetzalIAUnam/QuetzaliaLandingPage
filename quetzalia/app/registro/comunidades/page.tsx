@@ -22,6 +22,11 @@ export default function RegistroComunidadesPage() {
   const [memberCount, setMemberCount] = useState(""); // Número aproximado de integrantes
   const [talkMaterials, setTalkMaterials] = useState(""); // Descripción / actividades
 
+  // Ficha enriquecida de comunidad
+  const [communityMotto, setCommunityMotto] = useState("");
+  const [communityGoal, setCommunityGoal] = useState("");
+  const [communityActivities, setCommunityActivities] = useState("");
+
   // Redes sociales y presencia digital (opcionales)
   const [instagram, setInstagram] = useState("");
   const [linkedin, setLinkedin] = useState("");
@@ -133,6 +138,9 @@ export default function RegistroComunidadesPage() {
           talkTitle: memberCount ? `Comunidad (~${memberCount} integrantes)` : "Comunidad STEM",
           talkMaterials: `Número aproximado de integrantes: ${memberCount || "No especificado"}.\nDescripción y actividades: ${talkMaterials.trim()}`,
           photoPath: uploadedLogoPath,
+          communityMotto: communityMotto.trim() || undefined,
+          communityGoal: communityGoal.trim() || undefined,
+          communityActivities: communityActivities.trim() || undefined,
           ...(Object.keys(cleanSocials).length > 0 ? { socials: cleanSocials } : {}),
           ...(cleanSocials.linkedin ? { linkedin: cleanSocials.linkedin } : {}),
           ...(cleanSocials.instagram ? { instagram: cleanSocials.instagram } : {}),
@@ -396,6 +404,71 @@ export default function RegistroComunidadesPage() {
                   placeholder="Misión del grupo, redes sociales o proyectos en los que trabajan."
                   className="form-textarea"
                 />
+              </div>
+
+              {/* Propósito e Inspiración STEM */}
+              <div className="border border-[var(--rule)] bg-[var(--bg-alt)]/40 p-5 rounded-xl space-y-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">💜</span>
+                    <h3 className="text-base font-display text-[var(--head)]">
+                      Propósito e Inspiración STEM · La Esencia de su Colectivo
+                    </h3>
+                  </div>
+                  <p className="text-xs text-[var(--fg)] opacity-85 mt-1 leading-relaxed">
+                    Queremos destacar la chispa que mueve a su comunidad. Esta información se presentará en la ficha interactiva para que las niñas y asistentes conozcan su labor.
+                  </p>
+                </div>
+
+                {/* Grito de Guerra o Frase Inspiradora */}
+                <div className="space-y-1.5">
+                  <label className="form-label flex items-center justify-between" htmlFor="communityMotto">
+                    <span>Una frase o grito de guerra para inspirar a más niñas</span>
+                    <span className="text-[10px] uppercase font-mono tracking-wider opacity-70">Recomendado</span>
+                  </label>
+                  <input
+                    id="communityMotto"
+                    type="text"
+                    value={communityMotto}
+                    onChange={(e) => setCommunityMotto(e.target.value)}
+                    placeholder="Ej. “En manada el vuelo es más alto” o “Juntas somos el futuro que soñamos construir”"
+                    maxLength={180}
+                    className="form-input italic text-xs sm:text-sm"
+                  />
+                  <p className="text-[11px] text-[var(--fg)] opacity-70">
+                    Encabezará la tarjeta de su comunidad en el directorio oficial.
+                  </p>
+                </div>
+
+                {/* Objetivo como comunidad en Quetzalia */}
+                <div className="space-y-1.5 pt-2 border-t border-[var(--rule)]">
+                  <label className="form-label" htmlFor="communityGoal">
+                    ¿Cuál es su objetivo o causa principal como comunidad?
+                  </label>
+                  <textarea
+                    id="communityGoal"
+                    rows={2}
+                    value={communityGoal}
+                    onChange={(e) => setCommunityGoal(e.target.value)}
+                    placeholder="Ej. “Despertar vocaciones científicas desde edades tempranas, crear redes de mentoría seguras y visibilizar el talento femenino en computación y ciencias exactas.”"
+                    className="form-textarea text-xs sm:text-sm"
+                  />
+                </div>
+
+                {/* Qué encontrarán en su stand */}
+                <div className="space-y-1.5 pt-2 border-t border-[var(--rule)]">
+                  <label className="form-label" htmlFor="communityActivities">
+                    ¿Qué dinámicas o actividades encontrarán las asistentes en su stand/feria STEM?
+                  </label>
+                  <textarea
+                    id="communityActivities"
+                    rows={2}
+                    value={communityActivities}
+                    onChange={(e) => setCommunityActivities(e.target.value)}
+                    placeholder="Ej. “Demostraciones en vivo de robots autónomos, stickers de científicas, dinámicas para aprender a programar y asesoría para unirse a nuestros semilleros.”"
+                    className="form-textarea text-xs sm:text-sm"
+                  />
+                </div>
               </div>
 
               {/* Subida de Logotipo / Emblema de la Comunidad */}

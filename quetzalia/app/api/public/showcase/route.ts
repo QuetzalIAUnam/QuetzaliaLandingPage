@@ -18,6 +18,9 @@ export async function GET() {
       talk: string;
       linkedin?: string;
       photoUrl?: string;
+      tagline?: string;
+      badges?: string[];
+      inspirationQuote?: string;
       socials?: {
         linkedin?: string;
         instagram?: string;
@@ -40,6 +43,9 @@ export async function GET() {
       representative?: string;
       desc?: string;
       logoUrl?: string;
+      communityMotto?: string;
+      communityGoal?: string;
+      communityActivities?: string;
       socials?: {
         linkedin?: string;
         instagram?: string;
@@ -73,6 +79,9 @@ export async function GET() {
           talk: data.talkTitle || "Charla en Quetzalia 2027",
           linkedin,
           photoUrl: data.photoPath || undefined,
+          tagline: data.tagline || undefined,
+          badges: Array.isArray(data.badges) ? data.badges : undefined,
+          inspirationQuote: data.inspirationQuote || undefined,
           socials: {
             linkedin,
             instagram,
@@ -102,6 +111,9 @@ export async function GET() {
           representative: data.fullName,
           desc: data.talkMaterials || "",
           logoUrl: data.photoPath || data.logoPath || undefined,
+          communityMotto: data.communityMotto || undefined,
+          communityGoal: data.communityGoal || undefined,
+          communityActivities: data.communityActivities || undefined,
           socials: {
             linkedin,
             instagram,
