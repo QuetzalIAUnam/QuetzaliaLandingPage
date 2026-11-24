@@ -641,7 +641,7 @@ export default function RegistroSpeakersPage() {
                 </p>
 
                 {/* Chips predefinidos */}
-                <div className="flex flex-wrap gap-2 pt-1">
+                <div className="flex flex-wrap gap-1.5 sm:gap-2 pt-1">
                   {PRESET_BADGES.map((b) => {
                     const isSelected = selectedBadges.includes(b);
                     return (
@@ -649,22 +649,23 @@ export default function RegistroSpeakersPage() {
                         key={b}
                         type="button"
                         onClick={() => toggleBadge(b)}
-                        className={`text-xs px-3 py-1.5 rounded-full border transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+                        aria-pressed={isSelected}
+                        className={`text-xs px-3 py-1.5 min-h-[36px] rounded-full border transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
                           isSelected
                             ? "bg-[var(--accent)] text-white border-[var(--accent)] shadow-xs font-semibold scale-102"
                             : "bg-[var(--bg-alt)] text-[var(--fg)] border-[var(--rule)] hover:border-[var(--accent)]/60"
                         }`}
                       >
-                        <span>{isSelected ? "✓" : "+"}</span>
+                        <span aria-hidden="true" className="font-bold text-sm leading-none">{isSelected ? "✓" : "+"}</span>
                         <span>{b}</span>
                       </button>
                     );
                   })}
                 </div>
 
-                {/* Agregar insignia personalizada */}
+                {/* Agregar insignia personalizada - Responsive & accesible en mobile */}
                 <div className="pt-2">
-                  <div className="flex gap-2 max-w-md">
+                  <div className="flex items-center gap-2 w-full max-w-md">
                     <input
                       type="text"
                       value={customBadge}
@@ -675,36 +676,43 @@ export default function RegistroSpeakersPage() {
                           handleAddCustomBadge();
                         }
                       }}
-                      placeholder="Otra distinción (ej. ACM Fellow, Premio Estatal de Ciencia)"
-                      className="form-input text-xs py-1.5"
+                      placeholder="Otra distinción (ej. ACM Fellow)"
+                      className="form-input text-xs sm:text-sm py-2 px-3 flex-1 min-w-0"
+                      aria-label="Nombre de otra condecoración o insignia"
                     />
                     <button
                       type="button"
                       onClick={handleAddCustomBadge}
-                      className="btn btn-ghost text-xs px-3 py-1.5 shrink-0 cursor-pointer"
+                      disabled={!customBadge.trim()}
+                      className="shrink-0 h-10 px-3.5 sm:px-4 rounded-xl font-semibold text-xs transition-all flex items-center justify-center gap-1 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed bg-[var(--head)] text-[var(--bg)] hover:bg-[var(--accent)] hover:text-white active:scale-95 shadow-xs whitespace-nowrap"
+                      aria-label="Añadir condecoración personalizada"
                     >
-                      + Añadir
+                      <span className="font-bold text-sm leading-none">+</span>
+                      <span>Añadir</span>
                     </button>
                   </div>
                 </div>
 
                 {/* Lista de insignias personalizadas seleccionadas */}
                 {selectedBadges.filter((b) => !PRESET_BADGES.includes(b)).length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    <span className="text-[11px] text-[var(--head)] font-semibold self-center mr-1">Tus insignias añadidas:</span>
+                  <div className="flex flex-wrap gap-1.5 pt-1 items-center">
+                    <span className="text-[11px] text-[var(--head)] font-semibold w-full sm:w-auto mr-1">
+                      Tus insignias añadidas:
+                    </span>
                     {selectedBadges
                       .filter((b) => !PRESET_BADGES.includes(b))
                       .map((cb) => (
                         <span
                           key={cb}
-                          className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-[var(--accent)]/15 text-[var(--head)] border border-[var(--accent)]/30 font-medium"
+                          className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-[var(--accent)]/15 text-[var(--head)] border border-[var(--accent)]/30 font-medium max-w-full"
                         >
-                          <span>🏅 {cb}</span>
+                          <span className="truncate max-w-[200px]">🏅 {cb}</span>
                           <button
                             type="button"
                             onClick={() => removeBadge(cb)}
-                            className="hover:text-rose-600 font-bold ml-1 cursor-pointer"
-                            title="Eliminar"
+                            className="w-5 h-5 rounded-full hover:bg-[var(--accent)]/20 flex items-center justify-center text-rose-700 dark:text-rose-400 font-bold cursor-pointer transition-colors"
+                            aria-label={`Eliminar insignia ${cb}`}
+                            title={`Eliminar ${cb}`}
                           >
                             ×
                           </button>
@@ -714,17 +722,17 @@ export default function RegistroSpeakersPage() {
                 )}
               </div>
 
-              {/* Consejo a tu yo más joven / niñas */}
+              {/* Consejo a tu yo más joven / mujeres en STEM */}
               <div className="space-y-1.5 pt-2 border-t border-[var(--rule)]">
                 <label className="form-label" htmlFor="inspirationQuote">
-                  Un mensaje o consejo para tu “yo” más joven o para las niñas que sueñan con STEM
+                  Un mensaje o consejo para tu “yo” más joven o para inspirar a más mujeres en STEM
                 </label>
                 <textarea
                   id="inspirationQuote"
                   rows={3}
                   value={inspirationQuote}
                   onChange={(e) => setInspirationQuote(e.target.value)}
-                  placeholder="Ej. “Atrévete a preguntar y no permitas que nadie defina el límite de lo que puedes construir. Tu curiosidad es tu mayor superpoder.”"
+                  placeholder="Ej. “Atrévete a preguntar y no permitas que nadie defina el límite de lo que puedes construir. Tu curiosidad y tu voz merecen estar en la mesa de decisiones.”"
                   className="form-textarea text-xs sm:text-sm"
                 />
               </div>

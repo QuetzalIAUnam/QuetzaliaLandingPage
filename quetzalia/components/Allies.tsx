@@ -791,21 +791,21 @@ export default function Allies() {
       {/* Modal / Ficha de la Comunidad */}
       {selectedCommunity && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs"
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/65 backdrop-blur-xs"
           role="dialog"
           aria-modal="true"
           aria-labelledby="community-modal-title"
           onClick={() => setSelectedCommunity(null)}
         >
           <div
-            className="relative w-full max-w-lg bg-[var(--card)] border-2 border-[var(--accent)] p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto"
+            className="relative w-full max-w-lg bg-[var(--card)] border-2 border-[var(--accent)] p-5 sm:p-8 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto rounded-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Botón cerrar */}
             <button
               type="button"
               onClick={() => setSelectedCommunity(null)}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full border border-[var(--rule)] bg-[var(--bg-alt)] hover:bg-[var(--accent)] hover:text-white text-[var(--head)] flex items-center justify-center transition-colors cursor-pointer text-sm font-bold"
+              className="absolute top-3 right-3 sm:top-4 sm:right-4 w-9 h-9 rounded-full border border-[var(--rule)] bg-[var(--bg-alt)] hover:bg-[var(--accent)] hover:text-white text-[var(--head)] flex items-center justify-center transition-colors cursor-pointer text-sm font-bold z-20 shadow-xs"
               aria-label="Cerrar ficha"
             >
               ✕
@@ -994,7 +994,7 @@ export default function Allies() {
               <button
                 type="button"
                 onClick={() => setSelectedCommunity(null)}
-                className="btn btn-ghost text-xs px-6 py-2 cursor-pointer"
+                className="w-full sm:w-auto px-6 py-2.5 rounded-xl border border-[var(--rule)] bg-[var(--bg-alt)] hover:bg-[var(--head)] hover:text-[var(--bg)] text-xs font-semibold text-[var(--head)] transition-all cursor-pointer shadow-xs"
               >
                 Cerrar Ficha
               </button>
@@ -1006,21 +1006,21 @@ export default function Allies() {
       {/* Modal / Ficha Oficial de Ponente */}
       {selectedSpeaker && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs"
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/65 backdrop-blur-xs"
           role="dialog"
           aria-modal="true"
           aria-labelledby="speaker-modal-title"
           onClick={() => setSelectedSpeaker(null)}
         >
           <div
-            className="relative w-full max-w-lg bg-[var(--card)] border-2 border-[var(--accent)] p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto"
+            className="relative w-full max-w-lg bg-[var(--card)] border-2 border-[var(--accent)] p-5 sm:p-8 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto rounded-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Botón cerrar */}
             <button
               type="button"
               onClick={() => setSelectedSpeaker(null)}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full border border-[var(--rule)] bg-[var(--bg-alt)] hover:bg-[var(--accent)] hover:text-white text-[var(--head)] flex items-center justify-center transition-colors cursor-pointer text-sm font-bold"
+              className="absolute top-3 right-3 sm:top-4 sm:right-4 w-9 h-9 rounded-full border border-[var(--rule)] bg-[var(--bg-alt)] hover:bg-[var(--accent)] hover:text-white text-[var(--head)] flex items-center justify-center transition-colors cursor-pointer text-sm font-bold z-20 shadow-xs"
               aria-label="Cerrar semblanza"
             >
               ✕
@@ -1098,12 +1098,12 @@ export default function Allies() {
               </div>
             </div>
 
-            {/* Mensaje a las niñas / Inspiración STEM */}
+            {/* Mensaje de inspiración / Mujeres en STEM */}
             {selectedSpeaker.inspirationQuote && (
               <div className="border-t border-[var(--rule)] pt-4 space-y-1.5 text-left">
                 <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--head)] flex items-center gap-1.5">
                   <span>💡</span>
-                  <span>Mensaje para futuras científicas e ingenieras:</span>
+                  <span>Mensaje para inspirar a más mujeres en STEM:</span>
                 </h4>
                 <div className="p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-lg text-xs sm:text-sm text-[var(--fg)] leading-relaxed italic">
                   “{selectedSpeaker.inspirationQuote}”
@@ -1211,7 +1211,7 @@ export default function Allies() {
               <button
                 type="button"
                 onClick={() => setSelectedSpeaker(null)}
-                className="btn btn-ghost text-xs px-6 py-2 cursor-pointer"
+                className="w-full sm:w-auto px-6 py-2.5 rounded-xl border border-[var(--rule)] bg-[var(--bg-alt)] hover:bg-[var(--head)] hover:text-[var(--bg)] text-xs font-semibold text-[var(--head)] transition-all cursor-pointer shadow-xs"
               >
                 Cerrar Semblanza
               </button>

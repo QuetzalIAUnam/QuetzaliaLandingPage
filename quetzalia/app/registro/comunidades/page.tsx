@@ -416,14 +416,14 @@ export default function RegistroComunidadesPage() {
                     </h3>
                   </div>
                   <p className="text-xs text-[var(--fg)] opacity-85 mt-1 leading-relaxed">
-                    Queremos destacar la chispa que mueve a su comunidad. Esta información se presentará en la ficha interactiva para que las niñas y asistentes conozcan su labor.
+                    Queremos destacar la chispa que mueve a su comunidad. Esta información se presentará en la ficha interactiva para que las mujeres y asistentes conozcan su labor.
                   </p>
                 </div>
 
                 {/* Grito de Guerra o Frase Inspiradora */}
                 <div className="space-y-1.5">
                   <label className="form-label flex items-center justify-between" htmlFor="communityMotto">
-                    <span>Una frase o grito de guerra para inspirar a más niñas</span>
+                    <span>Una frase o grito de guerra para inspirar a más mujeres</span>
                     <span className="text-[10px] uppercase font-mono tracking-wider opacity-70">Recomendado</span>
                   </label>
                   <input

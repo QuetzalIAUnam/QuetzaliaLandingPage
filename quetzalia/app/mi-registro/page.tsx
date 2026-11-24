@@ -516,7 +516,7 @@ export default function MiRegistroPage() {
                         )}
                         {registration.inspirationQuote && (
                           <div className="sm:col-span-2">
-                            <p className="font-semibold text-[var(--head)]">Mensaje para futuras científicas:</p>
+                            <p className="font-semibold text-[var(--head)]">Mensaje para inspirar a más mujeres en STEM:</p>
                             <p className="text-xs sm:text-sm text-[var(--fg)] italic bg-[var(--bg-alt)]/40 p-2.5 border border-[var(--rule)]">
                               “{registration.inspirationQuote}”
                             </p>
